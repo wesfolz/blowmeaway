@@ -1,4 +1,4 @@
-package wesley.folz.blowme;
+package wesley.folz.blowme.ui;
 
 import android.app.Activity;
 import android.app.ActivityManager;
@@ -15,10 +15,10 @@ public class GamePlayActivity extends Activity
     protected void onCreate( Bundle savedInstanceState )
     {
         super.onCreate( savedInstanceState );
-        setContentView( R.layout.activity_game_play );
+        //setContentView( R.layout.activity_game_play );
 
-        //surfaceView = new GLSurfaceView(this);
-        surfaceView = (GLSurfaceView) findViewById( R.id.surfaceView );
+        surfaceView = new GLSurfaceView( this );
+        //surfaceView = (GLSurfaceView) findViewById( R.id.surfaceView );
 
 
         // Check if the system supports OpenGL ES 2.0.
@@ -41,13 +41,24 @@ public class GamePlayActivity extends Activity
             // renderer if you wanted to support both ES 1 and ES 2.
             return;
         }
+        setContentView( surfaceView );
+
     }
 
     @Override
     protected void onPause()
     {
         super.onPause();
+        surfaceView.onPause();
     }
+
+    @Override
+    protected void onResume()
+    {
+        super.onResume();
+        surfaceView.onResume();
+    }
+
 
     /**
      * View where OpenGL objects are drawn

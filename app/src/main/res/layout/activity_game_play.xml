@@ -6,7 +6,7 @@
                 android:paddingRight="0dp"
                 android:paddingTop="0dp"
                 android:paddingBottom="0dp"
-                tools:context="wesley.folz.blowme.GamePlayActivity">
+                tools:context="wesley.folz.blowme.ui.GamePlayActivity">
 
     <android.opengl.GLSurfaceView
         android:layout_width="wrap_content"

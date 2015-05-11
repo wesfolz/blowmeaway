@@ -1,4 +1,4 @@
-package wesley.folz.blowme;
+package wesley.folz.blowme.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -6,6 +6,8 @@ import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+
+import wesley.folz.blowme.R;
 
 
 public class MainMenuActivity extends ActionBarActivity
