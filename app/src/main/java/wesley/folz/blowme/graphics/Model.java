@@ -8,6 +8,7 @@ import java.nio.FloatBuffer;
 
 import wesley.folz.blowme.R;
 import wesley.folz.blowme.ui.GamePlayRenderer;
+import wesley.folz.blowme.util.OBJReader;
 
 /**
  * Created by wesley on 5/11/2015.
@@ -16,6 +17,7 @@ public class Model
 {
     public Model()
     {
+        OBJReader.readOBJFile( this );
         ByteBuffer bb = ByteBuffer.allocateDirect( vertexData.length * 4 );
         bb.order( ByteOrder.nativeOrder() );
         vertexBuffer = bb.asFloatBuffer();
@@ -82,13 +84,24 @@ public class Model
         GLES20.glUniformMatrix4fv( mMVPMatrixHandle, 1, false, mMVPMatrix, 0 );
 
         // Draw the triangle
-        GLES20.glDrawArrays( GLES20.GL_TRIANGLES, 0, 6 );
+        GLES20.glDrawArrays( GLES20.GL_TRIANGLES, 0, vertexData.length );
         //GLES20.glDrawArrays( GLES20.GL_TRIANGLES, 0, 3 );
 
         // Disable vertex array
         GLES20.glDisableVertexAttribArray( mPositionHandle );
 
     }
+
+    public void setVertexData( float[] data )
+    {
+        vertexData = data;
+    }
+
+    public void setNormalData( float[] data )
+    {
+        normalData = data;
+    }
+
 
     final String fragmentShaderCode =
             "precision mediump float;       \n"     // Set the default precision to medium. We
@@ -135,13 +148,13 @@ public class Model
 
             0.5f, - 0.25f, 0.0f,
 
-            0.0f, 0.559016994f, 0.0f,
+            0.0f, 0.559016994f, 0.0f};/*
 
             0.5f, - 0.25f, 0.0f,
 
             1.5f, - 0.25f, 0.0f,
 
-            1.0f, 0.559016994f, 0.0f};
+            1.0f, 0.559016994f, 0.0f};*/
 
     private float[] colorData = {
             1.0f, 0.0f, 0.0f, 1.0f,
@@ -158,7 +171,6 @@ public class Model
      */
     private final int mColorOffset = 3;
 
-    private final int vertexCount = vertexData.length / COORDS_PER_VERTEX;
     private final int vertexStride = COORDS_PER_VERTEX * 4; // 4 bytes per vertex
 
     private FloatBuffer vertexBuffer;
@@ -175,5 +187,5 @@ public class Model
 
     private float[] mModelMatrix = new float[16];
 
-    public static final int RESOURCE = R.raw.cube;
+    public static final int RESOURCE = R.raw.triangle;
 }
