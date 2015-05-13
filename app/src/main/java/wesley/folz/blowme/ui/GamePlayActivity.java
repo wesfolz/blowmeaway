@@ -29,11 +29,11 @@ public class GamePlayActivity extends Activity
         if (supportsEs2)
         {
             // Request an OpenGL ES 2.0 compatible context.
-            surfaceView.setEGLContextClientVersion(2);
+            surfaceView.setEGLContextClientVersion( 2 );
 
             // Set the renderer to our demo renderer, defined below.
-            surfaceView.setRenderer(new GamePlayRenderer());
-            surfaceView.setRenderMode( GLSurfaceView.RENDERMODE_WHEN_DIRTY );
+            surfaceView.setRenderer( new GamePlayRenderer() );
+            //surfaceView.setRenderMode( GLSurfaceView.RENDERMODE_WHEN_DIRTY );
         }
         else
         {

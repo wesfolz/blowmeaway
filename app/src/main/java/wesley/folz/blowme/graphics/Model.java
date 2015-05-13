@@ -5,6 +5,7 @@ import android.opengl.GLES20;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
+import java.nio.ShortBuffer;
 
 import wesley.folz.blowme.R;
 import wesley.folz.blowme.ui.GamePlayRenderer;
@@ -23,6 +24,15 @@ public class Model
         vertexBuffer = bb.asFloatBuffer();
         vertexBuffer.put( vertexData );
         vertexBuffer.position( 0 );
+
+        // initialize byte buffer for the draw list
+        ByteBuffer dlb = ByteBuffer.allocateDirect(
+                // (# of coordinate values * 2 bytes per short)
+                vertexOrder.length * 2 );
+        dlb.order( ByteOrder.nativeOrder() );
+        drawListBuffer = dlb.asShortBuffer();
+        drawListBuffer.put( vertexOrder );
+        drawListBuffer.position( 0 );
 
 
         ByteBuffer cb = ByteBuffer.allocateDirect( colorData.length * 4 );
@@ -76,7 +86,6 @@ public class Model
 
         GLES20.glEnableVertexAttribArray( mColorHandle );
 
-
         // get handle to shape's transformation matrix
         mMVPMatrixHandle = GLES20.glGetUniformLocation( mProgram, "u_MVPMatrix" );
 
@@ -84,12 +93,24 @@ public class Model
         GLES20.glUniformMatrix4fv( mMVPMatrixHandle, 1, false, mMVPMatrix, 0 );
 
         // Draw the triangle
-        GLES20.glDrawArrays( GLES20.GL_TRIANGLES, 0, vertexData.length );
+        //GLES20.glDrawArrays( GLES20.GL_TRIANGLES, 0, vertexData.length );
+        GLES20.glDrawElements( GLES20.GL_TRIANGLES, vertexOrder.length, GLES20.GL_UNSIGNED_SHORT,
+                drawListBuffer );
         //GLES20.glDrawArrays( GLES20.GL_TRIANGLES, 0, 3 );
 
         // Disable vertex array
         GLES20.glDisableVertexAttribArray( mPositionHandle );
+    }
 
+
+    public void setNormalOrder( short[] normalOrder )
+    {
+        this.normalOrder = normalOrder;
+    }
+
+    public void setVertexOrder( short[] order )
+    {
+        vertexOrder = order;
     }
 
     public void setVertexData( float[] data )
@@ -142,7 +163,55 @@ public class Model
                     // matrix to get the final point in
                     + "}                              \n";    // normalized screen coordinates.
 
+    private final ShortBuffer drawListBuffer;
+
+    private short[] normalOrder;
+    private short[] vertexOrder;// = { 0, 1, 2, 0, 2, 3 };
+
     private float[] vertexData = {
+
+            - 0.5f, 0.5f, 0.0f,   // top left
+            - 0.5f, - 0.5f, 0.0f,   // bottom left
+            0.5f, - 0.5f, 0.0f,   // bottom right
+            0.5f, 0.5f, 0.0f};
+    /*
+            -0.585474f, 0.585474f, 0.585473f,
+            -0.585474f, 0.585474f, -0.585474f,
+            0.585474f, 0.585474f, -0.585473f,
+            -0.585474f, -0.585474f, 0.585473f,
+            0.585473f, -0.585474f, 0.585474f,
+            0.585474f, -0.585474f, -0.585473f,
+            -0.585474f, 0.585474f, 0.585473f,
+            -0.585474f, -0.585474f, 0.585473f,
+            -0.585473f, -0.585474f, -0.585474f,
+            -0.585474f, 0.585474f, -0.585474f,
+            -0.585473f, -0.585474f, -0.585474f,
+            0.585474f, 0.585474f, -0.585473f,
+            0.585474f, 0.585474f, -0.585473f,
+            0.585474f, -0.585474f, -0.585473f,
+            0.585473f, 0.585474f, 0.585474f,
+            -0.585474f, -0.585474f, 0.585473f,
+            -0.585474f, 0.585474f, 0.585473f,
+            0.585473f, 0.585474f, 0.585474f,
+            0.585473f, 0.585474f, 0.585474f,
+            -0.585474f, 0.585474f, 0.585473f,
+            0.585474f, 0.585474f, -0.585473f,
+            -0.585473f, -0.585474f, -0.585474f,
+            -0.585474f, -0.585474f, 0.585473f,
+            0.585474f, -0.585474f, -0.585473f,
+            -0.585474f, 0.585474f, -0.585474f,
+            -0.585474f, 0.585474f, 0.585473f,
+            -0.585473f, -0.585474f, -0.585474f,
+            -0.585473f, -0.585474f, -0.585474f,
+            0.585474f, -0.585474f, -0.585473f,
+            0.585474f, 0.585474f, -0.585473f,
+            0.585474f, -0.585474f, -0.585473f,
+            0.585473f, -0.585474f, 0.585474f,
+            0.585473f, 0.585474f, 0.585474f,
+            0.585473f, -0.585474f, 0.585474f,
+            -0.585474f, -0.585474f, 0.585473f,
+            0.585473f, 0.585474f, 0.585474f};
+    /*
             // X, Y, Z,
             - 0.5f, - 0.25f, 0.0f,
 
@@ -187,5 +256,5 @@ public class Model
 
     private float[] mModelMatrix = new float[16];
 
-    public static final int RESOURCE = R.raw.triangle;
+    public static final int RESOURCE = R.raw.fan2;
 }

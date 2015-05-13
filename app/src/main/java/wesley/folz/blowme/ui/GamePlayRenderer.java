@@ -3,6 +3,7 @@ package wesley.folz.blowme.ui;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
+import android.os.SystemClock;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -106,15 +107,36 @@ public class GamePlayRenderer implements GLSurfaceView.Renderer
     @Override
     public void onDrawFrame( GL10 gl )
     {
+        float[] mRotationMatrix = new float[16];
+        float[] initialRotation = new float[16];
+        float[] initialMatrix = new float[16];
+        float[] scratch = new float[16];
         // Redraw background color
         GLES20.glClear( GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT );
         // Set the camera position (View matrix)
         Matrix.setLookAtM( mViewMatrix, 0, 0, 0, 1.5f, 0, 0, - 5.0f, 0, 1.0f, 0 );
+        Matrix.setRotateM( initialRotation, 0, 90, 1, 0, 0 );
 
         // Calculate the projection and view transformation
         Matrix.multiplyMM( mMVPMatrix, 0, mProjectionMatrix, 0, mViewMatrix, 0 );
+        Matrix.multiplyMM( initialMatrix, 0, mMVPMatrix, 0, initialRotation, 0 );
+        Matrix.scaleM( initialMatrix, 0, 0.2f, 0.2f, 0.2f );
 
-        model.draw( mMVPMatrix );
+
+        // Create a rotation transformation for the triangle
+        long time = SystemClock.uptimeMillis();// % 4000L;
+        float angle = 0.40f * ((int) time);
+        Matrix.setRotateM( mRotationMatrix, 0, angle, 0, - 1, 0 );
+
+        // Combine the rotation matrix with the projection and camera view
+        // Note that the mMVPMatrix factor *must be first* in order
+        // for the matrix multiplication product to be correct.
+        Matrix.multiplyMM( scratch, 0, initialMatrix, 0, mRotationMatrix, 0 );
+
+        // Draw triangle
+        model.draw( scratch );
+
+        //model.draw( mMVPMatrix );
 
     }
 

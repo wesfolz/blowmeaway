@@ -22,10 +22,11 @@ public abstract class OBJReader
                 .RESOURCE );
         BufferedReader reader = new BufferedReader( new InputStreamReader( stream ) );
 
-        ArrayList<float[]> vertices = new ArrayList<>();
-        ArrayList<float[]> normals = new ArrayList<>();
-        ArrayList<Float> faceList = new ArrayList<>();
-        ArrayList<Float> faceNormals = new ArrayList<>();
+        ArrayList<Float> vertices = new ArrayList<>();
+        ArrayList<Float> normals = new ArrayList<>();
+        ArrayList<Short> faceList = new ArrayList<>();
+        ArrayList<Short> faceNormals = new ArrayList<>();
+        short offset = 1;
 
         String line = null;
         try
@@ -48,11 +49,15 @@ public abstract class OBJReader
                     }
                     if( line.startsWith( "vn " ) )
                     {
-                        normals.add( coordinate );
+                        normals.add( coordinate[0] );
+                        normals.add( coordinate[1] );
+                        normals.add( coordinate[2] );
                     }
                     else if( line.startsWith( "v " ) )
                     {
-                        vertices.add( coordinate );
+                        vertices.add( coordinate[0] );
+                        vertices.add( coordinate[1] );
+                        vertices.add( coordinate[2] );
                     }
 
                 }
@@ -69,16 +74,12 @@ public abstract class OBJReader
                         if( count % 2 == 0 )
                         {
                             String s = tokenizer.nextToken();
-                            faceList.add( vertices.get( Integer.parseInt( s ) - 1 )[0] );
-                            faceList.add( vertices.get( Integer.parseInt( s ) - 1 )[1] );
-                            faceList.add( vertices.get( Integer.parseInt( s ) - 1 )[2] );
+                            faceList.add( (short) (Short.parseShort( s ) - offset) );
                         }
                         if( count % 2 == 1 )
                         {
                             String s = tokenizer.nextToken();
-                            faceNormals.add( normals.get( Integer.parseInt( s ) - 1 )[0] );
-                            faceNormals.add( normals.get( Integer.parseInt( s ) - 1 )[1] );
-                            faceNormals.add( normals.get( Integer.parseInt( s ) - 1 )[2] );
+                            faceNormals.add( (short) (Short.parseShort( s ) - offset) );
                         }
                         count++;
                     }
@@ -93,14 +94,24 @@ public abstract class OBJReader
         {
             try
             {
-                float[] faceVertices = new float[faceList.size()];
-                float[] normalVectors = new float[faceNormals.size()];
+                short[] vertexOrder = new short[faceList.size()];
+                short[] normalOrder = new short[faceNormals.size()];
                 for( int i = 0; i < faceList.size(); i++ )
                 {
-                    faceVertices[i] = faceList.get( i );
-                    normalVectors[i] = faceNormals.get( i );
+                    vertexOrder[i] = faceList.get( i );
+                    normalOrder[i] = faceNormals.get( i );
                 }
+
+                float[] faceVertices = new float[vertices.size()];
+                float[] normalVectors = new float[normals.size()];
+                for( int i = 0; i < vertices.size(); i++ )
+                {
+                    faceVertices[i] = vertices.get( i );
+                    //normalVectors[i] = normals.get( i );
+                }
+                model.setVertexOrder( vertexOrder );
                 model.setVertexData( faceVertices );
+                model.setNormalOrder( normalOrder );
                 model.setNormalData( normalVectors );
                 stream.close();
             }
