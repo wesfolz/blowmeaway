@@ -1,6 +1,7 @@
 package wesley.folz.blowme.graphics;
 
 import android.opengl.GLES20;
+import android.opengl.Matrix;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -14,7 +15,7 @@ import wesley.folz.blowme.util.OBJReader;
 /**
  * Created by wesley on 5/11/2015.
  */
-public class Model
+public abstract class Model
 {
     public Model()
     {
@@ -62,8 +63,9 @@ public class Model
         GLES20.glLinkProgram( mProgram );
     }
 
-    public void draw( float[] mMVPMatrix )
+    public void draw()
     {
+        float[] mMVPMatrix = createTransformationMatrix();
         // Add program to OpenGL ES environment
         GLES20.glUseProgram( mProgram );
 
@@ -103,14 +105,19 @@ public class Model
     }
 
 
+    public void setNormalData( float[] data )
+    {
+        normalData = data;
+    }
+
     public void setNormalOrder( short[] normalOrder )
     {
         this.normalOrder = normalOrder;
     }
 
-    public void setVertexOrder( short[] order )
+    public void setProjectionMatrix( float[] projectionMatrix )
     {
-        vertexOrder = order;
+        this.projectionMatrix = projectionMatrix;
     }
 
     public void setVertexData( float[] data )
@@ -118,11 +125,22 @@ public class Model
         vertexData = data;
     }
 
-    public void setNormalData( float[] data )
+
+    public void setVertexOrder( short[] order )
     {
-        normalData = data;
+        vertexOrder = order;
     }
 
+    public abstract float[] createTransformationMatrix();
+
+    public void initializeMatrix()
+    {
+        // Set the camera position (View matrix)
+        Matrix.setLookAtM( viewMatrix, 0, 0, 0, 1.5f, 0, 0, - 5.0f, 0, 1.0f, 0 );
+        //set model view projection matrix
+        Matrix.multiplyMM( mvpMatrix, 0, projectionMatrix, 0, viewMatrix, 0 );
+
+    }
 
     final String fragmentShaderCode =
             "precision mediump float;       \n"     // Set the default precision to medium. We
@@ -163,88 +181,29 @@ public class Model
                     // matrix to get the final point in
                     + "}                              \n";    // normalized screen coordinates.
 
-    private final ShortBuffer drawListBuffer;
-
-    private short[] normalOrder;
-    private short[] vertexOrder;// = { 0, 1, 2, 0, 2, 3 };
-
-    private float[] vertexData = {
-
-            - 0.5f, 0.5f, 0.0f,   // top left
-            - 0.5f, - 0.5f, 0.0f,   // bottom left
-            0.5f, - 0.5f, 0.0f,   // bottom right
-            0.5f, 0.5f, 0.0f};
-    /*
-            -0.585474f, 0.585474f, 0.585473f,
-            -0.585474f, 0.585474f, -0.585474f,
-            0.585474f, 0.585474f, -0.585473f,
-            -0.585474f, -0.585474f, 0.585473f,
-            0.585473f, -0.585474f, 0.585474f,
-            0.585474f, -0.585474f, -0.585473f,
-            -0.585474f, 0.585474f, 0.585473f,
-            -0.585474f, -0.585474f, 0.585473f,
-            -0.585473f, -0.585474f, -0.585474f,
-            -0.585474f, 0.585474f, -0.585474f,
-            -0.585473f, -0.585474f, -0.585474f,
-            0.585474f, 0.585474f, -0.585473f,
-            0.585474f, 0.585474f, -0.585473f,
-            0.585474f, -0.585474f, -0.585473f,
-            0.585473f, 0.585474f, 0.585474f,
-            -0.585474f, -0.585474f, 0.585473f,
-            -0.585474f, 0.585474f, 0.585473f,
-            0.585473f, 0.585474f, 0.585474f,
-            0.585473f, 0.585474f, 0.585474f,
-            -0.585474f, 0.585474f, 0.585473f,
-            0.585474f, 0.585474f, -0.585473f,
-            -0.585473f, -0.585474f, -0.585474f,
-            -0.585474f, -0.585474f, 0.585473f,
-            0.585474f, -0.585474f, -0.585473f,
-            -0.585474f, 0.585474f, -0.585474f,
-            -0.585474f, 0.585474f, 0.585473f,
-            -0.585473f, -0.585474f, -0.585474f,
-            -0.585473f, -0.585474f, -0.585474f,
-            0.585474f, -0.585474f, -0.585473f,
-            0.585474f, 0.585474f, -0.585473f,
-            0.585474f, -0.585474f, -0.585473f,
-            0.585473f, -0.585474f, 0.585474f,
-            0.585473f, 0.585474f, 0.585474f,
-            0.585473f, -0.585474f, 0.585474f,
-            -0.585474f, -0.585474f, 0.585473f,
-            0.585473f, 0.585474f, 0.585474f};
-    /*
-            // X, Y, Z,
-            - 0.5f, - 0.25f, 0.0f,
-
-            0.5f, - 0.25f, 0.0f,
-
-            0.0f, 0.559016994f, 0.0f};/*
-
-            0.5f, - 0.25f, 0.0f,
-
-            1.5f, - 0.25f, 0.0f,
-
-            1.0f, 0.559016994f, 0.0f};*/
-
-    private float[] colorData = {
+    protected float[] colorData = {
             1.0f, 0.0f, 0.0f, 1.0f,
             0.0f, 0.0f, 1.0f, 1.0f,
             0.0f, 1.0f, 0.0f, 1.0f
     };
 
-    private float[] normalData;
+    protected final float[] mvpMatrix = new float[16];
 
-    static final int COORDS_PER_VERTEX = 3;
+    protected float[] normalData;
 
-    /**
-     * Offset of the color data.
-     */
-    private final int mColorOffset = 3;
+    protected float[] projectionMatrix;
 
-    private final int vertexStride = COORDS_PER_VERTEX * 4; // 4 bytes per vertex
+    protected float[] vertexData;
+
+    protected final float[] viewMatrix = new float[16];
+
+    private FloatBuffer colorBuffer;
+
+    private FloatBuffer normalBuffer;
 
     private FloatBuffer vertexBuffer;
 
-    private FloatBuffer colorBuffer;
+    private static final int COORDS_PER_VERTEX = 3;
 
     private final int mProgram;
 
@@ -254,7 +213,13 @@ public class Model
 
     private int mMVPMatrixHandle;
 
-    private float[] mModelMatrix = new float[16];
+    private final int vertexStride = COORDS_PER_VERTEX * 4; // 4 bytes per vertex
+
+    private short[] normalOrder;
+
+    private short[] vertexOrder;
+
+    private final ShortBuffer drawListBuffer;
 
     public static final int RESOURCE = R.raw.fan2;
 }
