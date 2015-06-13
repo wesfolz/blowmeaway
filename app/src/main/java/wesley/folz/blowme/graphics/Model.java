@@ -20,6 +20,32 @@ public abstract class Model
     public Model()
     {
         OBJReader.readOBJFile( this );
+
+    }
+
+    public void draw()
+    {
+        float[] mMVPMatrix = createTransformationMatrix();
+
+
+        // get handle to shape's transformation matrix
+        mMVPMatrixHandle = GLES20.glGetUniformLocation( mProgram, "u_MVPMatrix" );
+
+        // Pass the projection and view transformation to the shader
+        GLES20.glUniformMatrix4fv( mMVPMatrixHandle, 1, false, mMVPMatrix, 0 );
+
+        // Draw the triangle
+        //GLES20.glDrawArrays( GLES20.GL_TRIANGLES, 0, vertexData.length );
+        GLES20.glDrawElements( GLES20.GL_TRIANGLES, vertexOrder.length, GLES20.GL_UNSIGNED_SHORT,
+                drawListBuffer );
+        //GLES20.glDrawArrays( GLES20.GL_TRIANGLES, 0, 3 );
+
+        // Disable vertex array
+        //GLES20.glDisableVertexAttribArray( mPositionHandle );
+    }
+
+    public void enableGraphics()
+    {
         ByteBuffer bb = ByteBuffer.allocateDirect( vertexData.length * 4 );
         bb.order( ByteOrder.nativeOrder() );
         vertexBuffer = bb.asFloatBuffer();
@@ -61,11 +87,7 @@ public abstract class Model
 
         // creates OpenGL ES program executables
         GLES20.glLinkProgram( mProgram );
-    }
 
-    public void draw()
-    {
-        float[] mMVPMatrix = createTransformationMatrix();
         // Add program to OpenGL ES environment
         GLES20.glUseProgram( mProgram );
 
@@ -87,23 +109,16 @@ public abstract class Model
                 4, colorBuffer );
 
         GLES20.glEnableVertexAttribArray( mColorHandle );
-
-        // get handle to shape's transformation matrix
-        mMVPMatrixHandle = GLES20.glGetUniformLocation( mProgram, "u_MVPMatrix" );
-
-        // Pass the projection and view transformation to the shader
-        GLES20.glUniformMatrix4fv( mMVPMatrixHandle, 1, false, mMVPMatrix, 0 );
-
-        // Draw the triangle
-        //GLES20.glDrawArrays( GLES20.GL_TRIANGLES, 0, vertexData.length );
-        GLES20.glDrawElements( GLES20.GL_TRIANGLES, vertexOrder.length, GLES20.GL_UNSIGNED_SHORT,
-                drawListBuffer );
-        //GLES20.glDrawArrays( GLES20.GL_TRIANGLES, 0, 3 );
-
-        // Disable vertex array
-        GLES20.glDisableVertexAttribArray( mPositionHandle );
     }
 
+
+    public void initializeMatrix()
+    {
+        // Set the camera position (View matrix)
+        Matrix.setLookAtM( viewMatrix, 0, 0, 0, 2, 0, 0, 0, 0, 1.0f, 0 );
+        //set model view projection matrix
+        Matrix.multiplyMM( mvpMatrix, 0, projectionMatrix, 0, viewMatrix, 0 );
+    }
 
     public void setNormalData( float[] data )
     {
@@ -131,16 +146,19 @@ public abstract class Model
         vertexOrder = order;
     }
 
+    public void setxPos( float xPos )
+    {
+        this.xPos = xPos;
+    }
+
+    public void setyPos( float yPos )
+    {
+        this.yPos = yPos;
+    }
+
     public abstract float[] createTransformationMatrix();
 
-    public void initializeMatrix()
-    {
-        // Set the camera position (View matrix)
-        Matrix.setLookAtM( viewMatrix, 0, 0, 0, 1.5f, 0, 0, - 5.0f, 0, 1.0f, 0 );
-        //set model view projection matrix
-        Matrix.multiplyMM( mvpMatrix, 0, projectionMatrix, 0, viewMatrix, 0 );
-
-    }
+    public abstract void updatePosition( float x, float y );
 
     final String fragmentShaderCode =
             "precision mediump float;       \n"     // Set the default precision to medium. We
@@ -187,6 +205,16 @@ public abstract class Model
             0.0f, 1.0f, 0.0f, 1.0f
     };
 
+    /**
+     * Center x position of model
+     */
+    protected float xPos;
+
+    /**
+     * Center y position of model
+     */
+    protected float yPos;
+
     protected final float[] mvpMatrix = new float[16];
 
     protected float[] normalData;
@@ -205,7 +233,7 @@ public abstract class Model
 
     private static final int COORDS_PER_VERTEX = 3;
 
-    private final int mProgram;
+    private int mProgram;
 
     private int mPositionHandle;
 
@@ -219,7 +247,7 @@ public abstract class Model
 
     private short[] vertexOrder;
 
-    private final ShortBuffer drawListBuffer;
+    private ShortBuffer drawListBuffer;
 
     public static final int RESOURCE = R.raw.fan2;
 }

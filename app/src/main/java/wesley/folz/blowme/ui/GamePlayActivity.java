@@ -4,15 +4,16 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.pm.ConfigurationInfo;
+import android.graphics.Point;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.Toast;
 
 import wesley.folz.blowme.R;
+import wesley.folz.blowme.graphics.Fan;
 
 
 public class GamePlayActivity extends Activity
@@ -47,11 +48,16 @@ public class GamePlayActivity extends Activity
         //surfaceView = new GLSurfaceView( this );
         surfaceView = (GLSurfaceView) findViewById( R.id.surfaceView );
 
-
         // Check if the system supports OpenGL ES 2.0.
         final ActivityManager activityManager = (ActivityManager) getSystemService( Context.ACTIVITY_SERVICE);
         final ConfigurationInfo configurationInfo = activityManager.getDeviceConfigurationInfo();
         final boolean supportsEs2 = configurationInfo.reqGlEsVersion >= 0x20000;
+
+        Point p = new Point();
+        getWindowManager().getDefaultDisplay().getSize( p );
+        WIDTH = p.x;
+        HEIGHT = p.y;
+        fan = new Fan();
 
         if (supportsEs2)
         {
@@ -59,7 +65,7 @@ public class GamePlayActivity extends Activity
             surfaceView.setEGLContextClientVersion( 2 );
 
             // Set the renderer to our demo renderer, defined below.
-            surfaceView.setRenderer( new GamePlayRenderer() );
+            surfaceView.setRenderer( new GamePlayRenderer( fan ) );
             //surfaceView.setRenderMode( GLSurfaceView.RENDERMODE_WHEN_DIRTY );
         }
         else
@@ -75,12 +81,23 @@ public class GamePlayActivity extends Activity
             {
                 if( event.getAction() == MotionEvent.ACTION_DOWN )
                 {
-                    Toast.makeText( MyApplication.getAppContext(), " Down: X " + event.getRawX()
-                            + " Y " + event.getRawY(), Toast.LENGTH_SHORT ).show();
+                    fan.setInitialX( (event.getX() / WIDTH) );
+                    fan.setInitialY( (event.getY() / HEIGHT) );
+                    //Toast.makeText( MyApplication.getAppContext(), " Down: X " + event.getRawX
+                    // ()/WIDTH
+                    //       + " Y " + event.getRawY() / HEIGHT, Toast.LENGTH_SHORT ).show();
                 }
+                if( event.getAction() == MotionEvent.ACTION_UP )
+                {
+                    fan.setDeltaX( 0 );
+                    fan.setDeltaY( 0 );
+                }
+
                 if( event.getAction() == MotionEvent.ACTION_MOVE )
                 {
-                    Log.e( "blowme", "Move: X " + event.getRawX() + " Y " + event.getRawY() );
+                    fan.updatePosition( (event.getX() / WIDTH), (event.getY() / HEIGHT) );
+                    surfaceView.requestRender();
+                    Log.e( "blowme", "Move: X " + (event.getRawX() / WIDTH) + " Y " + (event.getRawY() / HEIGHT) );
                 }
                 return true;
             }
@@ -123,4 +140,9 @@ public class GamePlayActivity extends Activity
      */
     private GLSurfaceView surfaceView;
 
+    private Fan fan;
+
+    private int WIDTH;
+
+    private int HEIGHT;
 }

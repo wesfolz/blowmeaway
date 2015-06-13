@@ -15,8 +15,9 @@ import wesley.folz.blowme.graphics.Fan;
 public class GamePlayRenderer implements GLSurfaceView.Renderer
 {
 
-    public GamePlayRenderer()
+    public GamePlayRenderer( Fan f )
     {
+        fan = f;
     }
 
     /**
@@ -48,7 +49,8 @@ public class GamePlayRenderer implements GLSurfaceView.Renderer
     {
         // Set the background frame color
         GLES20.glClearColor( 0.0f, 0.0f, 0.0f, 1.0f );
-        fan = new Fan();
+        //fan = new Fan();
+        fan.enableGraphics();
     }
 
     /**
@@ -85,7 +87,8 @@ public class GamePlayRenderer implements GLSurfaceView.Renderer
         // this projection matrix is applied to object coordinates
         // in the onDrawFrame() method
         float[] mProjectionMatrix = new float[16];
-        Matrix.frustumM( mProjectionMatrix, 0, - ratio, ratio, - 1, 1, 1, 10 );
+        //Matrix.frustumM( mProjectionMatrix, 0, - ratio, ratio, - 1, 1, 1, 3 );
+        Matrix.orthoM( mProjectionMatrix, 0, - ratio, ratio, - 1, 1, 1, 10 );
         fan.setProjectionMatrix( mProjectionMatrix );
         fan.initializeMatrix();
     }
@@ -111,6 +114,8 @@ public class GamePlayRenderer implements GLSurfaceView.Renderer
     {
         // Redraw background color
         GLES20.glClear( GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT );
+        GLES20.glEnable( GLES20.GL_CULL_FACE );
+        GLES20.glCullFace( GLES20.GL_BACK );
         // Draw triangle
         fan.draw();
     }
