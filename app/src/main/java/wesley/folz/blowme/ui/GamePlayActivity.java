@@ -7,6 +7,7 @@ import android.content.pm.ConfigurationInfo;
 import android.graphics.Point;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
+import android.support.v4.view.MotionEventCompat;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -79,25 +80,35 @@ public class GamePlayActivity extends Activity
             @Override
             public boolean onTouch( View v, MotionEvent event )
             {
-                if( event.getAction() == MotionEvent.ACTION_DOWN )
-                {
-                    fan.setInitialX( (event.getX() / WIDTH) );
-                    fan.setInitialY( (event.getY() / HEIGHT) );
-                    //Toast.makeText( MyApplication.getAppContext(), " Down: X " + event.getRawX
-                    // ()/WIDTH
-                    //       + " Y " + event.getRawY() / HEIGHT, Toast.LENGTH_SHORT ).show();
-                }
-                if( event.getAction() == MotionEvent.ACTION_UP )
-                {
-                    fan.setDeltaX( 0 );
-                    fan.setDeltaY( 0 );
-                }
+                final int action = MotionEventCompat.getActionMasked( event );
+                float x = event.getX() / WIDTH;
+                float y = event.getY() / HEIGHT;
 
-                if( event.getAction() == MotionEvent.ACTION_MOVE )
+                switch( action )
                 {
-                    fan.updatePosition( (event.getX() / WIDTH), (event.getY() / HEIGHT) );
-                    surfaceView.requestRender();
-                    Log.e( "blowme", "Move: X " + (event.getRawX() / WIDTH) + " Y " + (event.getRawY() / HEIGHT) );
+                    case MotionEvent.ACTION_DOWN:
+                        fan.setInitialX( x );
+                        fan.setInitialY( y );
+                        Log.e( "blowme", "x " + event.getX() + " y " + event.getY() );
+
+                        break;
+
+                    case MotionEvent.ACTION_UP:
+                        //fan.endingX = fan.deltaX;
+                        //fan.endingY = fan.deltaY;
+                        fan.setDeltaX( 0 );
+                        fan.setDeltaY( 0 );
+                        break;
+
+                    case MotionEvent.ACTION_MOVE:
+
+                        fan.updatePosition( x, y );
+                        surfaceView.requestRender();
+                        fan.setInitialX( x );
+                        fan.setInitialY( y );
+                        //Log.e( "blowme", "Move: X " + (event.getRawX() / WIDTH) + " Y " +
+                        // (event.getRawY() / HEIGHT) );
+                        break;
                 }
                 return true;
             }

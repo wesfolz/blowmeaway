@@ -27,10 +27,6 @@ public abstract class Model
     {
         float[] mMVPMatrix = createTransformationMatrix();
 
-
-        // get handle to shape's transformation matrix
-        mMVPMatrixHandle = GLES20.glGetUniformLocation( mProgram, "u_MVPMatrix" );
-
         // Pass the projection and view transformation to the shader
         GLES20.glUniformMatrix4fv( mMVPMatrixHandle, 1, false, mMVPMatrix, 0 );
 
@@ -109,13 +105,16 @@ public abstract class Model
                 4, colorBuffer );
 
         GLES20.glEnableVertexAttribArray( mColorHandle );
+
+        // get handle to shape's transformation matrix
+        mMVPMatrixHandle = GLES20.glGetUniformLocation( mProgram, "u_MVPMatrix" );
     }
 
 
     public void initializeMatrix()
     {
         // Set the camera position (View matrix)
-        Matrix.setLookAtM( viewMatrix, 0, 0, 0, 2, 0, 0, 0, 0, 1.0f, 0 );
+        Matrix.setLookAtM( viewMatrix, 0, 0, 0, 5, 0, 0, 0, 0, 1.0f, 0 );
         //set model view projection matrix
         Matrix.multiplyMM( mvpMatrix, 0, projectionMatrix, 0, viewMatrix, 0 );
     }

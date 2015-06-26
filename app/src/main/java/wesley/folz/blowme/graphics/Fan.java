@@ -2,6 +2,7 @@ package wesley.folz.blowme.graphics;
 
 import android.opengl.Matrix;
 import android.os.SystemClock;
+import android.util.Log;
 
 /**
  * Created by wesley on 5/11/2015.
@@ -23,9 +24,20 @@ public class Fan extends Model
 
         float[] first = new float[16];
 
-        Matrix.translateM( mvpMatrix, 0, deltaX, - deltaY, 0 );
+        float[] translation = new float[16];
+
+        float[] translationMatrix = new float[16];
+
+        //Matrix.setIdentityM( translation, 0 );
+        //Matrix.translateM( translation, 0, deltaX, deltaY, 0 );
+        //Matrix.multiplyMM( translationMatrix, 0, mvpMatrix, 0, translation, 0 );
+
+        //Log.e( "blowme", "DeltaX " + deltaX + "DeltaY " + deltaY );
+
         deltaX = 0;
         deltaY = 0;
+
+        //Matrix.multiplyMM( first, 0, translationMatrix, 0, initialRotation, 0 );
 
         Matrix.multiplyMM( first, 0, mvpMatrix, 0, initialRotation, 0 );
         Matrix.multiplyMM( initialTransformationMatrix, 0, first, 0, secondRotation, 0 );
@@ -52,6 +64,7 @@ public class Fan extends Model
         Matrix.setRotateM( secondRotation, 0, 90, 1, 0, 0 );
         //Matrix.setIdentityM( secondRotation, 0 );
         //Matrix.scaleM( initialTransformationMatrix, 0, 0.1f, 0.1f, 0.1f );
+        Matrix.translateM( mvpMatrix, 0, - 0.4f, 0, 0 );
         Matrix.scaleM( mvpMatrix, 0, 0.05f, 0.05f, 0.05f );
     }
 
@@ -60,8 +73,10 @@ public class Fan extends Model
     {
         deltaX = 2 * (x - initialX);
         deltaY = 2 * (y - initialY);
-        //initialX = 2*(initialX + x);
-        //initialY = 2*(initialY + y);
+        Matrix.scaleM( mvpMatrix, 0, 20f, 20f, 20f );
+        Matrix.translateM( mvpMatrix, 0, deltaX, - deltaY, 0 );
+        Matrix.scaleM( mvpMatrix, 0, 0.05f, 0.05f, 0.05f );
+        Log.e( "blowme", "DeltaX " + deltaX + "DeltaY " + deltaY );
     }
 
     public void setInitialY( float initialY )
@@ -87,13 +102,17 @@ public class Fan extends Model
         this.deltaY = deltaY;
     }
 
-    private float deltaX;
+    public float deltaX;
 
-    private float deltaY;
+    public float deltaY;
 
     private float initialX;
 
     private float initialY;
+
+    public float endingX;
+
+    public float endingY;
 
     private final float[] secondRotation = new float[16];
     private final float[] initialRotation = new float[16];
