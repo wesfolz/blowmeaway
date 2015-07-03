@@ -12,7 +12,7 @@ public class Fan extends Model
     public Fan()
     {
         super();
-        xPos = X_EDGE_POSITION;//+.01f;
+        xPos = - X_EDGE_POSITION;//+.01f;
         yPos = 0;
     }
 
@@ -24,6 +24,8 @@ public class Fan extends Model
         float[] bladeRotation = new float[16];
 
         float[] first = new float[16];
+
+        float[] inwardRotation = new float[16];
 
         //float[] translation = new float[16];
 
@@ -44,9 +46,9 @@ public class Fan extends Model
         //Matrix.scaleM( translationMatrix, 0, 0.05f, 0.05f, 0.05f );
         //Log.e( "blowme", "DeltaX " + deltaX + "DeltaY " + deltaY );
 
+
         deltaY = 0;
         deltaX = 0;
-
 /*
         Matrix.scaleM( mvpMatrix, 0, 20f, 20f, 20f );
         Matrix.setIdentityM( translation, 0 );
@@ -60,7 +62,8 @@ public class Fan extends Model
 
         //Matrix.multiplyMM( first, 0, translationMatrix, 0, initialRotation, 0 );
 
-        Matrix.multiplyMM( first, 0, mvpMatrix, 0, initialRotation, 0 );
+        Matrix.multiplyMM( inwardRotation, 0, mvpMatrix, 0, calculateInwardRotation(), 0 );
+        Matrix.multiplyMM( first, 0, inwardRotation, 0, initialRotation, 0 );
         Matrix.multiplyMM( initialTransformationMatrix, 0, first, 0, secondRotation, 0 );
 
 
@@ -79,11 +82,13 @@ public class Fan extends Model
     public void initializeMatrix()
     {
         super.initializeMatrix();
-        Matrix.setRotateM( initialRotation, 0, - 45, 0, 1, 0 );
+        //rotate -45 degrees about y-axis
+        Matrix.setRotateM( initialRotation, 0, - 65, 0, 1, 0 );
+        //rotate 90 degrees about x-axis
         Matrix.setRotateM( secondRotation, 0, 90, 1, 0, 0 );
         //Matrix.setIdentityM( secondRotation, 0 );
         //Matrix.scaleM( initialTransformationMatrix, 0, 0.1f, 0.1f, 0.1f );
-        Matrix.translateM( mvpMatrix, 0, 0.4f, 0, 0 );
+        Matrix.translateM( mvpMatrix, 0, - X_EDGE_POSITION, 0, 0 );
         Matrix.scaleM( mvpMatrix, 0, 0.05f, 0.05f, 0.05f );
 
         Log.e( "blowme", "xpos: " + xPos + " ypos " + yPos );
@@ -172,6 +177,45 @@ public class Fan extends Model
         }
     }
 
+    /**
+     * TODO: Rotate fan so that it doesn't compete with blade rotation
+     * Rotate fan so that it's pointing towards the center of the screen
+     *
+     * @return - rotation matrix about z axis that points fan towards center of screen
+     */
+    private float[] calculateInwardRotation()
+    {
+        float[] rotationMatrix = new float[16];
+        float inwardRotation;
+        float cornerAngle = (float) (180 * Math.atan( X_EDGE_POSITION / Y_EDGE_POSITION ) / Math
+                .PI);
+
+        float xRatio = (90 - cornerAngle) / X_EDGE_POSITION;
+        float yRatio = cornerAngle / Y_EDGE_POSITION;
+
+        //on negative x edge
+        if( xPos == (- X_EDGE_POSITION) )
+        {
+            //inwardRotation = yRatio * ( yPos + (yPos/Math.abs(yPos))*(X_EDGE_POSITION + xPos) );
+            inwardRotation = yRatio * yPos;
+            //Log.e( "blowme", "negative x edge" );
+        }
+        //on positive x edge
+        else if( xPos == X_EDGE_POSITION )
+        {
+            inwardRotation = 180 - cornerAngle + yRatio * (Y_EDGE_POSITION - yPos);
+            //Log.e( "blowme", "negative x edge" );
+        }
+        //on y edge
+        else
+        {
+            inwardRotation = (yPos / Math.abs( yPos )) * (xRatio * xPos + 90);
+            //Log.e( "blowme", "negative y edge" );
+        }
+
+        Matrix.setRotateM( rotationMatrix, 0, inwardRotation, 0, 0, 1 );
+        return rotationMatrix;
+    }
 
     /**
      * Calculates the change in x and y position
