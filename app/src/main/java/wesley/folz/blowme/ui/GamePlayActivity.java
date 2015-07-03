@@ -50,7 +50,8 @@ public class GamePlayActivity extends Activity
         surfaceView = (GLSurfaceView) findViewById( R.id.surfaceView );
 
         // Check if the system supports OpenGL ES 2.0.
-        final ActivityManager activityManager = (ActivityManager) getSystemService( Context.ACTIVITY_SERVICE);
+        final ActivityManager activityManager = (ActivityManager) getSystemService( Context
+                .ACTIVITY_SERVICE );
         final ConfigurationInfo configurationInfo = activityManager.getDeviceConfigurationInfo();
         final boolean supportsEs2 = configurationInfo.reqGlEsVersion >= 0x20000;
 
@@ -58,9 +59,11 @@ public class GamePlayActivity extends Activity
         getWindowManager().getDefaultDisplay().getSize( p );
         WIDTH = p.x;
         HEIGHT = p.y;
+
+        Log.e( "blowme", "WIDTH " + WIDTH + " HEIGHT " + HEIGHT );
         fan = new Fan();
 
-        if (supportsEs2)
+        if( supportsEs2 )
         {
             // Request an OpenGL ES 2.0 compatible context.
             surfaceView.setEGLContextClientVersion( 2 );
@@ -81,8 +84,8 @@ public class GamePlayActivity extends Activity
             public boolean onTouch( View v, MotionEvent event )
             {
                 final int action = MotionEventCompat.getActionMasked( event );
-                float x = event.getX() / WIDTH;
-                float y = event.getY() / HEIGHT;
+                float x = 2 * event.getX() / WIDTH;
+                float y = 2 * event.getY() / HEIGHT;
 
                 switch( action )
                 {
@@ -93,19 +96,10 @@ public class GamePlayActivity extends Activity
 
                         break;
 
-                    case MotionEvent.ACTION_UP:
-                        //fan.endingX = fan.deltaX;
-                        //fan.endingY = fan.deltaY;
-                        fan.setDeltaX( 0 );
-                        fan.setDeltaY( 0 );
-                        break;
-
                     case MotionEvent.ACTION_MOVE:
 
                         fan.updatePosition( x, y );
                         surfaceView.requestRender();
-                        fan.setInitialX( x );
-                        fan.setInitialY( y );
                         //Log.e( "blowme", "Move: X " + (event.getRawX() / WIDTH) + " Y " +
                         // (event.getRawY() / HEIGHT) );
                         break;
