@@ -10,7 +10,6 @@ import java.nio.ShortBuffer;
 
 import wesley.folz.blowme.R;
 import wesley.folz.blowme.ui.GamePlayRenderer;
-import wesley.folz.blowme.util.OBJReader;
 
 /**
  * Created by wesley on 5/11/2015.
@@ -19,12 +18,36 @@ public abstract class Model
 {
     public Model()
     {
-        OBJReader.readOBJFile( this );
-
+        //OBJReader.readOBJFile( this );
     }
 
     public void draw()
     {
+        // Add program to OpenGL ES environment
+        GLES20.glUseProgram( mProgram );
+
+        // get handle to vertex shader's vPosition member
+        mPositionHandle = GLES20.glGetAttribLocation( mProgram, "a_Position" );
+
+        // Prepare the triangle coordinate data
+        vertexBuffer.position( 0 );
+        GLES20.glVertexAttribPointer( mPositionHandle, COORDS_PER_VERTEX,
+                GLES20.GL_FLOAT, false,
+                vertexStride, vertexBuffer );
+        // Enable a handle to the triangle vertices
+        GLES20.glEnableVertexAttribArray( mPositionHandle );
+
+        // get handle to fragment shader's vColor member
+        mColorHandle = GLES20.glGetAttribLocation( mProgram, "a_Color" );
+        colorBuffer.position( 0 );
+        GLES20.glVertexAttribPointer( mColorHandle, 4, GLES20.GL_FLOAT, false,
+                4, colorBuffer );
+
+        GLES20.glEnableVertexAttribArray( mColorHandle );
+
+        // get handle to shape's transformation matrix
+        mMVPMatrixHandle = GLES20.glGetUniformLocation( mProgram, "u_MVPMatrix" );
+
         float[] mMVPMatrix = createTransformationMatrix();
 
         // Pass the projection and view transformation to the shader
@@ -83,31 +106,6 @@ public abstract class Model
 
         // creates OpenGL ES program executables
         GLES20.glLinkProgram( mProgram );
-
-        // Add program to OpenGL ES environment
-        GLES20.glUseProgram( mProgram );
-
-        // get handle to vertex shader's vPosition member
-        mPositionHandle = GLES20.glGetAttribLocation( mProgram, "a_Position" );
-
-        // Prepare the triangle coordinate data
-        vertexBuffer.position( 0 );
-        GLES20.glVertexAttribPointer( mPositionHandle, COORDS_PER_VERTEX,
-                GLES20.GL_FLOAT, false,
-                vertexStride, vertexBuffer );
-        // Enable a handle to the triangle vertices
-        GLES20.glEnableVertexAttribArray( mPositionHandle );
-
-        // get handle to fragment shader's vColor member
-        mColorHandle = GLES20.glGetAttribLocation( mProgram, "a_Color" );
-        colorBuffer.position( 0 );
-        GLES20.glVertexAttribPointer( mColorHandle, 4, GLES20.GL_FLOAT, false,
-                4, colorBuffer );
-
-        GLES20.glEnableVertexAttribArray( mColorHandle );
-
-        // get handle to shape's transformation matrix
-        mMVPMatrixHandle = GLES20.glGetUniformLocation( mProgram, "u_MVPMatrix" );
     }
 
 
@@ -122,6 +120,26 @@ public abstract class Model
     public void setNormalData( float[] data )
     {
         normalData = data;
+    }
+
+    public float[] getBounds()
+    {
+        return bounds;
+    }
+
+    public void setBounds( float[] bounds )
+    {
+        this.bounds = bounds;
+    }
+
+    public float[] getSize()
+    {
+        return size;
+    }
+
+    public void setSize( float[] size )
+    {
+        this.size = size;
     }
 
     public void setNormalOrder( short[] normalOrder )
@@ -224,29 +242,33 @@ public abstract class Model
 
     protected final float[] viewMatrix = new float[16];
 
-    private FloatBuffer colorBuffer;
+    protected FloatBuffer colorBuffer;
 
-    private FloatBuffer normalBuffer;
+    protected FloatBuffer normalBuffer;
 
-    private FloatBuffer vertexBuffer;
+    protected FloatBuffer vertexBuffer;
 
-    private static final int COORDS_PER_VERTEX = 3;
+    protected static final int COORDS_PER_VERTEX = 3;
 
-    private int mProgram;
+    protected int mProgram;
 
-    private int mPositionHandle;
+    protected int mPositionHandle;
 
-    private int mColorHandle;
+    protected int mColorHandle;
 
-    private int mMVPMatrixHandle;
+    protected int mMVPMatrixHandle;
 
-    private final int vertexStride = COORDS_PER_VERTEX * 4; // 4 bytes per vertex
+    protected final int vertexStride = COORDS_PER_VERTEX * 4; // 4 bytes per vertex
 
     private short[] normalOrder;
 
-    private short[] vertexOrder;
+    protected short[] vertexOrder;
 
-    private ShortBuffer drawListBuffer;
+    protected ShortBuffer drawListBuffer;
+
+    private float[] bounds;
+
+    private float[] size;
 
     public static final int RESOURCE = R.raw.fan2;
 }

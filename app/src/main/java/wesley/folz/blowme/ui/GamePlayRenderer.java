@@ -7,6 +7,7 @@ import android.opengl.Matrix;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
+import wesley.folz.blowme.graphics.FallingObject;
 import wesley.folz.blowme.graphics.Fan;
 
 /**
@@ -47,10 +48,12 @@ public class GamePlayRenderer implements GLSurfaceView.Renderer
     @Override
     public void onSurfaceCreated( GL10 gl, EGLConfig config )
     {
+        triangle = new FallingObject();
         // Set the background frame color
         GLES20.glClearColor( 0.0f, 0.0f, 0.0f, 1.0f );
         //fan = new Fan();
         fan.enableGraphics();
+        triangle.enableGraphics();
     }
 
     /**
@@ -91,6 +94,8 @@ public class GamePlayRenderer implements GLSurfaceView.Renderer
         Matrix.orthoM( mProjectionMatrix, 0, - ratio, ratio, - 1, 1, 1, 10 );
         fan.setProjectionMatrix( mProjectionMatrix );
         fan.initializeMatrix();
+        triangle.setProjectionMatrix( mProjectionMatrix );
+        triangle.initializeMatrix();
     }
 
     /**
@@ -117,7 +122,10 @@ public class GamePlayRenderer implements GLSurfaceView.Renderer
         GLES20.glEnable( GLES20.GL_CULL_FACE );
         GLES20.glCullFace( GLES20.GL_BACK );
         // Draw triangle
+        //fan.enableGraphics();
         fan.draw();
+        //triangle.enableGraphics();
+        triangle.draw();
     }
 
     public static int loadShader( int type, String shaderCode )
@@ -134,6 +142,8 @@ public class GamePlayRenderer implements GLSurfaceView.Renderer
     }
 
     private Fan fan;
+
+    private FallingObject triangle;
 
     // mMVPMatrix is an abbreviation for "Model View Projection Matrix"
     private final float[] mMVPMatrix = new float[16];

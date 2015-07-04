@@ -4,6 +4,8 @@ import android.opengl.Matrix;
 import android.os.SystemClock;
 import android.util.Log;
 
+import wesley.folz.blowme.util.OBJReader;
+
 /**
  * Created by wesley on 5/11/2015.
  */
@@ -11,9 +13,13 @@ public class Fan extends Model
 {
     public Fan()
     {
-        super();
+//        super();
+        OBJReader.readOBJFile( this );
         xPos = - X_EDGE_POSITION;//+.01f;
         yPos = 0;
+        setWind( new Wind() );
+        //setSize( new float[]{} );
+
     }
 
     @Override
@@ -90,6 +96,8 @@ public class Fan extends Model
         //Matrix.scaleM( initialTransformationMatrix, 0, 0.1f, 0.1f, 0.1f );
         Matrix.translateM( mvpMatrix, 0, - X_EDGE_POSITION, 0, 0 );
         Matrix.scaleM( mvpMatrix, 0, 0.05f, 0.05f, 0.05f );
+
+        wind.setBounds( new float[]{} );
 
         Log.e( "blowme", "xpos: " + xPos + " ypos " + yPos );
     }
@@ -234,6 +242,17 @@ public class Fan extends Model
         initialY = y;
     }
 
+
+    public Wind getWind()
+    {
+        return wind;
+    }
+
+    public void setWind( Wind wind )
+    {
+        this.wind = wind;
+    }
+
     public void setInitialY( float initialY )
     {
         this.initialY = initialY;
@@ -258,6 +277,8 @@ public class Fan extends Model
     private float initialX;
 
     private float initialY;
+
+    private Wind wind;
 
     private final float[] secondRotation = new float[16];
     private final float[] initialRotation = new float[16];
