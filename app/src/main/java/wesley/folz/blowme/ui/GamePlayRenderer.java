@@ -3,12 +3,15 @@ package wesley.folz.blowme.ui;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
+import android.util.Log;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
 import wesley.folz.blowme.graphics.FallingObject;
 import wesley.folz.blowme.graphics.Fan;
+import wesley.folz.blowme.graphics.Line;
+import wesley.folz.blowme.util.Physics;
 
 /**
  * Created by wesley on 5/10/2015.
@@ -49,11 +52,14 @@ public class GamePlayRenderer implements GLSurfaceView.Renderer
     public void onSurfaceCreated( GL10 gl, EGLConfig config )
     {
         triangle = new FallingObject();
+        line = new Line();
         // Set the background frame color
         GLES20.glClearColor( 0.0f, 0.0f, 0.0f, 1.0f );
         //fan = new Fan();
         fan.enableGraphics();
+        fan.getWind().enableGraphics();
         triangle.enableGraphics();
+        line.enableGraphics();
     }
 
     /**
@@ -83,7 +89,7 @@ public class GamePlayRenderer implements GLSurfaceView.Renderer
     @Override
     public void onSurfaceChanged( GL10 gl, int width, int height )
     {
-        GLES20.glViewport(0, 0, width, height);
+        GLES20.glViewport( 0, 0, width, height );
 
         float ratio = (float) width / height;
 
@@ -94,8 +100,12 @@ public class GamePlayRenderer implements GLSurfaceView.Renderer
         Matrix.orthoM( mProjectionMatrix, 0, - ratio, ratio, - 1, 1, 1, 10 );
         fan.setProjectionMatrix( mProjectionMatrix );
         fan.initializeMatrix();
+        fan.getWind().setProjectionMatrix( mProjectionMatrix );
+        fan.getWind().initializeMatrix();
         triangle.setProjectionMatrix( mProjectionMatrix );
         triangle.initializeMatrix();
+        line.setProjectionMatrix( mProjectionMatrix );
+        line.initializeMatrix();
     }
 
     /**
@@ -123,9 +133,31 @@ public class GamePlayRenderer implements GLSurfaceView.Renderer
         GLES20.glCullFace( GLES20.GL_BACK );
         // Draw triangle
         //fan.enableGraphics();
+        fan.getWind().draw();
         fan.draw();
         //triangle.enableGraphics();
+        fan.getWind().calculateWindForce();
+
+        //Log.e( "blowme", "min bounds " + fan.getWind().getBounds().getyCorners()[0] + " max
+        // bounds " +
+        //        fan.getWind().getBounds().getyCorners()[1] );
+
+        if( Physics.isCollision( fan.getWind().getBounds(), triangle.getBounds() ) )
+        {
+            triangle.updatePosition( fan.getWind().getxForce(), fan.getWind().getyForce() );
+            Log.e( "blowme", "True" );
+            //Log.e( "blowme", "wind bounds " + triangle.getBounds().getyMin() + " triangle
+            // bounds " + triangle.getBounds().getyMax() );
+        }
+        else
+        {
+            triangle.updatePosition( 0, 0 );
+            Log.e( "blowme", "False" );
+        }
         triangle.draw();
+
+        //line.updatePosition( fan.deltaX, fan.deltaY );
+        //line.draw();
     }
 
     public static int loadShader( int type, String shaderCode )
@@ -144,6 +176,8 @@ public class GamePlayRenderer implements GLSurfaceView.Renderer
     private Fan fan;
 
     private FallingObject triangle;
+
+    private Line line;
 
     // mMVPMatrix is an abbreviation for "Model View Projection Matrix"
     private final float[] mMVPMatrix = new float[16];

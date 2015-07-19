@@ -1,7 +1,9 @@
 package wesley.folz.blowme.graphics;
 
 import android.opengl.Matrix;
-import android.util.Log;
+
+import wesley.folz.blowme.util.Bounds;
+import wesley.folz.blowme.util.Physics;
 
 /**
  * Created by wesley on 7/3/2015.
@@ -10,6 +12,7 @@ public class FallingObject extends Model
 {
     public FallingObject()
     {
+        setBounds( new Bounds() );
         vertexData = new float[]{
                 0.0f, 0.2f, 0.0f,   // top
                 - 0.1f, 0.0f, 0.0f,   // bottom left
@@ -17,9 +20,13 @@ public class FallingObject extends Model
 
         vertexOrder = new short[]{0, 1, 2};
 
+        xPos = 0;
+
+        yPos = - 0.6f;
+
         xVelocity = 0;
 
-        yVelocity = 0.1f;
+        yVelocity = 0;//0.1f;
 
         previousTime = System.nanoTime();
     }
@@ -31,7 +38,7 @@ public class FallingObject extends Model
 
         float[] result = new float[16];
 
-        updatePosition( 0, 0 );
+        //updatePosition( 0, 0 );
 
         //Matrix.setIdentityM( transformation, 0 );
 
@@ -44,7 +51,16 @@ public class FallingObject extends Model
         return mvpMatrix;
     }
 
+    @Override
+    public void initializeMatrix()
+    {
+        super.initializeMatrix();
+        Matrix.translateM( mvpMatrix, 0, 0, 0.6f, 0 );
+
+    }
+
     /**
+     * TODO:  make movement after wind collision look behave correctly
      * @param x - x component of wind force
      * @param y - y component of wind force
      */
@@ -55,11 +71,22 @@ public class FallingObject extends Model
         previousTime = System.nanoTime();
         float fallingTime = MASS * time;
 
-        Log.e( "blowme", "Falling time: " + fallingTime );
+        float[] force = Physics.sumOfForces( x, y );
+
+        xVelocity += force[0] * fallingTime;
+
+        yVelocity += force[1] * fallingTime;
 
         deltaX = fallingTime * xVelocity;
 
         deltaY = fallingTime * yVelocity;
+
+        xPos += deltaX;
+        yPos += deltaY;
+
+        getBounds().setBounds( xPos - 0.1f, yPos - 0.1f, xPos + 0.1f, yPos + 0.1f );
+
+        //  Log.e( "blowme", "xpos " + xPos + " ypos " + yPos );
 
     }
 

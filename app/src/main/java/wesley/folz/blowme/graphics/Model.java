@@ -10,6 +10,7 @@ import java.nio.ShortBuffer;
 
 import wesley.folz.blowme.R;
 import wesley.folz.blowme.ui.GamePlayRenderer;
+import wesley.folz.blowme.util.Bounds;
 
 /**
  * Created by wesley on 5/11/2015.
@@ -122,12 +123,12 @@ public abstract class Model
         normalData = data;
     }
 
-    public float[] getBounds()
+    public Bounds getBounds()
     {
         return bounds;
     }
 
-    public void setBounds( float[] bounds )
+    public void setBounds( Bounds bounds )
     {
         this.bounds = bounds;
     }
@@ -266,7 +267,7 @@ public abstract class Model
 
     protected ShortBuffer drawListBuffer;
 
-    private float[] bounds;
+    private Bounds bounds;
 
     private float[] size;
 

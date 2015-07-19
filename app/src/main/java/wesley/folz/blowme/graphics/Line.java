@@ -1,12 +1,22 @@
 package wesley.folz.blowme.graphics;
 
 import android.opengl.GLES20;
+import android.opengl.Matrix;
 
 /**
  * Created by wesley on 7/3/2015.
  */
 public class Line extends Model
 {
+    public Line()
+    {
+        vertexData = new float[]{
+                - 0.5f, 0.25f, 0.0f,   // top
+                0.5f, 0.25f, 0.0f}; // top right
+
+        vertexOrder = new short[]{0, 1};
+    }
+
     @Override
     public void draw()
     {
@@ -53,12 +63,19 @@ public class Line extends Model
     @Override
     public float[] createTransformationMatrix()
     {
-        return new float[0];
+        Matrix.translateM( mvpMatrix, 0, deltaX, deltaY, 0 );
+        return mvpMatrix;
     }
 
     @Override
     public void updatePosition( float x, float y )
     {
+        deltaX = x;
 
+        deltaY = - y;
     }
+
+    private float deltaX;
+
+    private float deltaY;
 }
