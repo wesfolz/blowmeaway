@@ -164,16 +164,15 @@ public abstract class Model
         vertexOrder = order;
     }
 
-    public void setxPos( float xPos )
+    public float getxPos()
     {
-        this.xPos = xPos;
+        return xPos;
     }
 
-    public void setyPos( float yPos )
+    public float getyPos()
     {
-        this.yPos = yPos;
+        return yPos;
     }
-
     public abstract float[] createTransformationMatrix();
 
     public abstract void updatePosition( float x, float y );

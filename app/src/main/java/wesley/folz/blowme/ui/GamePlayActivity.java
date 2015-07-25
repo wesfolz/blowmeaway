@@ -145,9 +145,9 @@ public class GamePlayActivity extends Activity
      */
     private GLSurfaceView surfaceView;
 
-    public static final float X_EDGE_POSITION = 0.4f;
+    public static final float X_EDGE_POSITION = 0.3f;
 
-    public static final float Y_EDGE_POSITION = 0.6f;
+    public static final float Y_EDGE_POSITION = 0.7f;
 
     private Fan fan;
 

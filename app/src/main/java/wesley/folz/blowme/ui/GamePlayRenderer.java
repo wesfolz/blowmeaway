@@ -3,7 +3,6 @@ package wesley.folz.blowme.ui;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
-import android.util.Log;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -136,7 +135,8 @@ public class GamePlayRenderer implements GLSurfaceView.Renderer
         fan.getWind().draw();
         fan.draw();
         //triangle.enableGraphics();
-        fan.getWind().calculateWindForce();
+        //fan.getWind().calculateWindForce();
+        Physics.calculateWindForce( fan.getWind(), triangle );
 
         //Log.e( "blowme", "min bounds " + fan.getWind().getBounds().getyCorners()[0] + " max
         // bounds " +
@@ -145,14 +145,14 @@ public class GamePlayRenderer implements GLSurfaceView.Renderer
         if( Physics.isCollision( fan.getWind().getBounds(), triangle.getBounds() ) )
         {
             triangle.updatePosition( fan.getWind().getxForce(), fan.getWind().getyForce() );
-            Log.e( "blowme", "True" );
+            //Log.e( "blowme", "True" );
             //Log.e( "blowme", "wind bounds " + triangle.getBounds().getyMin() + " triangle
             // bounds " + triangle.getBounds().getyMax() );
         }
         else
         {
             triangle.updatePosition( 0, 0 );
-            Log.e( "blowme", "False" );
+            //Log.e( "blowme", "False" );
         }
         triangle.draw();
 

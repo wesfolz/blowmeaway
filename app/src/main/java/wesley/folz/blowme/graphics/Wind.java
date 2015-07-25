@@ -46,15 +46,25 @@ public class Wind extends Model
         this.yForce = yForce;
     }
 
+    public float getWindDisplacement()
+    {
+        return windDisplacement;
+    }
+
+    public void setWindDisplacement( float windDisplacement )
+    {
+        this.windDisplacement = windDisplacement;
+    }
+
 
     public void calculateWindForce()
     {
-        xForce = (- 1) * xPos * windPower;
-        yForce = (- 1) * yPos * windPower;
+        xForce = (- 1) * xPos * windDisplacement;
+        yForce = (- 1) * yPos * windDisplacement;
     }
 
     /**
-     * TODO: Rotate fan so that it doesn't compete with blade rotation
+     * TODO: Rotate fan so that it doesn't compete with blade rotation (make wind force a function of distance)
      * Rotate fan so that it's pointing towards the center of the screen
      *
      * @return - rotation matrix about z axis that points fan towards center of screen
@@ -120,7 +130,7 @@ public class Wind extends Model
 
     private float yForce;
 
-    private float windPower = 0.1f;
+    private float windDisplacement = 0.5f;
 
     private float[] rotationMatrix;
 }

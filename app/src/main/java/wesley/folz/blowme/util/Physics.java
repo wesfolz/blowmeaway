@@ -1,10 +1,24 @@
 package wesley.folz.blowme.util;
 
+import wesley.folz.blowme.graphics.FallingObject;
+import wesley.folz.blowme.graphics.Wind;
+
 /**
  * Created by wesley on 7/3/2015.
  */
 public abstract class Physics
 {
+    public static void calculateWindForce( Wind wind, FallingObject object )
+    {
+        float distance = (float) Math.sqrt( Math.pow( wind.getxPos() - object.getxPos(), 2 ) +
+                Math.pow( wind.getyPos() - object.getyPos(), 2 ) );
+        float displacement = wind.getWindDisplacement() - distance;
+        if( displacement < 0 )
+            displacement = 0;
+        wind.setxForce( (- 1) * wind.getxPos() * (displacement) );
+        wind.setyForce( (- 1) * wind.getyPos() * (displacement) );
+    }
+
     public static boolean isCollision( Bounds b1, Bounds b2 )
     {
         float b1xMin = Math.min( b1.getxCorners()[0], b1.getxCorners()[1] );
@@ -34,5 +48,5 @@ public abstract class Physics
 
     public static final float GRAVITY = 9.8f;
 
-    public static final float KINETIC_FRICTION = 9.79f;
+    public static final float KINETIC_FRICTION = 9.75f;
 }

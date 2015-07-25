@@ -60,7 +60,7 @@ public class FallingObject extends Model
     }
 
     /**
-     * TODO:  make movement after wind collision look behave correctly
+     * TODO: make movement after wind collision look behave correctly
      * @param x - x component of wind force
      * @param y - y component of wind force
      */
