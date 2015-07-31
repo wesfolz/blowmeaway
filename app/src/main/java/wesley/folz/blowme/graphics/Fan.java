@@ -4,6 +4,7 @@ import android.opengl.Matrix;
 import android.os.SystemClock;
 import android.util.Log;
 
+import wesley.folz.blowme.R;
 import wesley.folz.blowme.ui.GamePlayActivity;
 import wesley.folz.blowme.util.Bounds;
 import wesley.folz.blowme.util.OBJReader;
@@ -16,6 +17,7 @@ public class Fan extends Model
     public Fan()
     {
 //        super();
+        this.RESOURCE = R.raw.fan2;
         OBJReader.readOBJFile( this );
         xPos = - GamePlayActivity.X_EDGE_POSITION;//+.01f;
         yPos = 0;

@@ -8,7 +8,6 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 
-import wesley.folz.blowme.R;
 import wesley.folz.blowme.ui.GamePlayRenderer;
 import wesley.folz.blowme.util.Bounds;
 
@@ -270,5 +269,5 @@ public abstract class Model
 
     private float[] size;
 
-    public static final int RESOURCE = R.raw.fan2;
+    public int RESOURCE;
 }

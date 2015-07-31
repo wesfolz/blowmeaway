@@ -7,6 +7,7 @@ import android.opengl.Matrix;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
+import wesley.folz.blowme.graphics.Dispenser;
 import wesley.folz.blowme.graphics.FallingObject;
 import wesley.folz.blowme.graphics.Fan;
 import wesley.folz.blowme.graphics.Line;
@@ -51,14 +52,17 @@ public class GamePlayRenderer implements GLSurfaceView.Renderer
     public void onSurfaceCreated( GL10 gl, EGLConfig config )
     {
         triangle = new FallingObject();
-        line = new Line();
+        //line = new Line();
+        dispenser = new Dispenser();
         // Set the background frame color
         GLES20.glClearColor( 0.0f, 0.0f, 0.0f, 1.0f );
         //fan = new Fan();
         fan.enableGraphics();
         fan.getWind().enableGraphics();
         triangle.enableGraphics();
-        line.enableGraphics();
+        //line.enableGraphics();
+        dispenser.enableGraphics();
+
     }
 
     /**
@@ -103,8 +107,10 @@ public class GamePlayRenderer implements GLSurfaceView.Renderer
         fan.getWind().initializeMatrix();
         triangle.setProjectionMatrix( mProjectionMatrix );
         triangle.initializeMatrix();
-        line.setProjectionMatrix( mProjectionMatrix );
-        line.initializeMatrix();
+        //line.setProjectionMatrix( mProjectionMatrix );
+        //line.initializeMatrix();
+        dispenser.setProjectionMatrix( mProjectionMatrix );
+        dispenser.initializeMatrix();
     }
 
     /**
@@ -134,6 +140,8 @@ public class GamePlayRenderer implements GLSurfaceView.Renderer
         //fan.enableGraphics();
         fan.getWind().draw();
         fan.draw();
+        dispenser.updatePosition( 0, 0 );
+        dispenser.draw();
         //triangle.enableGraphics();
         //fan.getWind().calculateWindForce();
         Physics.calculateWindForce( fan.getWind(), triangle );
@@ -176,6 +184,8 @@ public class GamePlayRenderer implements GLSurfaceView.Renderer
     private Fan fan;
 
     private FallingObject triangle;
+
+    private Dispenser dispenser;
 
     private Line line;
 

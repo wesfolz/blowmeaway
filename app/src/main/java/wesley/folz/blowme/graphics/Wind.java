@@ -130,7 +130,7 @@ public class Wind extends Model
 
     private float yForce;
 
-    private float windDisplacement = 0.5f;
+    private float windDisplacement = 0.8f;
 
     private float[] rotationMatrix;
 }
