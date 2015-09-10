@@ -19,12 +19,12 @@ public class Bounds
         setBounds( xMin, yMin, xMax, yMax );
     }
 
-    public float[] getxCorners()
+    public float[] getXCorners()
     {
         return xCorners;
     }
 
-    public float[] getyCorners()
+    public float[] getYCorners()
     {
         return yCorners;
     }

@@ -7,6 +7,7 @@ public class Border extends Model
 {
     public Border()
     {
+
     }
 
     @Override
@@ -20,4 +21,9 @@ public class Border extends Model
     {
 
     }
+
+    public static final float XMIN = - 0.5f;
+
+    public static final float XMAX = 0.5f;
+
 }

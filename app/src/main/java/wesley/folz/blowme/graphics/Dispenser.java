@@ -1,7 +1,6 @@
 package wesley.folz.blowme.graphics;
 
 import android.opengl.Matrix;
-import android.util.Log;
 
 import wesley.folz.blowme.R;
 import wesley.folz.blowme.ui.GamePlayActivity;
@@ -41,7 +40,7 @@ public class Dispenser extends Model
         Matrix.translateM( mvpMatrix, 0, 0, yPos, 0 );
         Matrix.scaleM( mvpMatrix, 0, 0.2f, 0.2f, 0.2f );
 
-        Log.e( "blowme", "xpos: " + xPos + " ypos " + yPos );
+        //Log.e( "blowme", "xpos: " + xPos + " ypos " + yPos );
     }
 
     @Override
@@ -56,8 +55,8 @@ public class Dispenser extends Model
             motionMultiplier = 1;
         deltaX *= motionMultiplier;
         xPos += deltaX;//*motionMultiplier;
-        Log.e( "blowme", "motionmultiplier " + motionMultiplier + " deltax " + deltaX + " xpos "
-                + xPos );
+        //Log.e( "blowme", "motionmultiplier " + motionMultiplier + " deltax " + deltaX + " xpos "
+        //       + xPos );
 
     }
 

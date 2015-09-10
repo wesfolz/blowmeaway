@@ -10,7 +10,6 @@ import javax.microedition.khronos.opengles.GL10;
 import wesley.folz.blowme.graphics.Dispenser;
 import wesley.folz.blowme.graphics.FallingObject;
 import wesley.folz.blowme.graphics.Fan;
-import wesley.folz.blowme.graphics.Line;
 import wesley.folz.blowme.util.Physics;
 
 /**
@@ -186,8 +185,6 @@ public class GamePlayRenderer implements GLSurfaceView.Renderer
     private FallingObject triangle;
 
     private Dispenser dispenser;
-
-    private Line line;
 
     // mMVPMatrix is an abbreviation for "Model View Projection Matrix"
     private final float[] mMVPMatrix = new float[16];

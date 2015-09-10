@@ -2,7 +2,6 @@ package wesley.folz.blowme.graphics;
 
 import android.opengl.Matrix;
 import android.os.SystemClock;
-import android.util.Log;
 
 import wesley.folz.blowme.R;
 import wesley.folz.blowme.ui.GamePlayActivity;
@@ -149,7 +148,7 @@ public class Fan extends Model
         Matrix.translateM( mvpMatrix, 0, - GamePlayActivity.X_EDGE_POSITION, 0, 0 );
         Matrix.scaleM( mvpMatrix, 0, 0.05f, 0.05f, 0.05f );
 
-        Log.e( "blowme", "xpos: " + xPos + " ypos " + yPos );
+        //Log.e( "blowme", "xpos: " + xPos + " ypos " + yPos );
     }
 
     /**

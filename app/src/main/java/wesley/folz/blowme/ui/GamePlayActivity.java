@@ -8,7 +8,6 @@ import android.graphics.Point;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.support.v4.view.MotionEventCompat;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
@@ -60,7 +59,7 @@ public class GamePlayActivity extends Activity
         WIDTH = p.x;
         HEIGHT = p.y;
 
-        Log.e( "blowme", "WIDTH " + WIDTH + " HEIGHT " + HEIGHT );
+        //Log.e( "blowme", "WIDTH " + WIDTH + " HEIGHT " + HEIGHT );
         fan = new Fan();
 
         if( supportsEs2 )
@@ -92,7 +91,7 @@ public class GamePlayActivity extends Activity
                     case MotionEvent.ACTION_DOWN:
                         fan.setInitialX( x );
                         fan.setInitialY( y );
-                        Log.e( "blowme", "x " + event.getX() + " y " + event.getY() );
+                        //Log.e( "blowme", "x " + event.getX() + " y " + event.getY() );
 
                         break;
 
@@ -145,7 +144,7 @@ public class GamePlayActivity extends Activity
      */
     private GLSurfaceView surfaceView;
 
-    public static final float X_EDGE_POSITION = 0.3f;
+    public static final float X_EDGE_POSITION = 0.35f;
 
     public static final float Y_EDGE_POSITION = 0.7f;
 

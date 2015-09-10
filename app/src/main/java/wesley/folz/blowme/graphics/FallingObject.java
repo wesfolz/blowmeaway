@@ -51,6 +51,17 @@ public class FallingObject extends Model
         return mvpMatrix;
     }
 
+    public float getDeltaX()
+    {
+        return deltaX;
+    }
+
+    public float getDeltaY()
+    {
+        return deltaY;
+    }
+
+
     @Override
     public void initializeMatrix()
     {
@@ -61,6 +72,7 @@ public class FallingObject extends Model
 
     /**
      * TODO: make movement after wind collision look behave correctly
+     *
      * @param x - x component of wind force
      * @param y - y component of wind force
      */
@@ -71,9 +83,16 @@ public class FallingObject extends Model
         previousTime = System.nanoTime();
         float fallingTime = MASS * time;
 
+
         float[] force = Physics.sumOfForces( x, y );
 
         xVelocity += force[0] * fallingTime;
+
+        //reflection of falling object off of side border simply changes sign of xVelocity
+        if( Physics.isBorderCollision( this.getBounds() ) )
+        {
+            xVelocity = - xVelocity;
+        }
 
         yVelocity += force[1] * fallingTime;
 
@@ -81,8 +100,10 @@ public class FallingObject extends Model
 
         deltaY = fallingTime * yVelocity;
 
+
         xPos += deltaX;
         yPos += deltaY;
+
 
         getBounds().setBounds( xPos - 0.1f, yPos - 0.1f, xPos + 0.1f, yPos + 0.1f );
 
