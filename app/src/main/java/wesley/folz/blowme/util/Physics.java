@@ -13,7 +13,7 @@ public abstract class Physics
     {
         float distance = (float) Math.sqrt( Math.pow( wind.getxPos() - object.getxPos(), 2 ) +
                 Math.pow( wind.getyPos() - object.getyPos(), 2 ) );
-        float displacement = wind.getWindDisplacement() - distance;
+        float displacement = wind.getWindDisplacement() - 1.5f * distance;
         if( displacement < 0 )
         {
             displacement = 0;

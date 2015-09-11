@@ -3,6 +3,7 @@ package wesley.folz.blowme.ui;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
+import android.util.Log;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -97,7 +98,7 @@ public class GamePlayRenderer implements GLSurfaceView.Renderer
 
         // this projection matrix is applied to object coordinates
         // in the onDrawFrame() method
-        float[] mProjectionMatrix = new float[16];
+        mProjectionMatrix = new float[16];
         //Matrix.frustumM( mProjectionMatrix, 0, - ratio, ratio, - 1, 1, 1, 3 );
         Matrix.orthoM( mProjectionMatrix, 0, - ratio, ratio, - 1, 1, 1, 10 );
         fan.setProjectionMatrix( mProjectionMatrix );
@@ -161,6 +162,14 @@ public class GamePlayRenderer implements GLSurfaceView.Renderer
             triangle.updatePosition( 0, 0 );
             //Log.e( "blowme", "False" );
         }
+        if( triangle.isOffscreen() )
+        {
+            Log.e( "blowme", "offscreen" );
+            triangle = new FallingObject();
+            triangle.enableGraphics();
+            triangle.setProjectionMatrix( mProjectionMatrix );
+            triangle.initializeMatrix();
+        }
         triangle.draw();
 
         //line.updatePosition( fan.deltaX, fan.deltaY );
@@ -187,6 +196,5 @@ public class GamePlayRenderer implements GLSurfaceView.Renderer
     private Dispenser dispenser;
 
     // mMVPMatrix is an abbreviation for "Model View Projection Matrix"
-    private final float[] mMVPMatrix = new float[16];
-    private final float[] mViewMatrix = new float[16];
+    private float[] mProjectionMatrix = new float[16];
 }

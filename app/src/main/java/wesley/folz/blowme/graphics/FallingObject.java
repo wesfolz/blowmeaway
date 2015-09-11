@@ -20,9 +20,14 @@ public class FallingObject extends Model
 
         vertexOrder = new short[]{0, 1, 2};
 
-        xPos = 0;
+        xPos = (float) (Math.random() - 0.5);
 
-        yPos = - 0.6f;
+        if( xPos > 0.35 )
+            xPos = 0.35f;
+        if( xPos <= - 0.35 )
+            xPos = - 0.35f;
+
+        yPos = - 1.0f;
 
         xVelocity = 0;
 
@@ -61,12 +66,17 @@ public class FallingObject extends Model
         return deltaY;
     }
 
+    public boolean isOffscreen()
+    {
+        return this.getBounds().getYCorners()[0] > Border.YMAX /*|| this.getBounds().getYCorners()
+                [1] < Border.YMIN */;
+    }
 
     @Override
     public void initializeMatrix()
     {
         super.initializeMatrix();
-        Matrix.translateM( mvpMatrix, 0, 0, 0.6f, 0 );
+        Matrix.translateM( mvpMatrix, 0, xPos, - yPos, 0 );
 
     }
 

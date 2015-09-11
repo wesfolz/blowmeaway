@@ -26,4 +26,8 @@ public class Border extends Model
 
     public static final float XMAX = 0.5f;
 
+    public static final float YMIN = - 1.0f;
+
+    public static final float YMAX = 1.0f;
+
 }
