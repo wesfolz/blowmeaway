@@ -4,7 +4,7 @@ import android.opengl.Matrix;
 
 import wesley.folz.blowme.R;
 import wesley.folz.blowme.ui.GamePlayActivity;
-import wesley.folz.blowme.util.OBJReader;
+import wesley.folz.blowme.util.GraphicsReader;
 
 /**
  * Created by wesley on 7/25/2015.
@@ -13,8 +13,8 @@ public class Dispenser extends Model
 {
     public Dispenser()
     {
-        this.RESOURCE = R.raw.triangle_collector;
-        OBJReader.readOBJFile( this );
+        this.OBJ_FILE_RESOURCE = R.raw.triangle_collector;
+        GraphicsReader.readOBJFile(this);
         xPos = 0;//+.01f;
         yPos = GamePlayActivity.Y_EDGE_POSITION;
         initialRotation = new float[16];

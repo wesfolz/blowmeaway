@@ -13,13 +13,43 @@ import wesley.folz.blowme.ui.MyApplication;
 /**
  * Created by wesley on 5/11/2015.
  */
-public abstract class OBJReader
+public abstract class GraphicsReader
 {
+    public static void readShader(Model model)
+    {
+        InputStream vertexStream = MyApplication.getAppContext().getResources().openRawResource( model.VERTEX_SHADER );
+        BufferedReader vertexReader = new BufferedReader( new InputStreamReader( vertexStream ) );
+
+        InputStream fragmentStream = MyApplication.getAppContext().getResources().openRawResource( model.FRAGMENT_SHADER );
+        BufferedReader fragmentReader = new BufferedReader( new InputStreamReader( fragmentStream ) );
+
+        String line;
+        model.vertexShaderCode = new String("");
+        model.fragmentShaderCode = new String("");
+        try
+        {
+            while( (line = vertexReader.readLine()) != null )
+            {
+                model.vertexShaderCode += line;// + "\n";
+            }
+
+            while( (line = fragmentReader.readLine()) != null )
+            {
+                model.fragmentShaderCode += line;// + "\n";
+            }
+
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+    }
+
     public static void readOBJFile( Model model )
     {
         //opening input stream to obj file
         InputStream stream = MyApplication.getAppContext().getResources().openRawResource( model
-                .RESOURCE );
+                .OBJ_FILE_RESOURCE);
         BufferedReader reader = new BufferedReader( new InputStreamReader( stream ) );
 
         ArrayList<Float> vertices = new ArrayList<>();
@@ -33,7 +63,7 @@ public abstract class OBJReader
         {
             while( (line = reader.readLine()) != null )
             {
-                if( line.startsWith( "v " ) || line.startsWith( "vn " ) )
+                if( line.startsWith( "v") )
                 {
                     StringTokenizer tokenizer = new StringTokenizer( line, " " );
                     float[] coordinate = new float[3];
@@ -65,20 +95,20 @@ public abstract class OBJReader
                 {
                     StringTokenizer tokenizer = new StringTokenizer( line, "// " );
                     int count = 0;
+                    String s;
                     while( tokenizer.hasMoreTokens() )
                     {
+                        s = tokenizer.nextToken();
                         if( count == 0 )
                         {
-                            tokenizer.nextToken();
+                            s = tokenizer.nextToken();
                         }
                         if( count % 2 == 0 )
                         {
-                            String s = tokenizer.nextToken();
                             faceList.add( (short) (Short.parseShort( s ) - offset) );
                         }
-                        if( count % 2 == 1 )
+                        else
                         {
-                            String s = tokenizer.nextToken();
                             faceNormals.add( (short) (Short.parseShort( s ) - offset) );
                         }
                         count++;
@@ -107,8 +137,12 @@ public abstract class OBJReader
                 for( int i = 0; i < vertices.size(); i++ )
                 {
                     faceVertices[i] = vertices.get( i );
-                    //normalVectors[i] = normals.get( i );
                 }
+                for( int i = 0; i < normals.size(); i++ )
+                {
+                    normalVectors[i] = normals.get( i );
+                }
+
                 model.setVertexOrder( vertexOrder );
                 model.setVertexData( faceVertices );
                 model.setNormalOrder( normalOrder );

@@ -6,7 +6,7 @@ import android.os.SystemClock;
 import wesley.folz.blowme.R;
 import wesley.folz.blowme.ui.GamePlayActivity;
 import wesley.folz.blowme.util.Bounds;
-import wesley.folz.blowme.util.OBJReader;
+import wesley.folz.blowme.util.GraphicsReader;
 
 /**
  * Created by wesley on 5/11/2015.
@@ -16,8 +16,11 @@ public class Fan extends Model
     public Fan()
     {
 //        super();
-        this.RESOURCE = R.raw.fan2;
-        OBJReader.readOBJFile( this );
+        this.OBJ_FILE_RESOURCE = R.raw.fan2;
+        //this.VERTEX_SHADER = R.raw.fanvertexshader;
+        //this.FRAGMENT_SHADER = R.raw.fanvertexshader;
+        GraphicsReader.readOBJFile(this);
+        //GraphicsReader.readShader(this);
         xPos = - GamePlayActivity.X_EDGE_POSITION;//+.01f;
         yPos = 0;
         setWind( new Wind() );

@@ -8,8 +8,10 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 
+import wesley.folz.blowme.R;
 import wesley.folz.blowme.ui.GamePlayRenderer;
 import wesley.folz.blowme.util.Bounds;
+import wesley.folz.blowme.util.GraphicsReader;
 
 /**
  * Created by wesley on 5/11/2015.
@@ -18,45 +20,68 @@ public abstract class Model
 {
     public Model()
     {
-        //OBJReader.readOBJFile( this );
+        //GraphicsReader.readOBJFile( this );
+        this.VERTEX_SHADER = R.raw.defaultvertexshader;
+        this.FRAGMENT_SHADER = R.raw.defaultfragmentshader;
+        GraphicsReader.readShader(this);
     }
 
     public void draw()
     {
         // Add program to OpenGL ES environment
-        GLES20.glUseProgram( mProgram );
+        GLES20.glUseProgram(mProgram);
 
-        // get handle to vertex shader's vPosition member
-        mPositionHandle = GLES20.glGetAttribLocation( mProgram, "a_Position" );
+        // get handle to vertex vertexshader's vPosition member
+        mPositionHandle = GLES20.glGetAttribLocation( mProgram, "position" );
 
         // Prepare the triangle coordinate data
         vertexBuffer.position( 0 );
-        GLES20.glVertexAttribPointer( mPositionHandle, COORDS_PER_VERTEX,
+
+        GLES20.glVertexAttribPointer(mPositionHandle, COORDS_PER_VERTEX,
                 GLES20.GL_FLOAT, false,
-                vertexStride, vertexBuffer );
+                vertexStride, vertexBuffer);
         // Enable a handle to the triangle vertices
-        GLES20.glEnableVertexAttribArray( mPositionHandle );
+        GLES20.glEnableVertexAttribArray(mPositionHandle);
 
-        // get handle to fragment shader's vColor member
-        mColorHandle = GLES20.glGetAttribLocation( mProgram, "a_Color" );
-        colorBuffer.position( 0 );
-        GLES20.glVertexAttribPointer( mColorHandle, 4, GLES20.GL_FLOAT, false,
-                4, colorBuffer );
+        if(normalData != null)
+        {
+            mNormalHandle = GLES20.glGetAttribLocation(mProgram, "normalVector");
 
-        GLES20.glEnableVertexAttribArray( mColorHandle );
+            GLES20.glVertexAttribPointer(mNormalHandle, COORDS_PER_VERTEX,
+                    GLES20.GL_FLOAT, false,
+                    vertexStride, normalBuffer);
+            // Enable a handle to the triangle vertices
+            GLES20.glEnableVertexAttribArray(mNormalHandle);
+        }
+        // get handle to fragment vertexshader's vColor member
+        //mColorHandle = GLES20.glGetAttribLocation( mProgram, "color" );
+        //colorBuffer.position(0);
+        //GLES20.glVertexAttribPointer(mColorHandle, 4, GLES20.GL_FLOAT, false,
+        //        4, colorBuffer);
+
+        // get handle to fragment vertexshader's vColor member
+        mColorHandle = GLES20.glGetUniformLocation(mProgram, "color");
+        //GLES20.glGenTextures();
+
+        // Set color for drawing the triangle
+        GLES20.glUniform4fv(mColorHandle, 1, color, 0);
+
+        //GLES20.glEnableVertexAttribArray( mColorHandle );
 
         // get handle to shape's transformation matrix
         mMVPMatrixHandle = GLES20.glGetUniformLocation( mProgram, "u_MVPMatrix" );
 
         float[] mMVPMatrix = createTransformationMatrix();
 
-        // Pass the projection and view transformation to the shader
+        // Pass the projection and view transformation to the vertexshader
         GLES20.glUniformMatrix4fv( mMVPMatrixHandle, 1, false, mMVPMatrix, 0 );
 
         // Draw the triangle
         //GLES20.glDrawArrays( GLES20.GL_TRIANGLES, 0, vertexData.length );
-        GLES20.glDrawElements( GLES20.GL_TRIANGLES, vertexOrder.length, GLES20.GL_UNSIGNED_SHORT,
-                drawListBuffer );
+        GLES20.glDrawElements(GLES20.GL_TRIANGLES, vertexOrder.length, GLES20.GL_UNSIGNED_SHORT,
+                drawListBuffer);
+
+//        GamePlayRenderer.checkGlError("glDrawElements");
         //GLES20.glDrawArrays( GLES20.GL_TRIANGLES, 0, 3 );
 
         // Disable vertex array
@@ -69,7 +94,7 @@ public abstract class Model
         bb.order( ByteOrder.nativeOrder() );
         vertexBuffer = bb.asFloatBuffer();
         vertexBuffer.put( vertexData );
-        vertexBuffer.position( 0 );
+        vertexBuffer.position(0);
 
         // initialize byte buffer for the draw list
         ByteBuffer dlb = ByteBuffer.allocateDirect(
@@ -77,15 +102,26 @@ public abstract class Model
                 vertexOrder.length * 2 );
         dlb.order( ByteOrder.nativeOrder() );
         drawListBuffer = dlb.asShortBuffer();
-        drawListBuffer.put( vertexOrder );
-        drawListBuffer.position( 0 );
+        drawListBuffer.put(vertexOrder);
+        drawListBuffer.position(0);
 
+        if (normalData != null)
+        {
+            ByteBuffer nb = ByteBuffer.allocateDirect(normalData.length * 4);
+            nb.order(ByteOrder.nativeOrder());
+            normalBuffer = nb.asFloatBuffer();
+            normalBuffer.put(normalData);
+            normalBuffer.position(0);
+        }
 
         ByteBuffer cb = ByteBuffer.allocateDirect( colorData.length * 4 );
         cb.order( ByteOrder.nativeOrder() );
         colorBuffer = cb.asFloatBuffer();
-        colorBuffer.put( colorData );
+        colorBuffer.put(colorData);
         colorBuffer.position( 0 );
+
+//        Log.e("shader", vertexShaderCode);
+//        Log.e("shader", fragmentShaderCode);
 
         int vertexShader = GamePlayRenderer.loadShader( GLES20.GL_VERTEX_SHADER, vertexShaderCode );
         int fragmentShader = GamePlayRenderer.loadShader( GLES20.GL_FRAGMENT_SHADER,
@@ -94,15 +130,17 @@ public abstract class Model
         // create empty OpenGL ES Program
         mProgram = GLES20.glCreateProgram();
 
-        // add the vertex shader to program
+        // add the vertex vertexshader to program
         GLES20.glAttachShader( mProgram, vertexShader );
 
-        // add the fragment shader to program
+        // add the fragment vertexshader to program
         GLES20.glAttachShader( mProgram, fragmentShader );
 
         // Bind attributes
-        GLES20.glBindAttribLocation( mProgram, 0, "a_Position" );
-        GLES20.glBindAttribLocation( mProgram, 1, "a_Color" );
+        GLES20.glBindAttribLocation( mProgram, 0, "position" );
+        GLES20.glBindAttribLocation( mProgram, 1, "normalVector" );
+
+        //GLES20.glBindAttribLocation( mProgram, 1, "color" );
 
         // creates OpenGL ES program executables
         GLES20.glLinkProgram( mProgram );
@@ -176,50 +214,14 @@ public abstract class Model
 
     public abstract void updatePosition( float x, float y );
 
-    final String fragmentShaderCode =
-            "precision mediump float;       \n"     // Set the default precision to medium. We
-            // don't need as high of a
-                    // precision in the fragment shader.
-                    + "varying vec4 v_Color;          \n"     // This is the color from the
-                    // vertex shader interpolated across the
-                    // triangle per fragment.
-                    + "void main()                    \n"     // The entry point for our fragment
-                    // shader.
-                    + "{                              \n"
-                    + "   gl_FragColor = v_Color;     \n"     // Pass the color directly through
-                    // the pipeline.
-                    + "}                              \n";
-
-
-    final String vertexShaderCode =
-            "uniform mat4 u_MVPMatrix;      \n"     // A constant representing the combined
-            // model/view/projection matrix.
-
-                    + "attribute vec4 a_Position;     \n"     // Per-vertex position information
-                    // we will pass in.
-                    + "attribute vec4 a_Color;        \n"     // Per-vertex color information we
-                    // will pass in.
-
-                    + "varying vec4 v_Color;          \n"     // This will be passed into the
-                    // fragment shader.
-
-                    + "void main()                    \n"     // The entry point for our vertex
-                    // shader.
-                    + "{                              \n"
-                    + "   v_Color = a_Color;          \n"     // Pass the color through to the
-                    // fragment shader.
-                    // It will be interpolated across the triangle.
-                    + "   gl_Position = u_MVPMatrix   \n"     // gl_Position is a special
-                    // variable used to store the final position.
-                    + "               * a_Position;   \n"     // Multiply the vertex by the
-                    // matrix to get the final point in
-                    + "}                              \n";    // normalized screen coordinates.
-
+    public String fragmentShaderCode;
+    public String vertexShaderCode;
     protected float[] colorData = {
             1.0f, 0.0f, 0.0f, 1.0f,
             0.0f, 0.0f, 1.0f, 1.0f,
             0.0f, 1.0f, 0.0f, 1.0f
     };
+    float color[] = { 0.63671875f, 0.76953125f, 0.22265625f, 0.0f };
 
     /**
      * Center x position of model
@@ -255,6 +257,8 @@ public abstract class Model
 
     protected int mColorHandle;
 
+    protected int mNormalHandle;
+
     protected int mMVPMatrixHandle;
 
     protected final int vertexStride = COORDS_PER_VERTEX * 4; // 4 bytes per vertex
@@ -269,5 +273,9 @@ public abstract class Model
 
     private float[] size;
 
-    public int RESOURCE;
+    public int OBJ_FILE_RESOURCE;
+
+    public int VERTEX_SHADER;
+
+    public int FRAGMENT_SHADER;
 }

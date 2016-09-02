@@ -103,9 +103,9 @@ public class GamePlayRenderer implements GLSurfaceView.Renderer
         Matrix.orthoM( mProjectionMatrix, 0, - ratio, ratio, - 1, 1, 1, 10 );
         fan.setProjectionMatrix( mProjectionMatrix );
         fan.initializeMatrix();
-        fan.getWind().setProjectionMatrix( mProjectionMatrix );
+        fan.getWind().setProjectionMatrix(mProjectionMatrix);
         fan.getWind().initializeMatrix();
-        triangle.setProjectionMatrix( mProjectionMatrix );
+        triangle.setProjectionMatrix(mProjectionMatrix);
         triangle.initializeMatrix();
         //line.setProjectionMatrix( mProjectionMatrix );
         //line.initializeMatrix();
@@ -134,17 +134,18 @@ public class GamePlayRenderer implements GLSurfaceView.Renderer
     {
         // Redraw background color
         GLES20.glClear( GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT );
-        GLES20.glEnable( GLES20.GL_CULL_FACE );
-        GLES20.glCullFace( GLES20.GL_BACK );
+        GLES20.glEnable(GLES20.GL_CULL_FACE);
+        GLES20.glCullFace(GLES20.GL_BACK);
+        GLES20.glEnable(GLES20.GL_DEPTH_TEST);
         // Draw triangle
         //fan.enableGraphics();
         fan.getWind().draw();
         fan.draw();
-        dispenser.updatePosition( 0, 0 );
+        dispenser.updatePosition(0, 0);
         dispenser.draw();
         //triangle.enableGraphics();
         //fan.getWind().calculateWindForce();
-        Physics.calculateWindForce( fan.getWind(), triangle );
+        Physics.calculateWindForce(fan.getWind(), triangle);
 
         //Log.e( "blowme", "min bounds " + fan.getWind().getBounds().getyCorners()[0] + " max
         // bounds " +
@@ -178,16 +179,37 @@ public class GamePlayRenderer implements GLSurfaceView.Renderer
 
     public static int loadShader( int type, String shaderCode )
     {
-        // create a vertex shader type (GLES20.GL_VERTEX_SHADER)
-        // or a fragment shader type (GLES20.GL_FRAGMENT_SHADER)
+        // create a vertex vertexshader type (GLES20.GL_VERTEX_SHADER)
+        // or a fragment vertexshader type (GLES20.GL_FRAGMENT_SHADER)
         int shader = GLES20.glCreateShader( type );
 
-        // add the source code to the shader and compile it
+        // add the source code to the vertexshader and compile it
         GLES20.glShaderSource( shader, shaderCode );
         GLES20.glCompileShader( shader );
 
         return shader;
     }
+
+    /**
+     * Utility method for debugging OpenGL calls. Provide the name of the call
+     * just after making it:
+     *
+     * <pre>
+     * mColorHandle = GLES20.glGetUniformLocation(mProgram, "vColor");
+     * MyGLRenderer.checkGlError("glGetUniformLocation");</pre>
+     *
+     * If the operation is not successful, the check throws an error.
+     *
+     * @param glOperation - Name of the OpenGL call to check.
+     */
+    public static void checkGlError(String glOperation) {
+        int error;
+        while ((error = GLES20.glGetError()) != GLES20.GL_NO_ERROR) {
+            Log.e("GLerror", glOperation + ": glError " + error);
+            throw new RuntimeException(glOperation + ": glError " + error);
+        }
+    }
+
 
     private Fan fan;
 

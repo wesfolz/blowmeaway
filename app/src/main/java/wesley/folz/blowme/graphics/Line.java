@@ -23,7 +23,7 @@ public class Line extends Model
         // Add program to OpenGL ES environment
         GLES20.glUseProgram( mProgram );
 
-        // get handle to vertex shader's vPosition member
+        // get handle to vertex vertexshader's vPosition member
         mPositionHandle = GLES20.glGetAttribLocation( mProgram, "a_Position" );
 
         // Prepare the triangle coordinate data
@@ -34,7 +34,7 @@ public class Line extends Model
         // Enable a handle to the triangle vertices
         GLES20.glEnableVertexAttribArray( mPositionHandle );
 
-        // get handle to fragment shader's vColor member
+        // get handle to fragment vertexshader's vColor member
         mColorHandle = GLES20.glGetAttribLocation( mProgram, "a_Color" );
         colorBuffer.position( 0 );
         GLES20.glVertexAttribPointer( mColorHandle, 4, GLES20.GL_FLOAT, false,
@@ -47,7 +47,7 @@ public class Line extends Model
 
         float[] mMVPMatrix = createTransformationMatrix();
 
-        // Pass the projection and view transformation to the shader
+        // Pass the projection and view transformation to the vertexshader
         GLES20.glUniformMatrix4fv( mMVPMatrixHandle, 1, false, mMVPMatrix, 0 );
 
         // Draw the triangle
