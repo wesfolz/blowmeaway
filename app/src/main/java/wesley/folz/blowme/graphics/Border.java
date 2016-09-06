@@ -1,5 +1,7 @@
 package wesley.folz.blowme.graphics;
 
+import android.opengl.GLSurfaceView;
+
 /**
  * Created by wesley on 7/19/2015.
  */
@@ -7,7 +9,7 @@ public class Border extends Model
 {
     public Border()
     {
-
+        super();
     }
 
     @Override

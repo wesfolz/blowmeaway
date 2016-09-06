@@ -1,5 +1,6 @@
 package wesley.folz.blowme.graphics;
 
+import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 import android.os.SystemClock;
 
@@ -15,19 +16,18 @@ public class Fan extends Model
 {
     public Fan()
     {
-//        super();
-        this.OBJ_FILE_RESOURCE = R.raw.fan2;
-        //this.VERTEX_SHADER = R.raw.fanvertexshader;
-        //this.FRAGMENT_SHADER = R.raw.fanvertexshader;
+        super();
+        this.OBJ_FILE_RESOURCE = R.raw.fan;
+        this.VERTEX_SHADER = R.raw.fan_vertex_shader;
+        this.FRAGMENT_SHADER = R.raw.fan_fragment_shader;
         GraphicsReader.readOBJFile(this);
-        //GraphicsReader.readShader(this);
+        GraphicsReader.readShader(this);
         xPos = - GamePlayActivity.X_EDGE_POSITION;//+.01f;
         yPos = 0;
         setWind( new Wind() );
         setSize( new float[]{0.5f, 0.5f} );
         setBounds( new Bounds( xPos - getSize()[0] / 2, yPos - getSize()[1] / 2, xPos + getSize()
                 [0] / 2, yPos + getSize()[1] / 2 ) );
-
     }
 
     /**
@@ -94,12 +94,15 @@ public class Fan extends Model
         if( deltaX != 0 || deltaY != 0 )
             moveAlongEdge();
 
-        Matrix.scaleM( mvpMatrix, 0, 20f, 20f, 20f );
+        Matrix.scaleM( modelMatrix, 0, 20f, 20f, 20f );
+
         //Matrix.setIdentityM( translation, 0 );
         //Matrix.translateM( translation, 0, deltaX, - deltaY, 0 );
         //Matrix.multiplyMM( translationMatrix, 0, mvpMatrix, 0, translation, 0 );
-        Matrix.translateM( mvpMatrix, 0, deltaX, - deltaY, 0 );
-        Matrix.scaleM( mvpMatrix, 0, 0.05f, 0.05f, 0.05f );
+        Matrix.translateM( modelMatrix, 0, deltaX/20.0f, - deltaY/20.0f, 0 );
+        Matrix.scaleM( modelMatrix, 0, 0.05f, 0.05f, 0.05f );
+
+
         //Matrix.scaleM( translationMatrix, 0, 0.05f, 0.05f, 0.05f );
         //Log.e( "blowme", "DeltaX " + deltaX + "DeltaY " + deltaY );
 
@@ -119,7 +122,7 @@ public class Fan extends Model
 
         //Matrix.multiplyMM( first, 0, translationMatrix, 0, initialRotation, 0 );
 
-        Matrix.multiplyMM( inwardRotation, 0, mvpMatrix, 0, calculateInwardRotation(), 0 );
+        Matrix.multiplyMM( inwardRotation, 0, modelMatrix, 0, calculateInwardRotation(), 0 );
         Matrix.multiplyMM( first, 0, inwardRotation, 0, initialRotation, 0 );
         Matrix.multiplyMM( initialTransformationMatrix, 0, first, 0, secondRotation, 0 );
 
@@ -133,6 +136,12 @@ public class Fan extends Model
         // Note that the mMVPMatrix factor *must be first* in order
         // for the matrix multiplication product to be correct.
         Matrix.multiplyMM( bladeRotation, 0, initialTransformationMatrix, 0, mRotationMatrix, 0 );
+
+        Matrix.multiplyMM(mvMatrix, 0, viewMatrix, 0, bladeRotation, 0);
+
+        Matrix.multiplyMM(bladeRotation, 0, projectionMatrix, 0, mvMatrix, 0);
+
+        Matrix.scaleM(bladeRotation, 0, 0.05f, 0.05f, 0.05f);
 
 //        getWind().draw();
         return bladeRotation;
@@ -148,8 +157,22 @@ public class Fan extends Model
         Matrix.setRotateM( secondRotation, 0, 90, 1, 0, 0 );
         //Matrix.setIdentityM( secondRotation, 0 );
         //Matrix.scaleM( initialTransformationMatrix, 0, 0.1f, 0.1f, 0.1f );
-        Matrix.translateM( mvpMatrix, 0, - GamePlayActivity.X_EDGE_POSITION, 0, 0 );
-        Matrix.scaleM( mvpMatrix, 0, 0.05f, 0.05f, 0.05f );
+
+        Matrix.setIdentityM(modelMatrix, 0);
+
+        //Matrix.translateM( mvpMatrix, 0, - GamePlayActivity.X_EDGE_POSITION, 0, 0 );
+
+        Matrix.translateM(modelMatrix, 0, -GamePlayActivity.X_EDGE_POSITION, 0, 0);
+
+//        Matrix.translateM(modelMatrix, 0, 0.0f, 0, -5.0f);
+
+        //Matrix.multiplyMM(mvMatrix, 0, viewMatrix, 0, modelMatrix, 0);
+
+
+        //Matrix.scaleM(modelMatrix, 0, 0.05f, 0.05f, 0.05f);
+        //Matrix.scaleM(mvMatrix, 0, 0.05f, 0.05f, 0.05f);
+
+        //Matrix.scaleM(mvpMatrix, 0, 0.05f, 0.05f, 0.05f);
 
         //Log.e( "blowme", "xpos: " + xPos + " ypos " + yPos );
     }

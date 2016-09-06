@@ -1,14 +1,19 @@
 package wesley.folz.blowme.util;
 
+import android.util.Log;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.TreeSet;
 
 import wesley.folz.blowme.graphics.Model;
-import wesley.folz.blowme.ui.MyApplication;
+import wesley.folz.blowme.ui.MainApplication;
 
 /**
  * Created by wesley on 5/11/2015.
@@ -17,10 +22,10 @@ public abstract class GraphicsReader
 {
     public static void readShader(Model model)
     {
-        InputStream vertexStream = MyApplication.getAppContext().getResources().openRawResource( model.VERTEX_SHADER );
+        InputStream vertexStream = MainApplication.getAppContext().getResources().openRawResource( model.VERTEX_SHADER );
         BufferedReader vertexReader = new BufferedReader( new InputStreamReader( vertexStream ) );
 
-        InputStream fragmentStream = MyApplication.getAppContext().getResources().openRawResource( model.FRAGMENT_SHADER );
+        InputStream fragmentStream = MainApplication.getAppContext().getResources().openRawResource( model.FRAGMENT_SHADER );
         BufferedReader fragmentReader = new BufferedReader( new InputStreamReader( fragmentStream ) );
 
         String line;
@@ -30,12 +35,12 @@ public abstract class GraphicsReader
         {
             while( (line = vertexReader.readLine()) != null )
             {
-                model.vertexShaderCode += line;// + "\n";
+                model.vertexShaderCode += line + "\n";
             }
 
             while( (line = fragmentReader.readLine()) != null )
             {
-                model.fragmentShaderCode += line;// + "\n";
+                model.fragmentShaderCode += line + "\n";
             }
 
         }
@@ -48,7 +53,7 @@ public abstract class GraphicsReader
     public static void readOBJFile( Model model )
     {
         //opening input stream to obj file
-        InputStream stream = MyApplication.getAppContext().getResources().openRawResource( model
+        InputStream stream = MainApplication.getAppContext().getResources().openRawResource( model
                 .OBJ_FILE_RESOURCE);
         BufferedReader reader = new BufferedReader( new InputStreamReader( stream ) );
 
@@ -56,6 +61,9 @@ public abstract class GraphicsReader
         ArrayList<Float> normals = new ArrayList<>();
         ArrayList<Short> faceList = new ArrayList<>();
         ArrayList<Short> faceNormals = new ArrayList<>();
+
+        HashMap<Short, Float[]> normalVertexMap = new HashMap<>();
+
         short offset = 1;
 
         String line = null;
@@ -109,6 +117,13 @@ public abstract class GraphicsReader
                         }
                         else
                         {
+                            //create map with key being last vertex index and value being normal vector
+                            if(!normalVertexMap.containsKey(faceList.get(faceList.size() - 1)))
+                            {
+                                int normalIndex = 3*(Integer.parseInt(s) - offset);
+                                normalVertexMap.put(faceList.get(faceList.size() - 1),
+                                        new Float[]{normals.get(normalIndex), normals.get(normalIndex+1), normals.get(normalIndex+2)});
+                            }
                             faceNormals.add( (short) (Short.parseShort( s ) - offset) );
                         }
                         count++;
@@ -125,28 +140,14 @@ public abstract class GraphicsReader
             try
             {
                 short[] vertexOrder = new short[faceList.size()];
-                short[] normalOrder = new short[faceNormals.size()];
                 for( int i = 0; i < faceList.size(); i++ )
                 {
                     vertexOrder[i] = faceList.get( i );
-                    normalOrder[i] = faceNormals.get( i );
-                }
-
-                float[] faceVertices = new float[vertices.size()];
-                float[] normalVectors = new float[normals.size()];
-                for( int i = 0; i < vertices.size(); i++ )
-                {
-                    faceVertices[i] = vertices.get( i );
-                }
-                for( int i = 0; i < normals.size(); i++ )
-                {
-                    normalVectors[i] = normals.get( i );
                 }
 
                 model.setVertexOrder( vertexOrder );
-                model.setVertexData( faceVertices );
-                model.setNormalOrder( normalOrder );
-                model.setNormalData( normalVectors );
+                model.setInterleavedData(interleaveData(normalVertexMap, vertices));
+
                 stream.close();
             }
             catch( IOException e )
@@ -154,6 +155,42 @@ public abstract class GraphicsReader
                 e.printStackTrace();
             }
         }
+    }
+
+    private static float[] interleaveData(HashMap<Short, Float[]> normalVertexMap, ArrayList<Float> vertices)
+    {
+        ArrayList<Float> interleavedArrayList = new ArrayList<>();
+        float[] interleavedData = new float[2*vertices.size() + 4*vertices.size()/3];
+
+
+        Set<Short> keys = normalVertexMap.keySet();
+        ArrayList<Short> keyList = new ArrayList(new TreeSet(keys));
+
+        for(Short key: keyList)
+        {
+            Float[] normalVector = normalVertexMap.get(key);
+            //    Log.e("keys", String.valueOf(key));
+
+            for(int i=0; i<3; i++)
+                interleavedArrayList.add(vertices.get(3*key+i));
+
+            for(int i=0; i<3; i++)
+                interleavedArrayList.add(normalVector[i]);
+
+
+            for(int i=0; i<4; i++)
+                interleavedArrayList.add((float)(1.0*(float)(i%2)));
+        }
+
+        for (int i=0; i<interleavedData.length; i++)
+        {
+            interleavedData[i] = interleavedArrayList.get(i);
+            // Log.e("interleaved", String.valueOf(interleavedData[i]));
+        }
+
+        Log.e("interleave", String.valueOf(interleavedArrayList.size()));
+
+        return interleavedData;
     }
 
 }

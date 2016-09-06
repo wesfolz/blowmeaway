@@ -55,10 +55,10 @@ public class GamePlayRenderer implements GLSurfaceView.Renderer
         //line = new Line();
         dispenser = new Dispenser();
         // Set the background frame color
-        GLES20.glClearColor( 0.0f, 0.0f, 0.0f, 1.0f );
+        GLES20.glClearColor( 1.0f, 1.0f, 1.0f, 1.0f );
         //fan = new Fan();
         fan.enableGraphics();
-        fan.getWind().enableGraphics();
+        //fan.getWind().enableGraphics();
         triangle.enableGraphics();
         //line.enableGraphics();
         dispenser.enableGraphics();
@@ -99,7 +99,7 @@ public class GamePlayRenderer implements GLSurfaceView.Renderer
         // this projection matrix is applied to object coordinates
         // in the onDrawFrame() method
         mProjectionMatrix = new float[16];
-        //Matrix.frustumM( mProjectionMatrix, 0, - ratio, ratio, - 1, 1, 1, 3 );
+        //Matrix.frustumM( mProjectionMatrix, 0, - ratio, ratio, - 1, 1, 1, 10 );
         Matrix.orthoM( mProjectionMatrix, 0, - ratio, ratio, - 1, 1, 1, 10 );
         fan.setProjectionMatrix( mProjectionMatrix );
         fan.initializeMatrix();
@@ -139,8 +139,9 @@ public class GamePlayRenderer implements GLSurfaceView.Renderer
         GLES20.glEnable(GLES20.GL_DEPTH_TEST);
         // Draw triangle
         //fan.enableGraphics();
-        fan.getWind().draw();
+//        fan.getWind().draw();
         fan.draw();
+//        fan.drawLight();
         dispenser.updatePosition(0, 0);
         dispenser.draw();
         //triangle.enableGraphics();
@@ -171,6 +172,8 @@ public class GamePlayRenderer implements GLSurfaceView.Renderer
             triangle.setProjectionMatrix( mProjectionMatrix );
             triangle.initializeMatrix();
         }
+        //triangle.drawLight();
+
         triangle.draw();
 
         //line.updatePosition( fan.deltaX, fan.deltaY );
@@ -209,7 +212,6 @@ public class GamePlayRenderer implements GLSurfaceView.Renderer
             throw new RuntimeException(glOperation + ": glError " + error);
         }
     }
-
 
     private Fan fan;
 

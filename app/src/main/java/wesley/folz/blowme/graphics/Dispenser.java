@@ -1,5 +1,6 @@
 package wesley.folz.blowme.graphics;
 
+import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 
 import wesley.folz.blowme.R;
@@ -13,8 +14,12 @@ public class Dispenser extends Model
 {
     public Dispenser()
     {
+        super();
         this.OBJ_FILE_RESOURCE = R.raw.triangle_collector;
+        this.VERTEX_SHADER = R.raw.fan_vertex_shader;
+        this.FRAGMENT_SHADER = R.raw.fan_fragment_shader;
         GraphicsReader.readOBJFile(this);
+        GraphicsReader.readShader(this);
         xPos = 0;//+.01f;
         yPos = GamePlayActivity.Y_EDGE_POSITION;
         initialRotation = new float[16];
@@ -24,6 +29,8 @@ public class Dispenser extends Model
     @Override
     public float[] createTransformationMatrix()
     {
+        Matrix.translateM( modelMatrix, 0, deltaX, 0, 0 );
+        Matrix.translateM( mvMatrix, 0, deltaX, 0, 0 );
         Matrix.translateM( mvpMatrix, 0, deltaX, 0, 0 );
 
         return mvpMatrix;
@@ -38,6 +45,17 @@ public class Dispenser extends Model
         //Matrix.setIdentityM( secondRotation, 0 );
         //Matrix.scaleM( initialTransformationMatrix, 0, 0.1f, 0.1f, 0.1f );
         Matrix.translateM( mvpMatrix, 0, 0, yPos, 0 );
+
+        Matrix.setIdentityM(modelMatrix, 0);
+        Matrix.translateM(modelMatrix, 0, 0, yPos, 0);
+
+ //       Matrix.translateM(modelMatrix, 0, 0.0f, 0, -5.0f);
+
+        Matrix.multiplyMM(mvMatrix, 0, viewMatrix, 0, modelMatrix, 0);
+
+        //Matrix.translateM(mvpMatrix, 0, 0.0f, 0, -5.0f);
+
+        Matrix.scaleM( modelMatrix, 0, 0.2f, 0.2f, 0.2f );
         Matrix.scaleM( mvpMatrix, 0, 0.2f, 0.2f, 0.2f );
 
         //Log.e( "blowme", "xpos: " + xPos + " ypos " + yPos );
@@ -57,7 +75,6 @@ public class Dispenser extends Model
         xPos += deltaX;//*motionMultiplier;
         //Log.e( "blowme", "motionmultiplier " + motionMultiplier + " deltax " + deltaX + " xpos "
         //       + xPos );
-
     }
 
     private float deltaX;

@@ -1,6 +1,7 @@
 package wesley.folz.blowme.graphics;
 
 import android.opengl.GLES20;
+import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 
 /**
@@ -10,10 +11,11 @@ public class Line extends Model
 {
     public Line()
     {
-        vertexData = new float[]{
+        super();
+/*        vertexData = new float[]{
                 - 0.5f, 0.25f, 0.0f,   // top
                 0.5f, 0.25f, 0.0f}; // top right
-
+*/
         vertexOrder = new short[]{0, 1};
     }
 
@@ -36,9 +38,9 @@ public class Line extends Model
 
         // get handle to fragment vertexshader's vColor member
         mColorHandle = GLES20.glGetAttribLocation( mProgram, "a_Color" );
-        colorBuffer.position( 0 );
-        GLES20.glVertexAttribPointer( mColorHandle, 4, GLES20.GL_FLOAT, false,
-                4, colorBuffer );
+        //colorBuffer.position( 0 );
+       // GLES20.glVertexAttribPointer( mColorHandle, 4, GLES20.GL_FLOAT, false,
+         //       4, colorBuffer );
 
         GLES20.glEnableVertexAttribArray( mColorHandle );
 

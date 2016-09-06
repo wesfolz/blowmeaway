@@ -1,5 +1,6 @@
 package wesley.folz.blowme.graphics;
 
+import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 
 import wesley.folz.blowme.ui.GamePlayActivity;
@@ -12,12 +13,13 @@ public class Wind extends Model
 {
     public Wind()
     {
-        vertexData = new float[]{
+        super();
+  /*      vertexData = new float[]{
                 - 1.0f, 0.25f, 0.0f,   // top left
                 - 1.0f, - 0.25f, 0.0f,   // bottom left
                 1.0f, - 0.25f, 0.0f,   // bottom right
                 1.0f, 0.25f, 0.0f}; // top right
-
+*/
         vertexOrder = new short[]{0, 1, 2, 0, 2, 3};
 
         setSize( new float[]{2.0f, 0.5f} );

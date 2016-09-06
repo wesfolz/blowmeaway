@@ -1,7 +1,10 @@
 package wesley.folz.blowme.graphics;
 
 import android.opengl.GLES20;
+import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
+import android.os.SystemClock;
+import android.util.Log;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -31,42 +34,33 @@ public abstract class Model
         // Add program to OpenGL ES environment
         GLES20.glUseProgram(mProgram);
 
-        // get handle to vertex vertexshader's vPosition member
+        float[] mLightPosInWorldSpace = new float[4];
+        float[] mLightPosInModelSpace = new float[] {0.0f, 0.0f, 0.0f, 1.0f};
+        float[] mLightModelMatrix = new float[16];
+
+        // Calculate position of the light. Push into the distance.
+        Matrix.setIdentityM(mLightModelMatrix, 0);
+        Matrix.translateM(mLightModelMatrix, 0, 0.0f, 0.0f, 3.0f);
+
+        Matrix.multiplyMV(mLightPosInWorldSpace, 0, mLightModelMatrix, 0, mLightPosInModelSpace, 0);
+        Matrix.multiplyMV(mLightPosInEyeSpace, 0, viewMatrix, 0, mLightPosInWorldSpace, 0);
+
+        final int stride = (3 + 3 + 4) * 4;
+
         mPositionHandle = GLES20.glGetAttribLocation( mProgram, "position" );
-
-        // Prepare the triangle coordinate data
-        vertexBuffer.position( 0 );
-
-        GLES20.glVertexAttribPointer(mPositionHandle, COORDS_PER_VERTEX,
-                GLES20.GL_FLOAT, false,
-                vertexStride, vertexBuffer);
-        // Enable a handle to the triangle vertices
+        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, dataVBO);
         GLES20.glEnableVertexAttribArray(mPositionHandle);
+        GLES20.glVertexAttribPointer(mPositionHandle, 3, GLES20.GL_FLOAT, false, stride, 0);
 
-        if(normalData != null)
-        {
-            mNormalHandle = GLES20.glGetAttribLocation(mProgram, "normalVector");
+        mNormalHandle = GLES20.glGetAttribLocation(mProgram, "normalVector");
+        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, dataVBO);
+        GLES20.glEnableVertexAttribArray(mNormalHandle);
+        GLES20.glVertexAttribPointer(mNormalHandle, 3, GLES20.GL_FLOAT, false, stride, 3 * 4);
 
-            GLES20.glVertexAttribPointer(mNormalHandle, COORDS_PER_VERTEX,
-                    GLES20.GL_FLOAT, false,
-                    vertexStride, normalBuffer);
-            // Enable a handle to the triangle vertices
-            GLES20.glEnableVertexAttribArray(mNormalHandle);
-        }
-        // get handle to fragment vertexshader's vColor member
-        //mColorHandle = GLES20.glGetAttribLocation( mProgram, "color" );
-        //colorBuffer.position(0);
-        //GLES20.glVertexAttribPointer(mColorHandle, 4, GLES20.GL_FLOAT, false,
-        //        4, colorBuffer);
-
-        // get handle to fragment vertexshader's vColor member
-        mColorHandle = GLES20.glGetUniformLocation(mProgram, "color");
-        //GLES20.glGenTextures();
-
-        // Set color for drawing the triangle
-        GLES20.glUniform4fv(mColorHandle, 1, color, 0);
-
-        //GLES20.glEnableVertexAttribArray( mColorHandle );
+        mColorHandle = GLES20.glGetAttribLocation(mProgram, "color");
+        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, dataVBO);
+        GLES20.glEnableVertexAttribArray(mColorHandle);
+        GLES20.glVertexAttribPointer(mColorHandle, 4, GLES20.GL_FLOAT, false, stride, (3+4) * 4);
 
         // get handle to shape's transformation matrix
         mMVPMatrixHandle = GLES20.glGetUniformLocation( mProgram, "u_MVPMatrix" );
@@ -76,25 +70,32 @@ public abstract class Model
         // Pass the projection and view transformation to the vertexshader
         GLES20.glUniformMatrix4fv( mMVPMatrixHandle, 1, false, mMVPMatrix, 0 );
 
+        mLightPosHandle = GLES20.glGetUniformLocation(mProgram, "u_LightPos");
+
+        int mMVMatrixHandle = GLES20.glGetUniformLocation(mProgram, "u_MVMatrix");
+        GLES20.glUniformMatrix4fv( mMVMatrixHandle, 1, false, mvMatrix, 0 );
+
+        mLightPosHandle = GLES20.glGetUniformLocation(mProgram, "u_LightPos");
+
+        // Pass in the light position in eye space.
+        GLES20.glUniform3f(mLightPosHandle, mLightPosInEyeSpace[0], mLightPosInEyeSpace[1], mLightPosInEyeSpace[2]);
+
+        GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, orderVBO);
+
         // Draw the triangle
-        //GLES20.glDrawArrays( GLES20.GL_TRIANGLES, 0, vertexData.length );
-        GLES20.glDrawElements(GLES20.GL_TRIANGLES, vertexOrder.length, GLES20.GL_UNSIGNED_SHORT,
-                drawListBuffer);
+        GLES20.glDrawElements(GLES20.GL_TRIANGLES, vertexOrder.length, GLES20.GL_UNSIGNED_SHORT, 0);
+
+        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
+        GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
 
 //        GamePlayRenderer.checkGlError("glDrawElements");
-        //GLES20.glDrawArrays( GLES20.GL_TRIANGLES, 0, 3 );
-
-        // Disable vertex array
-        //GLES20.glDisableVertexAttribArray( mPositionHandle );
     }
 
     public void enableGraphics()
     {
-        ByteBuffer bb = ByteBuffer.allocateDirect( vertexData.length * 4 );
-        bb.order( ByteOrder.nativeOrder() );
-        vertexBuffer = bb.asFloatBuffer();
-        vertexBuffer.put( vertexData );
-        vertexBuffer.position(0);
+        dataBuffer = ByteBuffer.allocateDirect(interleavedData.length * 4)
+                .order(ByteOrder.nativeOrder()).asFloatBuffer();
+        dataBuffer.put(interleavedData).position(0);
 
         // initialize byte buffer for the draw list
         ByteBuffer dlb = ByteBuffer.allocateDirect(
@@ -105,60 +106,167 @@ public abstract class Model
         drawListBuffer.put(vertexOrder);
         drawListBuffer.position(0);
 
-        if (normalData != null)
-        {
-            ByteBuffer nb = ByteBuffer.allocateDirect(normalData.length * 4);
-            nb.order(ByteOrder.nativeOrder());
-            normalBuffer = nb.asFloatBuffer();
-            normalBuffer.put(normalData);
-            normalBuffer.position(0);
-        }
-
-        ByteBuffer cb = ByteBuffer.allocateDirect( colorData.length * 4 );
-        cb.order( ByteOrder.nativeOrder() );
-        colorBuffer = cb.asFloatBuffer();
-        colorBuffer.put(colorData);
-        colorBuffer.position( 0 );
-
-//        Log.e("shader", vertexShaderCode);
-//        Log.e("shader", fragmentShaderCode);
-
-        int vertexShader = GamePlayRenderer.loadShader( GLES20.GL_VERTEX_SHADER, vertexShaderCode );
-        int fragmentShader = GamePlayRenderer.loadShader( GLES20.GL_FRAGMENT_SHADER,
+        vertexShader = GamePlayRenderer.loadShader( GLES20.GL_VERTEX_SHADER, vertexShaderCode );
+        fragmentShader = GamePlayRenderer.loadShader( GLES20.GL_FRAGMENT_SHADER,
                 fragmentShaderCode );
 
         // create empty OpenGL ES Program
-        mProgram = GLES20.glCreateProgram();
+        mProgram = createAndLinkProgram(vertexShader, fragmentShader,
+                new String[]{"position", "color", "normalVector"});
 
-        // add the vertex vertexshader to program
-        GLES20.glAttachShader( mProgram, vertexShader );
+        int[] buffers = new int[2];
+        GLES20.glGenBuffers(2, buffers, 0);
 
-        // add the fragment vertexshader to program
-        GLES20.glAttachShader( mProgram, fragmentShader );
+        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, buffers[0]);
+        GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, dataBuffer.capacity() * 4,
+                dataBuffer, GLES20.GL_STATIC_DRAW);
 
-        // Bind attributes
-        GLES20.glBindAttribLocation( mProgram, 0, "position" );
-        GLES20.glBindAttribLocation( mProgram, 1, "normalVector" );
+        GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, buffers[1]);
+        GLES20.glBufferData(GLES20.GL_ELEMENT_ARRAY_BUFFER, drawListBuffer.capacity() * 2, drawListBuffer,
+                GLES20.GL_STATIC_DRAW);
 
-        //GLES20.glBindAttribLocation( mProgram, 1, "color" );
+        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
+        GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
 
-        // creates OpenGL ES program executables
-        GLES20.glLinkProgram( mProgram );
+
+        // IMPORTANT: Unbind from the buffer when we're done with it.
+        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
+        GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
+
+        dataVBO = buffers[0];
+        orderVBO = buffers[1];
     }
 
+    /**
+     * Draws a point representing the position of the light.
+     */
+    public void drawLight()
+    {
+
+        // Define a simple shader program for our point.
+        final String pointVertexShader =
+                "uniform mat4 u_MVPMatrix;      \n"
+                        +	"attribute vec4 a_Position;     \n"
+                        + "void main()                    \n"
+                        + "{                              \n"
+                        + "   gl_Position = u_MVPMatrix   \n"
+                        + "               * a_Position;   \n"
+                        + "   gl_PointSize = 5.0;         \n"
+                        + "}                              \n";
+
+        final String pointFragmentShader =
+                "precision mediump float;       \n"
+                        + "void main()                    \n"
+                        + "{                              \n"
+                        + "   gl_FragColor = vec4(1.0,    \n"
+                        + "   1.0, 1.0, 1.0);             \n"
+                        + "}                              \n";
+
+        final int pointVertexShaderHandle = GamePlayRenderer.loadShader(GLES20.GL_VERTEX_SHADER, pointVertexShader);
+        final int pointFragmentShaderHandle = GamePlayRenderer.loadShader(GLES20.GL_FRAGMENT_SHADER, pointFragmentShader);
+        mPointProgramHandle = createAndLinkProgram(pointVertexShaderHandle, pointFragmentShaderHandle,
+                new String[] {"a_Position"});
+        GLES20.glUseProgram(mPointProgramHandle);
+
+        // Do a complete rotation every 10 seconds.
+        long time = SystemClock.uptimeMillis() % 10000L;
+        float angleInDegrees = (360.0f / 10000.0f) * ((int) time);
+
+        float[] mLightPosInWorldSpace = new float[4];
+        float[] mLightPosInModelSpace = new float[] {0.0f, 0.0f, 0.0f, 1.0f};
+        float[] mLightModelMatrix = new float[16];
+        // Calculate position of the light. Rotate and then push into the distance.
+        Matrix.setIdentityM(mLightModelMatrix, 0);
+        Matrix.translateM(mLightModelMatrix, 0, 0.0f, 0.0f, -5.0f);
+        Matrix.rotateM(mLightModelMatrix, 0, angleInDegrees, 0.0f, 1.0f, 0.0f);
+        Matrix.translateM(mLightModelMatrix, 0, 0.0f, 0.0f, 2.0f);
+
+        Matrix.multiplyMV(mLightPosInWorldSpace, 0, mLightModelMatrix, 0, mLightPosInModelSpace, 0);
+        Matrix.multiplyMV(mLightPosInEyeSpace, 0, viewMatrix, 0, mLightPosInWorldSpace, 0);
+
+        final int pointMVPMatrixHandle = GLES20.glGetUniformLocation(mPointProgramHandle, "u_MVPMatrix");
+        final int pointPositionHandle = GLES20.glGetAttribLocation(mPointProgramHandle, "a_Position");
+
+        // Pass in the position.
+        GLES20.glVertexAttrib3f(pointPositionHandle, mLightPosInModelSpace[0], mLightPosInModelSpace[1], mLightPosInModelSpace[2]);
+
+        // Since we are not using a buffer object, disable vertex arrays for this attribute.
+        GLES20.glDisableVertexAttribArray(pointPositionHandle);
+
+        // Pass in the transformation matrix.
+        Matrix.multiplyMM(mvpMatrix, 0, viewMatrix, 0, mLightModelMatrix, 0);
+        Matrix.multiplyMM(mvpMatrix, 0, projectionMatrix, 0, mvpMatrix, 0);
+        GLES20.glUniformMatrix4fv(pointMVPMatrixHandle, 1, false, mvpMatrix, 0);
+
+        // Draw the point.
+        GLES20.glDrawArrays(GLES20.GL_POINTS, 0, 1);
+    }
 
     public void initializeMatrix()
     {
         // Set the camera position (View matrix)
-        Matrix.setLookAtM( viewMatrix, 0, 0, 0, 5, 0, 0, 0, 0, 1.0f, 0 );
+        Matrix.setLookAtM( viewMatrix, 0, 0, 0, 5f, 0, 0, 0.0f, 0, 1.0f, 0 );
         //set model view projection matrix
         Matrix.multiplyMM( mvpMatrix, 0, projectionMatrix, 0, viewMatrix, 0 );
     }
 
-    public void setNormalData( float[] data )
+    /**
+     * Helper function to compile and link a program.
+     *
+     * @param vertexShaderHandle An OpenGL handle to an already-compiled vertex shader.
+     * @param fragmentShaderHandle An OpenGL handle to an already-compiled fragment shader.
+     * @param attributes Attributes that need to be bound to the program.
+     * @return An OpenGL handle to the program.
+     */
+    private int createAndLinkProgram(final int vertexShaderHandle, final int fragmentShaderHandle, final String[] attributes)
     {
-        normalData = data;
+        int programHandle = GLES20.glCreateProgram();
+
+        if (programHandle != 0)
+        {
+            // Bind the vertex shader to the program.
+            GLES20.glAttachShader(programHandle, vertexShaderHandle);
+
+            // Bind the fragment shader to the program.
+            GLES20.glAttachShader(programHandle, fragmentShaderHandle);
+
+            // Bind attributes
+            if (attributes != null)
+            {
+                final int size = attributes.length;
+                for (int i = 0; i < size; i++)
+                {
+                    GLES20.glBindAttribLocation(programHandle, i, attributes[i]);
+                }
+            }
+
+            // Link the two shaders together into a program.
+            GLES20.glLinkProgram(programHandle);
+
+            // Get the link status.
+            final int[] linkStatus = new int[1];
+            GLES20.glGetProgramiv(programHandle, GLES20.GL_LINK_STATUS, linkStatus, 0);
+
+            // If the link failed, delete the program.
+            if (linkStatus[0] == 0)
+            {
+                Log.e("openGl", "Error compiling program: " + GLES20.glGetProgramInfoLog(programHandle));
+                Log.e("openGl", "Error compiling program: " + GLES20.glGetShaderInfoLog(vertexShaderHandle));
+                Log.e("openGl", "Error compiling program: " + GLES20.glGetShaderInfoLog(fragmentShaderHandle));
+
+                GLES20.glDeleteProgram(programHandle);
+                programHandle = 0;
+            }
+        }
+
+        if (programHandle == 0)
+        {
+            throw new RuntimeException("Error creating program.");
+        }
+
+        return programHandle;
     }
+
 
     public Bounds getBounds()
     {
@@ -180,26 +288,21 @@ public abstract class Model
         this.size = size;
     }
 
-    public void setNormalOrder( short[] normalOrder )
-    {
-        this.normalOrder = normalOrder;
-    }
-
     public void setProjectionMatrix( float[] projectionMatrix )
     {
         this.projectionMatrix = projectionMatrix;
     }
 
-    public void setVertexData( float[] data )
-    {
-        vertexData = data;
-    }
-
-
     public void setVertexOrder( short[] order )
     {
         vertexOrder = order;
     }
+
+    public void setInterleavedData(float[] data)
+    {
+        this.interleavedData = data;
+    }
+
 
     public float getxPos()
     {
@@ -216,11 +319,7 @@ public abstract class Model
 
     public String fragmentShaderCode;
     public String vertexShaderCode;
-    protected float[] colorData = {
-            1.0f, 0.0f, 0.0f, 1.0f,
-            0.0f, 0.0f, 1.0f, 1.0f,
-            0.0f, 1.0f, 0.0f, 1.0f
-    };
+    protected float[] colorData = { 0.63671875f, 0.76953125f, 0.22265625f, 0.0f };
     float color[] = { 0.63671875f, 0.76953125f, 0.22265625f, 0.0f };
 
     /**
@@ -235,23 +334,34 @@ public abstract class Model
 
     protected final float[] mvpMatrix = new float[16];
 
-    protected float[] normalData;
+    protected final float[] mvMatrix = new float[16];
+    protected float[] modelMatrix = new float[16];
 
     protected float[] projectionMatrix;
 
-    protected float[] vertexData;
+    protected float[] interleavedData;
 
     protected final float[] viewMatrix = new float[16];
 
-    protected FloatBuffer colorBuffer;
-
-    protected FloatBuffer normalBuffer;
-
     protected FloatBuffer vertexBuffer;
+
+    protected FloatBuffer dataBuffer;
 
     protected static final int COORDS_PER_VERTEX = 3;
 
     protected int mProgram;
+
+    private int mLightPosHandle;
+    private int vertexShader;
+    private int fragmentShader;
+
+    private int dataVBO;
+    private int orderVBO;
+
+    private float[] mLightPosInEyeSpace = new float[4];
+
+    /** This is a handle to our per-vertex cube shading program. */
+    private int mPointProgramHandle;
 
     protected int mPositionHandle;
 
@@ -262,8 +372,6 @@ public abstract class Model
     protected int mMVPMatrixHandle;
 
     protected final int vertexStride = COORDS_PER_VERTEX * 4; // 4 bytes per vertex
-
-    private short[] normalOrder;
 
     protected short[] vertexOrder;
 
