@@ -21,7 +21,7 @@ public class Dispenser extends Model
         GraphicsReader.readOBJFile(this);
         GraphicsReader.readShader(this);
         xPos = 0;//+.01f;
-        yPos = GamePlayActivity.Y_EDGE_POSITION;
+        yPos = 0.868f;//GamePlayActivity.Y_EDGE_POSITION;
         initialRotation = new float[16];
         motionMultiplier = 1;
 

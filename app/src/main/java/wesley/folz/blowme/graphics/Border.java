@@ -24,12 +24,16 @@ public class Border extends Model
 
     }
 
-    public static final float XMIN = - 0.5f;
+    //left side
+    public static final float XLEFT = -0.5f;
 
-    public static final float XMAX = 0.5f;
+    //right side
+    public static final float XRIGHT = 0.5f;
 
-    public static final float YMIN = - 1.0f;
+    //top
+    public static final float YTOP = -1.0f;
 
-    public static final float YMAX = 1.0f;
+    //bottom
+    public static final float YBOTTOM = 1.0f;
 
 }

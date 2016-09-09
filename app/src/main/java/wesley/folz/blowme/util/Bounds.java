@@ -17,6 +17,28 @@ public class Bounds
         setBounds( xMin, yMin, xMax, yMax );
     }
 
+    public float getyTop()
+    {
+        return yTop;
+    }
+
+
+    public float getyBottom()
+    {
+        return yBottom;
+    }
+
+    public float getxRight()
+    {
+        return xRight;
+    }
+
+    public float getxLeft()
+    {
+        return xLeft;
+    }
+
+    /*
     public float[] getXCorners()
     {
         return xCorners;
@@ -26,7 +48,7 @@ public class Bounds
     {
         return yCorners;
     }
-
+*/
     public void calculateBounds( float[] rotation )
     {
         Matrix.multiplyMM( matrix, 0, rotation, 0, initialMatrix, 0 );
@@ -51,16 +73,16 @@ public class Bounds
 
     private void determineBounds()
     {
-        xCorners[0] = matrix[0];
-        yCorners[0] = matrix[1];
-        xCorners[1] = matrix[4];
-        yCorners[1] = matrix[5];
+        xLeft = matrix[0];
+        yTop = matrix[1];
+        xRight = matrix[4];
+        yBottom = matrix[5];
     }
 
     public void setBounds( float xMin, float yMin, float xMax, float yMax )
     {
-        xCorners = new float[2];
-        yCorners = new float[2];
+        //xCorners = new float[2];
+        //yCorners = new float[2];
         matrix = new float[]{
                 xMin, yMin, 0, 1,
                 xMax, yMax, 0, 1,
@@ -79,7 +101,15 @@ public class Bounds
 
     private float[] initialMatrix;
 
-    private float[] xCorners;
+    //private float[] xCorners;
 
-    private float[] yCorners;
+    //private float[] yCorners;
+
+    private float yTop;
+
+    private float yBottom;
+
+    private float xRight;
+
+    private float xLeft;
 }

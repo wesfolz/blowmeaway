@@ -24,22 +24,27 @@ public abstract class Physics
 
     public static boolean isBorderCollision( Bounds object )
     {
-        return (object.getXCorners()[1] >= Border.XMAX ||
-                object.getXCorners()[0] <= Border.XMIN);
+        return (object.getxRight() >= Border.XRIGHT ||
+                object.getxLeft() <= Border.XLEFT);
+    }
+
+    public static boolean isTopBorderCollision(Bounds object)
+    {
+        return (object.getyTop() <= Border.YTOP);
     }
 
 
     public static boolean isCollision( Bounds b1, Bounds b2 )
     {
-        float b1xMin = Math.min( b1.getXCorners()[0], b1.getXCorners()[1] );
-        float b1xMax = Math.max( b1.getXCorners()[0], b1.getXCorners()[1] );
-        float b1yMin = Math.min( b1.getYCorners()[0], b1.getYCorners()[1] );
-        float b1yMax = Math.max( b1.getYCorners()[0], b1.getYCorners()[1] );
+        float b1xMin = Math.min(b1.getxLeft(), b1.getxRight());
+        float b1xMax = Math.max(b1.getxLeft(), b1.getxRight());
+        float b1yMin = Math.min(b1.getyTop(), b1.getyBottom());
+        float b1yMax = Math.max(b1.getyTop(), b1.getyBottom());
 
-        float b2xMin = Math.min( b2.getXCorners()[0], b2.getXCorners()[1] );
-        float b2xMax = Math.max( b2.getXCorners()[0], b2.getXCorners()[1] );
-        float b2yMin = Math.min( b2.getYCorners()[0], b2.getYCorners()[1] );
-        float b2yMax = Math.max( b2.getYCorners()[0], b2.getYCorners()[1] );
+        float b2xMin = Math.min(b2.getxLeft(), b2.getxRight());
+        float b2xMax = Math.max(b2.getxLeft(), b2.getxRight());
+        float b2yMin = Math.min(b2.getyTop(), b2.getyBottom());
+        float b2yMax = Math.max(b2.getyTop(), b2.getyBottom());
 
         return (b1xMin <= b2xMax && b1yMin <= b2yMax && b1xMax >= b2xMin && b1yMax >= b2yMin);
     }

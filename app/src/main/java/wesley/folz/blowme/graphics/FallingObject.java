@@ -1,12 +1,10 @@
 package wesley.folz.blowme.graphics;
 
-import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 import android.os.SystemClock;
 import android.util.Log;
 
 import wesley.folz.blowme.R;
-import wesley.folz.blowme.ui.GamePlayActivity;
 import wesley.folz.blowme.util.Bounds;
 import wesley.folz.blowme.util.GraphicsReader;
 import wesley.folz.blowme.util.Physics;
@@ -199,7 +197,7 @@ public class FallingObject extends Model
         if( xPos <= - 0.35 )
             xPos = - 0.35f;
 
-        yPos = - 1.0f;
+        yPos = -0.85f;//- 1.0f;
 
         xVelocity = 0;
 
@@ -249,8 +247,8 @@ public class FallingObject extends Model
     public boolean isOffscreen()
     {
  //       return false;
-        return this.getBounds().getYCorners()[0] > Border.YMAX /*|| this.getBounds().getYCorners()
-               [1] < Border.YMIN */;
+        return this.getBounds().getyTop() > Border.YBOTTOM /*|| this.getBounds().getYCorners()
+               [1] < Border.YTOP */;
     }
 
     @Override
@@ -285,6 +283,12 @@ public class FallingObject extends Model
             xVelocity = - xVelocity;
         }
 
+        //reflection of falling object off of top border simply changes sign of yVelocity
+        if (Physics.isTopBorderCollision(this.getBounds()))
+        {
+            yVelocity = -yVelocity;
+        }
+
         yVelocity += force[1] * fallingTime;
 
         deltaX = fallingTime * xVelocity;
@@ -297,6 +301,7 @@ public class FallingObject extends Model
         getBounds().setBounds(xPos - 0.1f, yPos - 0.1f, xPos + 0.1f, yPos + 0.1f);
 
         //Log.e("blowme", "xpos " + xPos + " ypos " + yPos);
+        //Log.e("blowme", "ycorners0 " + getBounds().getYCorners()[0] + " ycorners1 " + getBounds().getYCorners()[1]);
 
     }
 
