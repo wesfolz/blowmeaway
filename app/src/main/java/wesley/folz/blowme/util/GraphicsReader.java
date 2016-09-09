@@ -162,26 +162,29 @@ public abstract class GraphicsReader
         ArrayList<Float> interleavedArrayList = new ArrayList<>();
         float[] interleavedData = new float[2*vertices.size() + 4*vertices.size()/3];
 
-
-        Set<Short> keys = normalVertexMap.keySet();
-        ArrayList<Short> keyList = new ArrayList(new TreeSet(keys));
-
-        for(Short key: keyList)
+        for(short key=0; key < normalVertexMap.size(); key++)
         {
             Float[] normalVector = normalVertexMap.get(key);
             //    Log.e("keys", String.valueOf(key));
-
+            //vertices
             for(int i=0; i<3; i++)
                 interleavedArrayList.add(vertices.get(3*key+i));
-
+            //per-vertex normal vectors
             for(int i=0; i<3; i++)
                 interleavedArrayList.add(normalVector[i]);
+            //color data
+            for(int i=0; i<4; i++) {
+                if (i == 3)
+                    interleavedArrayList.add(1.0f);
+                else
+                    interleavedArrayList.add(0.5f);
+//                    interleavedArrayList.add((float) (1.0 * (float) (i % 2)));
+            }
 
+ //               interleavedArrayList.add(1.0f);
 
-            for(int i=0; i<4; i++)
-                interleavedArrayList.add((float)(1.0*(float)(i%2)));
         }
-
+        //copy arraylist to float array
         for (int i=0; i<interleavedData.length; i++)
         {
             interleavedData[i] = interleavedArrayList.get(i);

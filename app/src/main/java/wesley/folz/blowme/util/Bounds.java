@@ -7,12 +7,10 @@ import android.opengl.Matrix;
  */
 public class Bounds
 {
-
     public Bounds()
     {
         this( 0, 0, 0, 0 );
     }
-
 
     public Bounds( float xMin, float yMin, float xMax, float yMax )
     {

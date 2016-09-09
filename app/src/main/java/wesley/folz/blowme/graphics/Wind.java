@@ -3,8 +3,10 @@ package wesley.folz.blowme.graphics;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 
+import wesley.folz.blowme.R;
 import wesley.folz.blowme.ui.GamePlayActivity;
 import wesley.folz.blowme.util.Bounds;
+import wesley.folz.blowme.util.GraphicsReader;
 
 /**
  * Created by wesley on 7/3/2015.
@@ -14,13 +16,28 @@ public class Wind extends Model
     public Wind()
     {
         super();
-  /*      vertexData = new float[]{
-                - 1.0f, 0.25f, 0.0f,   // top left
-                - 1.0f, - 0.25f, 0.0f,   // bottom left
-                1.0f, - 0.25f, 0.0f,   // bottom right
-                1.0f, 0.25f, 0.0f}; // top right
-*/
+        interleavedData = new float[]{
+                - 1.0f, 0.25f, 0.0f,    // top left
+                 0.0f, 0.0f, 1.0f,      //normal
+                 0.0f, 0.0f, 1.0f, 0.8f, //color
+                - 1.0f, - 0.25f, 0.0f,  // bottom left
+                0.0f, 0.0f, 1.0f,       //normal
+                0.0f, 0.0f, 1.0f, 0.8f, //color
+                1.0f, - 0.25f, 0.0f,    // bottom right
+                0.0f, 0.0f, 1.0f,       //normal
+                0.0f, 0.0f, 1.0f, 0.8f, //color
+                1.0f, 0.25f, 0.0f,      // top right
+                0.0f, 0.0f , 1.0f,      //normal
+                0.0f, 0.0f, 1.0f, 0.8f};//color
+
         vertexOrder = new short[]{0, 1, 2, 0, 2, 3};
+
+
+        //this.OBJ_FILE_RESOURCE = R.raw.cube;
+        this.VERTEX_SHADER = R.raw.fan_vertex_shader;
+        this.FRAGMENT_SHADER = R.raw.fan_fragment_shader;
+        //GraphicsReader.readOBJFile(this);
+        GraphicsReader.readShader(this);
 
         setSize( new float[]{2.0f, 0.5f} );
         setBounds( new Bounds( - 1.0f, - 0.25f, 1.0f, 0.25f ) );
@@ -111,7 +128,10 @@ public class Wind extends Model
     {
         float[] transformation = new float[16];
 
-        Matrix.multiplyMM( transformation, 0, calculateInwardRotation(), 0, mvpMatrix, 0 );
+        Matrix.setIdentityM(modelMatrix, 0);
+
+        Matrix.multiplyMM(transformation, 0, calculateInwardRotation(), 0, modelMatrix, 0);
+
         //Log.e( "blowme", "xmin " + transformation[0] + " ymin " + transformation[1] + " xmax "
         // + transformation[4] + " ymax " + transformation[5]);
         return transformation;

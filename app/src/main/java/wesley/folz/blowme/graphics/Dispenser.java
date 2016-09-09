@@ -24,16 +24,24 @@ public class Dispenser extends Model
         yPos = GamePlayActivity.Y_EDGE_POSITION;
         initialRotation = new float[16];
         motionMultiplier = 1;
+
+        scaleFactor = 0.2f;
     }
 
     @Override
     public float[] createTransformationMatrix()
     {
-        Matrix.translateM( modelMatrix, 0, deltaX, 0, 0 );
-        Matrix.translateM( mvMatrix, 0, deltaX, 0, 0 );
-        Matrix.translateM( mvpMatrix, 0, deltaX, 0, 0 );
+        float[] mvp = new float[16];
 
-        return mvpMatrix;
+        Matrix.setIdentityM(mvp, 0);
+
+        //translate model matrix to new position
+        Matrix.translateM( modelMatrix, 0, deltaX, 0, 0 );
+
+        //copy modelMatrix to separate matrix for return, (returning modelMatrix doesn't work)
+        Matrix.multiplyMM(mvp, 0, modelMatrix, 0, mvp, 0);
+
+        return mvp;
     }
 
     @Override
@@ -42,21 +50,8 @@ public class Dispenser extends Model
         super.initializeMatrix();
         //rotate 180 degrees about x-axis
         Matrix.setRotateM( initialRotation, 0, 180, 1, 0, 0 );
-        //Matrix.setIdentityM( secondRotation, 0 );
-        //Matrix.scaleM( initialTransformationMatrix, 0, 0.1f, 0.1f, 0.1f );
-        Matrix.translateM( mvpMatrix, 0, 0, yPos, 0 );
-
-        Matrix.setIdentityM(modelMatrix, 0);
+        //translate to initial position
         Matrix.translateM(modelMatrix, 0, 0, yPos, 0);
-
- //       Matrix.translateM(modelMatrix, 0, 0.0f, 0, -5.0f);
-
-        Matrix.multiplyMM(mvMatrix, 0, viewMatrix, 0, modelMatrix, 0);
-
-        //Matrix.translateM(mvpMatrix, 0, 0.0f, 0, -5.0f);
-
-        Matrix.scaleM( modelMatrix, 0, 0.2f, 0.2f, 0.2f );
-        Matrix.scaleM( mvpMatrix, 0, 0.2f, 0.2f, 0.2f );
 
         //Log.e( "blowme", "xpos: " + xPos + " ypos " + yPos );
     }
@@ -65,11 +60,11 @@ public class Dispenser extends Model
     public void updatePosition( float x, float y )
     {
         //long time = SystemClock.uptimeMillis()% 10000L;
-        deltaX = 0.05f;//* ((int) time);
+        deltaX = 0.01f;//* ((int) time);
 
-        if( xPos >= 5 * GamePlayActivity.X_EDGE_POSITION )
+        if( xPos >= GamePlayActivity.X_EDGE_POSITION )
             motionMultiplier = - 1;
-        if( xPos <= - 5 * GamePlayActivity.X_EDGE_POSITION )
+        if( xPos <= -GamePlayActivity.X_EDGE_POSITION )
             motionMultiplier = 1;
         deltaX *= motionMultiplier;
         xPos += deltaX;//*motionMultiplier;

@@ -2,6 +2,8 @@ package wesley.folz.blowme.graphics;
 
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
+import android.os.SystemClock;
+import android.util.Log;
 
 import wesley.folz.blowme.R;
 import wesley.folz.blowme.ui.GamePlayActivity;
@@ -24,7 +26,6 @@ public class FallingObject extends Model
         this.FRAGMENT_SHADER = R.raw.fan_fragment_shader;
         GraphicsReader.readShader(this);
         GraphicsReader.readOBJFile(this);
-
 /*
         // Front face
         vertexData = new float[]{
@@ -183,14 +184,14 @@ public class FallingObject extends Model
                 0.0f, 0.2f, 0.0f,   // top
                 - 0.1f, 0.0f, 0.0f,   // bottom left
                 0.1f, 0.0f, 0.0f}; // top right
-        */
+
         vertexOrder = new short[24];//{0, 1, 2};
 
         for (short i=0; i< 24; i++)
         {
             vertexOrder[i] = i;
         }
-
+*/
         xPos = (float) (Math.random() - 0.5);
 
         if( xPos > 0.35 )
@@ -205,6 +206,8 @@ public class FallingObject extends Model
         yVelocity = 0;//0.1f;
 
         previousTime = System.nanoTime();
+
+        scaleFactor = 0.1f;
     }
 
     @Override
@@ -214,6 +217,10 @@ public class FallingObject extends Model
 
         float[] result = new float[16];
 
+        float[] mvp = new float[16];
+        long time = SystemClock.uptimeMillis();// % 4000L;
+        float angle = 0.1f * ((int) time);
+
         //updatePosition( 0, 0 );
 
         //Matrix.setIdentityM( transformation, 0 );
@@ -222,16 +229,11 @@ public class FallingObject extends Model
 
         //Matrix.multiplyMM( result, 0, mvpMatrix, 0, transformation, 0 );
 
-
         Matrix.translateM(modelMatrix, 0, deltaX, -deltaY, 0);
-        Matrix.rotateM(modelMatrix, 0, 1.0f, 1.0f, 1.0f, 1.0f);
+        Matrix.setRotateM(transformation, 0, angle, 1, 1, 1);
+        Matrix.multiplyMM(transformation, 0, modelMatrix, 0, transformation, 0);
 
-        Matrix.multiplyMM(mvMatrix, 0, viewMatrix, 0, modelMatrix, 0);
-
-        Matrix.translateM(mvpMatrix, 0, deltaX, -deltaY, 0);
-        Matrix.rotateM(mvpMatrix, 0, 1.0f, 1.0f, 1.0f, 1.0f);
-
-        return mvpMatrix;
+        return transformation;
     }
 
     public float getDeltaX()
@@ -246,9 +248,9 @@ public class FallingObject extends Model
 
     public boolean isOffscreen()
     {
-        return false;
-//        return this.getBounds().getYCorners()[0] > Border.YMAX /*|| this.getBounds().getYCorners()
-//               [1] < Border.YMIN */;
+ //       return false;
+        return this.getBounds().getYCorners()[0] > Border.YMAX /*|| this.getBounds().getYCorners()
+               [1] < Border.YMIN */;
     }
 
     @Override
@@ -256,12 +258,8 @@ public class FallingObject extends Model
     {
         super.initializeMatrix();
 
-        Matrix.setIdentityM(modelMatrix, 0);
+        //translate to initial position
         Matrix.translateM(modelMatrix, 0, xPos, -yPos, 0);
-        Matrix.scaleM(modelMatrix, 0, 0.1f, 0.1f, 0.1f);
-
-        Matrix.translateM(mvpMatrix, 0, xPos, -yPos, 0);
-        Matrix.scaleM(mvpMatrix, 0, 0.1f, 0.1f, 0.1f);
     }
 
     /**
@@ -276,7 +274,6 @@ public class FallingObject extends Model
         float time = (System.nanoTime() - previousTime) / 1000000000.0f;
         previousTime = System.nanoTime();
         float fallingTime = MASS * time;
-
 
         float[] force = Physics.sumOfForces( x, y );
 
@@ -294,14 +291,12 @@ public class FallingObject extends Model
 
         deltaY = fallingTime * yVelocity;
 
-
         xPos += deltaX;
         yPos += deltaY;
 
+        getBounds().setBounds(xPos - 0.1f, yPos - 0.1f, xPos + 0.1f, yPos + 0.1f);
 
-        getBounds().setBounds( xPos - 0.1f, yPos - 0.1f, xPos + 0.1f, yPos + 0.1f );
-
-        //  Log.e( "blowme", "xpos " + xPos + " ypos " + yPos );
+        //Log.e("blowme", "xpos " + xPos + " ypos " + yPos);
 
     }
 

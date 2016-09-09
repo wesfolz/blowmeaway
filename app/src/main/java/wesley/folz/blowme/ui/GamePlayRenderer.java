@@ -56,9 +56,11 @@ public class GamePlayRenderer implements GLSurfaceView.Renderer
         dispenser = new Dispenser();
         // Set the background frame color
         GLES20.glClearColor( 1.0f, 1.0f, 1.0f, 1.0f );
+        //GLES20.glEnable(GLES20.GL_BLEND);
+        //GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
         //fan = new Fan();
         fan.enableGraphics();
-        //fan.getWind().enableGraphics();
+        fan.getWind().enableGraphics();
         triangle.enableGraphics();
         //line.enableGraphics();
         dispenser.enableGraphics();
@@ -139,7 +141,7 @@ public class GamePlayRenderer implements GLSurfaceView.Renderer
         GLES20.glEnable(GLES20.GL_DEPTH_TEST);
         // Draw triangle
         //fan.enableGraphics();
-//        fan.getWind().draw();
+        fan.getWind().draw();
         fan.draw();
 //        fan.drawLight();
         dispenser.updatePosition(0, 0);
@@ -173,6 +175,8 @@ public class GamePlayRenderer implements GLSurfaceView.Renderer
             triangle.initializeMatrix();
         }
         //triangle.drawLight();
+
+        //triangle.updatePosition( 0, 0 );
 
         triangle.draw();
 

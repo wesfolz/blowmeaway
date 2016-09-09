@@ -66,6 +66,13 @@ public abstract class Model
         mMVPMatrixHandle = GLES20.glGetUniformLocation( mProgram, "u_MVPMatrix" );
 
         float[] mMVPMatrix = createTransformationMatrix();
+        float[] mvMatrix = new float[16];
+        //creating model-view matrix
+        Matrix.multiplyMM(mvMatrix, 0, viewMatrix, 0, mMVPMatrix, 0);
+        //creating model-view-projection matrix
+        Matrix.multiplyMM(mMVPMatrix, 0, projectionMatrix, 0, mvMatrix, 0);
+        //TODO: scaling mvMatrix messes up shader, so scaling must be done last, not sure why
+        Matrix.scaleM(mMVPMatrix, 0, scaleFactor, scaleFactor, scaleFactor);
 
         // Pass the projection and view transformation to the vertexshader
         GLES20.glUniformMatrix4fv( mMVPMatrixHandle, 1, false, mMVPMatrix, 0 );
@@ -137,77 +144,12 @@ public abstract class Model
         orderVBO = buffers[1];
     }
 
-    /**
-     * Draws a point representing the position of the light.
-     */
-    public void drawLight()
-    {
-
-        // Define a simple shader program for our point.
-        final String pointVertexShader =
-                "uniform mat4 u_MVPMatrix;      \n"
-                        +	"attribute vec4 a_Position;     \n"
-                        + "void main()                    \n"
-                        + "{                              \n"
-                        + "   gl_Position = u_MVPMatrix   \n"
-                        + "               * a_Position;   \n"
-                        + "   gl_PointSize = 5.0;         \n"
-                        + "}                              \n";
-
-        final String pointFragmentShader =
-                "precision mediump float;       \n"
-                        + "void main()                    \n"
-                        + "{                              \n"
-                        + "   gl_FragColor = vec4(1.0,    \n"
-                        + "   1.0, 1.0, 1.0);             \n"
-                        + "}                              \n";
-
-        final int pointVertexShaderHandle = GamePlayRenderer.loadShader(GLES20.GL_VERTEX_SHADER, pointVertexShader);
-        final int pointFragmentShaderHandle = GamePlayRenderer.loadShader(GLES20.GL_FRAGMENT_SHADER, pointFragmentShader);
-        mPointProgramHandle = createAndLinkProgram(pointVertexShaderHandle, pointFragmentShaderHandle,
-                new String[] {"a_Position"});
-        GLES20.glUseProgram(mPointProgramHandle);
-
-        // Do a complete rotation every 10 seconds.
-        long time = SystemClock.uptimeMillis() % 10000L;
-        float angleInDegrees = (360.0f / 10000.0f) * ((int) time);
-
-        float[] mLightPosInWorldSpace = new float[4];
-        float[] mLightPosInModelSpace = new float[] {0.0f, 0.0f, 0.0f, 1.0f};
-        float[] mLightModelMatrix = new float[16];
-        // Calculate position of the light. Rotate and then push into the distance.
-        Matrix.setIdentityM(mLightModelMatrix, 0);
-        Matrix.translateM(mLightModelMatrix, 0, 0.0f, 0.0f, -5.0f);
-        Matrix.rotateM(mLightModelMatrix, 0, angleInDegrees, 0.0f, 1.0f, 0.0f);
-        Matrix.translateM(mLightModelMatrix, 0, 0.0f, 0.0f, 2.0f);
-
-        Matrix.multiplyMV(mLightPosInWorldSpace, 0, mLightModelMatrix, 0, mLightPosInModelSpace, 0);
-        Matrix.multiplyMV(mLightPosInEyeSpace, 0, viewMatrix, 0, mLightPosInWorldSpace, 0);
-
-        final int pointMVPMatrixHandle = GLES20.glGetUniformLocation(mPointProgramHandle, "u_MVPMatrix");
-        final int pointPositionHandle = GLES20.glGetAttribLocation(mPointProgramHandle, "a_Position");
-
-        // Pass in the position.
-        GLES20.glVertexAttrib3f(pointPositionHandle, mLightPosInModelSpace[0], mLightPosInModelSpace[1], mLightPosInModelSpace[2]);
-
-        // Since we are not using a buffer object, disable vertex arrays for this attribute.
-        GLES20.glDisableVertexAttribArray(pointPositionHandle);
-
-        // Pass in the transformation matrix.
-        Matrix.multiplyMM(mvpMatrix, 0, viewMatrix, 0, mLightModelMatrix, 0);
-        Matrix.multiplyMM(mvpMatrix, 0, projectionMatrix, 0, mvpMatrix, 0);
-        GLES20.glUniformMatrix4fv(pointMVPMatrixHandle, 1, false, mvpMatrix, 0);
-
-        // Draw the point.
-        GLES20.glDrawArrays(GLES20.GL_POINTS, 0, 1);
-    }
-
     public void initializeMatrix()
     {
         // Set the camera position (View matrix)
         Matrix.setLookAtM( viewMatrix, 0, 0, 0, 5f, 0, 0, 0.0f, 0, 1.0f, 0 );
-        //set model view projection matrix
-        Matrix.multiplyMM( mvpMatrix, 0, projectionMatrix, 0, viewMatrix, 0 );
+        //initialize model matrix
+        Matrix.setIdentityM(modelMatrix, 0);
     }
 
     /**
@@ -332,9 +274,6 @@ public abstract class Model
      */
     protected float yPos;
 
-    protected final float[] mvpMatrix = new float[16];
-
-    protected final float[] mvMatrix = new float[16];
     protected float[] modelMatrix = new float[16];
 
     protected float[] projectionMatrix;
@@ -360,9 +299,6 @@ public abstract class Model
 
     private float[] mLightPosInEyeSpace = new float[4];
 
-    /** This is a handle to our per-vertex cube shading program. */
-    private int mPointProgramHandle;
-
     protected int mPositionHandle;
 
     protected int mColorHandle;
@@ -372,6 +308,8 @@ public abstract class Model
     protected int mMVPMatrixHandle;
 
     protected final int vertexStride = COORDS_PER_VERTEX * 4; // 4 bytes per vertex
+
+    protected float scaleFactor = 1.0f;
 
     protected short[] vertexOrder;
 

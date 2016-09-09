@@ -65,8 +65,8 @@ public class Line extends Model
     @Override
     public float[] createTransformationMatrix()
     {
-        Matrix.translateM( mvpMatrix, 0, deltaX, deltaY, 0 );
-        return mvpMatrix;
+        Matrix.translateM( modelMatrix, 0, deltaX, deltaY, 0 );
+        return modelMatrix;
     }
 
     @Override
