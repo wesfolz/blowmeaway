@@ -65,17 +65,25 @@ public abstract class Model
         // get handle to shape's transformation matrix
         mMVPMatrixHandle = GLES20.glGetUniformLocation( mProgram, "u_MVPMatrix" );
 
-        float[] mMVPMatrix = createTransformationMatrix();
-        float[] mvMatrix = new float[16];
-        //creating model-view matrix
-        Matrix.multiplyMM(mvMatrix, 0, viewMatrix, 0, mMVPMatrix, 0);
-        //creating model-view-projection matrix
-        Matrix.multiplyMM(mMVPMatrix, 0, projectionMatrix, 0, mvMatrix, 0);
-        //TODO: scaling mvMatrix messes up shader, so scaling must be done last, not sure why
-        Matrix.scaleM(mMVPMatrix, 0, scaleFactor, scaleFactor, scaleFactor);
+        //if resuming from a pause state, load previous matrix
+        if (!resuming)
+        {
+            mvpMatrix = createTransformationMatrix();
+            mvMatrix = new float[16];
+            //creating model-view matrix
+            Matrix.multiplyMM(mvMatrix, 0, viewMatrix, 0, mvpMatrix, 0);
+            //creating model-view-projection matrix
+            Matrix.multiplyMM(mvpMatrix, 0, projectionMatrix, 0, mvMatrix, 0);
+            //TODO: scaling mvMatrix messes up shader, so scaling must be done last, not sure why
+            Matrix.scaleM(mvpMatrix, 0, scaleFactor, scaleFactor, scaleFactor);
+
+        } else
+        {
+            this.resuming = false;
+        }
 
         // Pass the projection and view transformation to the vertexshader
-        GLES20.glUniformMatrix4fv( mMVPMatrixHandle, 1, false, mMVPMatrix, 0 );
+        GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mvpMatrix, 0);
 
         mLightPosHandle = GLES20.glGetUniformLocation(mProgram, "u_LightPos");
 
@@ -92,10 +100,9 @@ public abstract class Model
         // Draw the triangle
         GLES20.glDrawElements(GLES20.GL_TRIANGLES, vertexOrder.length, GLES20.GL_UNSIGNED_SHORT, 0);
 
+        //unbind buffers
         GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
         GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
-
-//        GamePlayRenderer.checkGlError("glDrawElements");
     }
 
     public void enableGraphics()
@@ -146,10 +153,30 @@ public abstract class Model
 
     public void initializeMatrix()
     {
+        Log.e("blowme", this.getClass().toString());
         // Set the camera position (View matrix)
         Matrix.setLookAtM( viewMatrix, 0, 0, 0, 5f, 0, 0, 0.0f, 0, 1.0f, 0 );
-        //initialize model matrix
-        Matrix.setIdentityM(modelMatrix, 0);
+
+        //only call if resuming from pause state
+        if (!resuming)
+        {
+            //initialize model matrix
+            Matrix.setIdentityM(modelMatrix, 0);
+            //translate model to initial position
+            Matrix.translateM(modelMatrix, 0, initialXPos, initialYPos, 0);
+        }
+    }
+
+    public void pauseGame()
+    {
+        paused = true;
+    }
+
+    public void resumeGame()
+    {
+        Log.e("blowme", String.valueOf(paused));
+        resuming = paused;
+        paused = false;
     }
 
     /**
@@ -255,6 +282,7 @@ public abstract class Model
     {
         return yPos;
     }
+
     public abstract float[] createTransformationMatrix();
 
     public abstract void updatePosition( float x, float y );
@@ -273,6 +301,10 @@ public abstract class Model
      * Center y position of model
      */
     protected float yPos;
+
+    protected float initialXPos;
+
+    protected float initialYPos;
 
     protected float[] modelMatrix = new float[16];
 
@@ -296,6 +328,14 @@ public abstract class Model
 
     private int dataVBO;
     private int orderVBO;
+
+    private boolean paused = false;
+
+    protected boolean resuming = false;
+
+    private float[] mvMatrix;
+
+    private float[] mvpMatrix;
 
     private float[] mLightPosInEyeSpace = new float[4];
 

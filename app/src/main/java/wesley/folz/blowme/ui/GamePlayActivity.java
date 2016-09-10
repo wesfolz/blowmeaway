@@ -8,9 +8,14 @@ import android.graphics.Point;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.support.v4.view.MotionEventCompat;
+import android.support.v4.view.ViewPager;
+import android.util.Log;
+import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.LinearLayout;
+import android.widget.PopupWindow;
 
 import wesley.folz.blowme.R;
 import wesley.folz.blowme.graphics.Fan;
@@ -44,9 +49,8 @@ public class GamePlayActivity extends Activity
             }
         } );
 
-
         //surfaceView = new GLSurfaceView( this );
-        surfaceView = (GLSurfaceView) findViewById( R.id.surfaceView );
+        surfaceView = (GamePlaySurfaceView) findViewById(R.id.surfaceView);
 
         // Check if the system supports OpenGL ES 2.0.
         final ActivityManager activityManager = (ActivityManager) getSystemService( Context
@@ -109,6 +113,21 @@ public class GamePlayActivity extends Activity
         //setContentView( surfaceView );
     }
 
+    protected void onPauseButtonClicked(View pauseButton)
+    {
+        Log.e("blowme", "pause");
+        View pauseView = getLayoutInflater().inflate(R.layout.pause_window_layout, null);
+        pauseWindow = new PopupWindow(pauseView, ViewPager.LayoutParams.WRAP_CONTENT, ViewPager.LayoutParams.WRAP_CONTENT);
+        surfaceView.onPause();
+        pauseWindow.showAtLocation(pauseView, Gravity.CENTER, 10, 10);
+    }
+
+    protected void onResumeButtonClicked(View resumeButton)
+    {
+        pauseWindow.dismiss();
+        surfaceView.onResume();
+    }
+
     @Override
     protected void onPause()
     {
@@ -142,7 +161,9 @@ public class GamePlayActivity extends Activity
     /**
      * View where OpenGL objects are drawn
      */
-    private GLSurfaceView surfaceView;
+    private GamePlaySurfaceView surfaceView;
+
+    private PopupWindow pauseWindow;
 
     public static final float X_EDGE_POSITION = 0.35f;
 

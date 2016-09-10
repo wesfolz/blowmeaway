@@ -8,10 +8,20 @@
                 android:paddingBottom="0dp"
                 tools:context="wesley.folz.blowme.ui.GamePlayActivity">
 
-    <android.opengl.GLSurfaceView
+    <wesley.folz.blowme.ui.GamePlaySurfaceView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/surfaceView" android:layout_centerVertical="true"
         android:layout_centerHorizontal="true"/>
+
+    <ImageButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/pauseButton"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:src="@android:drawable/ic_media_pause"
+        android:onClick="onPauseButtonClicked"/>
 
 </RelativeLayout>

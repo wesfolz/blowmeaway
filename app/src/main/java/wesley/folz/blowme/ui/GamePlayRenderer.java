@@ -22,6 +22,9 @@ public class GamePlayRenderer implements GLSurfaceView.Renderer
     public GamePlayRenderer( Fan f )
     {
         fan = f;
+        triangle = new FallingObject();
+        //line = new Line();
+        dispenser = new Dispenser();
     }
 
     /**
@@ -51,9 +54,6 @@ public class GamePlayRenderer implements GLSurfaceView.Renderer
     @Override
     public void onSurfaceCreated( GL10 gl, EGLConfig config )
     {
-        triangle = new FallingObject();
-        //line = new Line();
-        dispenser = new Dispenser();
         // Set the background frame color
         GLES20.glClearColor( 1.0f, 1.0f, 1.0f, 1.0f );
         //GLES20.glEnable(GLES20.GL_BLEND);
@@ -197,23 +197,24 @@ public class GamePlayRenderer implements GLSurfaceView.Renderer
         return shader;
     }
 
-    /**
-     * Utility method for debugging OpenGL calls. Provide the name of the call
-     * just after making it:
-     *
-     * <pre>
-     * mColorHandle = GLES20.glGetUniformLocation(mProgram, "vColor");
-     * MyGLRenderer.checkGlError("glGetUniformLocation");</pre>
-     *
-     * If the operation is not successful, the check throws an error.
-     *
-     * @param glOperation - Name of the OpenGL call to check.
-     */
-    public static void checkGlError(String glOperation) {
-        int error;
-        while ((error = GLES20.glGetError()) != GLES20.GL_NO_ERROR) {
-            Log.e("GLerror", glOperation + ": glError " + error);
-            throw new RuntimeException(glOperation + ": glError " + error);
+    public void pauseGame()
+    {
+        paused = true;
+        fan.pauseGame();
+        triangle.pauseGame();
+        dispenser.pauseGame();
+        fan.getWind().pauseGame();
+    }
+
+    public void resumeGame()
+    {
+        if (paused)
+        {
+            paused = false;
+            fan.resumeGame();
+            triangle.resumeGame();
+            dispenser.resumeGame();
+            fan.getWind().resumeGame();
         }
     }
 
@@ -222,6 +223,8 @@ public class GamePlayRenderer implements GLSurfaceView.Renderer
     private FallingObject triangle;
 
     private Dispenser dispenser;
+
+    private boolean paused;
 
     // mMVPMatrix is an abbreviation for "Model View Projection Matrix"
     private float[] mProjectionMatrix = new float[16];

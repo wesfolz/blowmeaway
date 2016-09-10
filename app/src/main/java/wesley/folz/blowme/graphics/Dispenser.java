@@ -1,6 +1,5 @@
 package wesley.folz.blowme.graphics;
 
-import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 
 import wesley.folz.blowme.R;
@@ -21,11 +20,14 @@ public class Dispenser extends Model
         GraphicsReader.readOBJFile(this);
         GraphicsReader.readShader(this);
         xPos = 0;//+.01f;
-        yPos = 0.868f;//GamePlayActivity.Y_EDGE_POSITION;
+        yPos = 0.935f;//GamePlayActivity.Y_EDGE_POSITION;
         initialRotation = new float[16];
         motionMultiplier = 1;
 
         scaleFactor = 0.2f;
+
+        initialXPos = xPos;
+        initialYPos = yPos;
     }
 
     @Override
@@ -48,10 +50,14 @@ public class Dispenser extends Model
     public void initializeMatrix()
     {
         super.initializeMatrix();
-        //rotate 180 degrees about x-axis
-        Matrix.setRotateM( initialRotation, 0, 180, 1, 0, 0 );
-        //translate to initial position
-        Matrix.translateM(modelMatrix, 0, 0, yPos, 0);
+
+        if (!this.resuming)
+        {
+            //rotate 180 degrees about x-axis
+            Matrix.setRotateM(initialRotation, 0, 180, 1, 0, 0);
+
+            Matrix.scaleM(modelMatrix, 0, 1.0f, 0.5f, 1.0f);
+        }
 
         //Log.e( "blowme", "xpos: " + xPos + " ypos " + yPos );
     }

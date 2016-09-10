@@ -1,6 +1,5 @@
 package wesley.folz.blowme.graphics;
 
-import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 import android.os.SystemClock;
 
@@ -30,6 +29,9 @@ public class Fan extends Model
                 [0] / 2, yPos + getSize()[1] / 2));
 
         scaleFactor = 0.05f;
+
+        initialXPos = xPos;
+        initialYPos = yPos;
     }
 
     /**
@@ -140,17 +142,6 @@ public class Fan extends Model
 
 //        getWind().draw();
         return bladeRotation;
-    }
-
-    @Override
-    public void initializeMatrix()
-    {
-        super.initializeMatrix();
-        //rotate -45 degrees about y-axis
-        //translate to initial position
-        Matrix.translateM(modelMatrix, 0, -GamePlayActivity.X_EDGE_POSITION, 0, 0);
-
-        //Log.e( "blowme", "xpos: " + xPos + " ypos " + yPos );
     }
 
     /**
