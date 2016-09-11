@@ -10,6 +10,9 @@ varying vec3 v_Normal; // Interpolated normal for this fragment.
 // The entry point for our fragment shader.
 void main()
 {
+    float gSpecularPower = 10;
+    float gMatSpecularIntensity = 10;
+    vec3 eyePosition = vec3(0, 0, 5);
     // Will be used for attenuation.
     float distance = length(u_LightPos - v_Position);
     // Get a lighting direction vector from the light to the vertex.
@@ -26,12 +29,21 @@ void main()
     {
         diffuse = max(dot(-v_Normal, lightVector), 0.0);
     }
-
-
     // Add attenuation.
     diffuse = diffuse * (1.0 / (1.0 + (0.10 * distance * distance)));// Add ambient lighting
     diffuse = diffuse + 0.4;
 
+    vec3 vertexToEye = normalize(eyePosition - v_Position);
+    vec3 lightReflect = normalize(reflect(-u_LightPos, v_Normal));
+
+    float specularColor = 0;
+    float specularFactor = dot(vertexToEye, lightReflect);
+    if (specularFactor > 0)
+    {
+        specularFactor = pow(specularFactor, gSpecularPower);
+        specularColor = gMatSpecularIntensity * specularFactor;
+    }
+
     // Multiply the color by the diffuse illumination level to get final output color.
-    gl_FragColor = v_Color * diffuse;
+    gl_FragColor = v_Color * (diffuse + specularColor);
 }

@@ -17,8 +17,8 @@ public class Fan extends Model
     {
         super();
         this.OBJ_FILE_RESOURCE = R.raw.fan;
-        this.VERTEX_SHADER = R.raw.fan_vertex_shader;
-        this.FRAGMENT_SHADER = R.raw.fan_fragment_shader;
+        this.VERTEX_SHADER = R.raw.texture_vertex_shader;
+        this.FRAGMENT_SHADER = R.raw.texture_fragment_shader;
         GraphicsReader.readOBJFile(this);
         GraphicsReader.readShader(this);
         xPos = - GamePlayActivity.X_EDGE_POSITION;//+.01f;

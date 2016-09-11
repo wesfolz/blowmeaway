@@ -1,7 +1,6 @@
 package wesley.folz.blowme.graphics;
 
 import android.opengl.Matrix;
-import android.os.Looper;
 import android.os.SystemClock;
 import android.util.Log;
 
@@ -21,10 +20,13 @@ public class FallingObject extends Model
         setBounds(new Bounds());
 
         this.OBJ_FILE_RESOURCE = R.raw.cube;
-        this.VERTEX_SHADER = R.raw.fan_vertex_shader;
-        this.FRAGMENT_SHADER = R.raw.fan_fragment_shader;
+        this.VERTEX_SHADER = R.raw.texture_vertex_shader;
+        this.FRAGMENT_SHADER = R.raw.texture_fragment_shader;
         GraphicsReader.readShader(this);
         GraphicsReader.readOBJFile(this);
+
+        for (int i = 0; i < interleavedData.length; i++)
+            Log.e("blowme interleaved", String.valueOf(interleavedData[i]));
 
         xPos = (float) (Math.random() - 0.5);
 
@@ -54,9 +56,8 @@ public class FallingObject extends Model
     {
         float[] transformation = new float[16];
 
-        float[] result = new float[16];
+        //float[] result = new float[16];
 
-        float[] mvp = new float[16];
         long time = SystemClock.uptimeMillis();// % 4000L;
         float angle = 0.1f * ((int) time);
 
@@ -116,16 +117,18 @@ public class FallingObject extends Model
 
         xVelocity += force[0] * fallingTime;
 
-        //reflection of falling object off of side border simply changes sign of xVelocity
-        if( Physics.isBorderCollision( this.getBounds() ) )
-        {
-            xVelocity = - xVelocity;
-        }
+        //reflection of falling object off of side border
+        //if object collides of off right border, xVelocity must be negative
+        if (this.getBounds().getxRight() >= Border.XRIGHT)
+            xVelocity = -1 * Math.abs(xVelocity);
+            //if object collides of off left border, xVelocity must be positive
+        else if (this.getBounds().getxLeft() <= Border.XLEFT)
+            xVelocity = Math.abs(xVelocity);
 
-        //reflection of falling object off of top border simply changes sign of yVelocity
+        //reflection of falling object off of top border, yVelocity must be positive
         if (Physics.isTopBorderCollision(this.getBounds()))
         {
-            yVelocity = -yVelocity;
+            yVelocity = Math.abs(yVelocity);
         }
 
         yVelocity += force[1] * fallingTime;

@@ -1,5 +1,10 @@
 package wesley.folz.blowme.util;
 
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.opengl.GLES20;
+import android.opengl.GLUtils;
 import android.util.Log;
 
 import java.io.BufferedReader;
@@ -8,9 +13,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Set;
 import java.util.StringTokenizer;
-import java.util.TreeSet;
 
 import wesley.folz.blowme.graphics.Model;
 import wesley.folz.blowme.ui.MainApplication;
@@ -47,6 +50,30 @@ public abstract class GraphicsReader
         catch (IOException e)
         {
             e.printStackTrace();
+        }
+    }
+
+    public static void readPLYFile(Model model)
+    {
+        //opening input stream to obj file
+        InputStream stream = MainApplication.getAppContext().getResources().openRawResource(model
+                .OBJ_FILE_RESOURCE);
+        BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
+        String line = null;
+        try
+        {
+            while ((line = reader.readLine()) != null)
+            {
+                if (line.startsWith("element vertex"))
+                {
+                    StringTokenizer tokenizer = new StringTokenizer(line, " ");
+
+                }
+
+            }
+        } catch (IOException e)
+        {
+
         }
     }
 
@@ -157,10 +184,46 @@ public abstract class GraphicsReader
         }
     }
 
+    public static int loadTexture(final Context context, final int resourceId)
+    {
+        final int[] textureHandle = new int[1];
+
+        GLES20.glGenTextures(1, textureHandle, 0);
+
+        if (textureHandle[0] != 0)
+        {
+            final BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inScaled = false;   // No pre-scaling
+
+            // Read in the resource
+            final Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), resourceId, options);
+
+            // Bind to the texture in OpenGL
+            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureHandle[0]);
+
+            // Set filtering
+            GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_NEAREST);
+            GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_NEAREST);
+
+            // Load the bitmap into the bound texture.
+            GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, bitmap, 0);
+
+            // Recycle the bitmap, since its data has been loaded into OpenGL.
+            bitmap.recycle();
+        }
+
+        if (textureHandle[0] == 0)
+        {
+            throw new RuntimeException("Error loading texture.");
+        }
+
+        return textureHandle[0];
+    }
+
     private static float[] interleaveData(HashMap<Short, Float[]> normalVertexMap, ArrayList<Float> vertices)
     {
         ArrayList<Float> interleavedArrayList = new ArrayList<>();
-        float[] interleavedData = new float[2*vertices.size() + 4*vertices.size()/3];
+        float[] interleavedData = new float[2 * vertices.size() + 4 * vertices.size() / 3 + 2 * vertices.size() / 3];
 
         for(short key=0; key < normalVertexMap.size(); key++)
         {
@@ -173,22 +236,50 @@ public abstract class GraphicsReader
             for(int i=0; i<3; i++)
                 interleavedArrayList.add(normalVector[i]);
             //color data
-            for(int i=0; i<4; i++) {
+            for (int i = 0; i < 4; i++)
+            {
                 if (i == 3)
                     interleavedArrayList.add(1.0f);
+                else if (i == 2)
+                    interleavedArrayList.add(0.75f);
                 else
-                    interleavedArrayList.add(0.5f);
+                    interleavedArrayList.add(0.75f);
 //                    interleavedArrayList.add((float) (1.0 * (float) (i % 2)));
             }
+            //texture coordinates
 
- //               interleavedArrayList.add(1.0f);
-
+            float xn = Math.abs(normalVector[0]);
+            float yn = Math.abs(normalVector[1]);
+            float zn = Math.abs(normalVector[2]);
+            if (xn > yn)
+            {
+                if (xn > zn)//y-z plane
+                {
+                    interleavedArrayList.add(vertices.get(3 * key + 2));
+                    interleavedArrayList.add(vertices.get(3 * key + 1));
+                } else //x-y plane
+                {
+                    interleavedArrayList.add(vertices.get(3 * key));
+                    interleavedArrayList.add(vertices.get(3 * key + 1));
+                }
+            } else
+            {
+                if (yn > zn) //x-z plane
+                {
+                    interleavedArrayList.add(vertices.get(3 * key));
+                    interleavedArrayList.add(vertices.get(3 * key + 2));
+                } else //x-y plane
+                {
+                    interleavedArrayList.add(vertices.get(3 * key));
+                    interleavedArrayList.add(vertices.get(3 * key + 1));
+                }
+            }
         }
         //copy arraylist to float array
         for (int i=0; i<interleavedData.length; i++)
         {
             interleavedData[i] = interleavedArrayList.get(i);
-            // Log.e("interleaved", String.valueOf(interleavedData[i]));
+            //Log.e("interleaved", String.valueOf(interleavedData[i]));
         }
 
         Log.e("interleave", String.valueOf(interleavedArrayList.size()));

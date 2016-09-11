@@ -8,6 +8,7 @@ import android.util.Log;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
+import wesley.folz.blowme.graphics.Background;
 import wesley.folz.blowme.graphics.Dispenser;
 import wesley.folz.blowme.graphics.FallingObject;
 import wesley.folz.blowme.graphics.Fan;
@@ -25,6 +26,8 @@ public class GamePlayRenderer implements GLSurfaceView.Renderer
         triangle = new FallingObject();
         //line = new Line();
         dispenser = new Dispenser();
+        background = new Background();
+
     }
 
     /**
@@ -56,6 +59,12 @@ public class GamePlayRenderer implements GLSurfaceView.Renderer
     {
         // Set the background frame color
         GLES20.glClearColor( 1.0f, 1.0f, 1.0f, 1.0f );
+        GLES20.glEnable(GLES20.GL_CULL_FACE);
+        GLES20.glCullFace(GLES20.GL_BACK);
+        GLES20.glEnable(GLES20.GL_DEPTH_TEST);
+        //GLES20.glEnable(GLES20.GL_BLEND);
+        //GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_SRC_COLOR);
+
         //GLES20.glEnable(GLES20.GL_BLEND);
         //GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
         //fan = new Fan();
@@ -64,7 +73,7 @@ public class GamePlayRenderer implements GLSurfaceView.Renderer
         triangle.enableGraphics();
         //line.enableGraphics();
         dispenser.enableGraphics();
-
+        background.enableGraphics();
     }
 
     /**
@@ -98,21 +107,33 @@ public class GamePlayRenderer implements GLSurfaceView.Renderer
 
         float ratio = (float) width / height;
 
+        // Set the camera position (View matrix)
+        Matrix.setLookAtM(viewMatrix, 0, 0, 0, 5f, 0, 0, 0.0f, 0, 1.0f, 0);
+
         // this projection matrix is applied to object coordinates
         // in the onDrawFrame() method
-        mProjectionMatrix = new float[16];
-        //Matrix.frustumM( mProjectionMatrix, 0, - ratio, ratio, - 1, 1, 1, 10 );
-        Matrix.orthoM( mProjectionMatrix, 0, - ratio, ratio, - 1, 1, 1, 10 );
-        fan.setProjectionMatrix( mProjectionMatrix );
-        fan.initializeMatrix();
-        fan.getWind().setProjectionMatrix(mProjectionMatrix);
-        fan.getWind().initializeMatrix();
-        triangle.setProjectionMatrix(mProjectionMatrix);
-        triangle.initializeMatrix();
-        //line.setProjectionMatrix( mProjectionMatrix );
-        //line.initializeMatrix();
-        dispenser.setProjectionMatrix( mProjectionMatrix );
-        dispenser.initializeMatrix();
+        //Matrix.frustumM( projectionMatrix, 0, - ratio, ratio, - 1, 1, 1, 10 );
+        Matrix.orthoM(projectionMatrix, 0, -ratio, ratio, -1, 1, 1, 10);
+
+        float[] mLightPosInWorldSpace = new float[4];
+        float[] mLightPosInModelSpace = new float[]{0.0f, 0.0f, 0.0f, 1.0f};
+        float[] mLightModelMatrix = new float[16];
+
+        // Calculate position of the light. Push into the distance.
+        Matrix.setIdentityM(mLightModelMatrix, 0);
+        Matrix.translateM(mLightModelMatrix, 0, 0.0f, 0.0f, 3.0f);
+
+        Matrix.multiplyMV(mLightPosInWorldSpace, 0, mLightModelMatrix, 0, mLightPosInModelSpace, 0);
+        Matrix.multiplyMV(lightPosInEyeSpace, 0, viewMatrix, 0, mLightPosInWorldSpace, 0);
+        //Matrix.multiplyMV(lightPosInEyeSpace, 0, projectionMatrix, 0, lightPosInEyeSpace, 0);
+
+        fan.initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
+        fan.getWind().initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
+        triangle.initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
+        //line.setProjectionMatrix( projectionMatrix );
+        //line.initializeMatrices();
+        dispenser.initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
+        background.initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
     }
 
     /**
@@ -136,12 +157,9 @@ public class GamePlayRenderer implements GLSurfaceView.Renderer
     {
         // Redraw background color
         GLES20.glClear( GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT );
-        GLES20.glEnable(GLES20.GL_CULL_FACE);
-        GLES20.glCullFace(GLES20.GL_BACK);
-        GLES20.glEnable(GLES20.GL_DEPTH_TEST);
-        // Draw triangle
-        //fan.enableGraphics();
-        fan.getWind().draw();
+        background.draw();
+
+//        fan.getWind().draw();
         fan.draw();
 //        fan.drawLight();
         dispenser.updatePosition(0, 0);
@@ -171,8 +189,7 @@ public class GamePlayRenderer implements GLSurfaceView.Renderer
             Log.e( "blowme", "offscreen" );
             triangle = new FallingObject();
             triangle.enableGraphics();
-            triangle.setProjectionMatrix( mProjectionMatrix );
-            triangle.initializeMatrix();
+            triangle.initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
         }
         //triangle.drawLight();
 
@@ -218,14 +235,27 @@ public class GamePlayRenderer implements GLSurfaceView.Renderer
         }
     }
 
+
+    public boolean isPaused()
+    {
+        return paused;
+    }
+
+
     private Fan fan;
 
     private FallingObject triangle;
 
     private Dispenser dispenser;
 
+    private Background background;
+
     private boolean paused;
 
     // mMVPMatrix is an abbreviation for "Model View Projection Matrix"
-    private float[] mProjectionMatrix = new float[16];
+    private float[] projectionMatrix = new float[16];
+
+    private float[] viewMatrix = new float[16];
+
+    private float[] lightPosInEyeSpace = new float[16];
 }

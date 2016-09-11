@@ -5,7 +5,6 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.content.pm.ConfigurationInfo;
 import android.graphics.Point;
-import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.support.v4.view.MotionEventCompat;
 import android.support.v4.view.ViewPager;
@@ -14,7 +13,6 @@ import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 
 import wesley.folz.blowme.R;
@@ -116,10 +114,13 @@ public class GamePlayActivity extends Activity
     protected void onPauseButtonClicked(View pauseButton)
     {
         Log.e("blowme", "pause");
-        View pauseView = getLayoutInflater().inflate(R.layout.pause_window_layout, null);
-        pauseWindow = new PopupWindow(pauseView, ViewPager.LayoutParams.WRAP_CONTENT, ViewPager.LayoutParams.WRAP_CONTENT);
-        surfaceView.onPause();
-        pauseWindow.showAtLocation(pauseView, Gravity.CENTER, 10, 10);
+        if (!surfaceView.getRenderer().isPaused())
+        {
+            View pauseView = getLayoutInflater().inflate(R.layout.pause_window_layout, null);
+            pauseWindow = new PopupWindow(pauseView, ViewPager.LayoutParams.WRAP_CONTENT, ViewPager.LayoutParams.WRAP_CONTENT);
+            surfaceView.onPause();
+            pauseWindow.showAtLocation(pauseView, Gravity.CENTER, 10, 10);
+        }
     }
 
     protected void onResumeButtonClicked(View resumeButton)

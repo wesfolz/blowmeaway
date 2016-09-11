@@ -1,9 +1,7 @@
 package wesley.folz.blowme.graphics;
 
 import android.opengl.GLES20;
-import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
-import android.os.SystemClock;
 import android.util.Log;
 
 import java.nio.ByteBuffer;
@@ -13,6 +11,7 @@ import java.nio.ShortBuffer;
 
 import wesley.folz.blowme.R;
 import wesley.folz.blowme.ui.GamePlayRenderer;
+import wesley.folz.blowme.ui.MainApplication;
 import wesley.folz.blowme.util.Bounds;
 import wesley.folz.blowme.util.GraphicsReader;
 
@@ -26,44 +25,55 @@ public abstract class Model
         //GraphicsReader.readOBJFile( this );
         this.VERTEX_SHADER = R.raw.defaultvertexshader;
         this.FRAGMENT_SHADER = R.raw.defaultfragmentshader;
+        this.TEXTURE_RESOURCE = R.raw.wood_texture;
         GraphicsReader.readShader(this);
     }
 
     public void draw()
     {
         // Add program to OpenGL ES environment
-        GLES20.glUseProgram(mProgram);
+        GLES20.glUseProgram(programHandle);
 
-        float[] mLightPosInWorldSpace = new float[4];
-        float[] mLightPosInModelSpace = new float[] {0.0f, 0.0f, 0.0f, 1.0f};
-        float[] mLightModelMatrix = new float[16];
+        //3 coords per vertex, 3 coords per normal, 4 coords per color, 2 coords per texture, 4 bytes per float
+        final int stride = (COORDS_PER_VERTEX + COORDS_PER_NORMAL + COORDS_PER_COLOR + COORDS_PER_TEX) * BYTES_PER_FLOAT;
 
-        // Calculate position of the light. Push into the distance.
-        Matrix.setIdentityM(mLightModelMatrix, 0);
-        Matrix.translateM(mLightModelMatrix, 0, 0.0f, 0.0f, 3.0f);
-
-        Matrix.multiplyMV(mLightPosInWorldSpace, 0, mLightModelMatrix, 0, mLightPosInModelSpace, 0);
-        Matrix.multiplyMV(mLightPosInEyeSpace, 0, viewMatrix, 0, mLightPosInWorldSpace, 0);
-
-        final int stride = (3 + 3 + 4) * 4;
-
-        mPositionHandle = GLES20.glGetAttribLocation( mProgram, "position" );
+        //vertices
+        int vertexPositionHandle = GLES20.glGetAttribLocation(programHandle, "position");
         GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, dataVBO);
-        GLES20.glEnableVertexAttribArray(mPositionHandle);
-        GLES20.glVertexAttribPointer(mPositionHandle, 3, GLES20.GL_FLOAT, false, stride, 0);
+        GLES20.glEnableVertexAttribArray(vertexPositionHandle);
+        GLES20.glVertexAttribPointer(vertexPositionHandle, COORDS_PER_VERTEX, GLES20.GL_FLOAT, false, stride, 0);
 
-        mNormalHandle = GLES20.glGetAttribLocation(mProgram, "normalVector");
+        //normal vectors
+        int normalVectorHandle = GLES20.glGetAttribLocation(programHandle, "normalVector");
         GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, dataVBO);
-        GLES20.glEnableVertexAttribArray(mNormalHandle);
-        GLES20.glVertexAttribPointer(mNormalHandle, 3, GLES20.GL_FLOAT, false, stride, 3 * 4);
+        GLES20.glEnableVertexAttribArray(normalVectorHandle);
+        GLES20.glVertexAttribPointer(normalVectorHandle, COORDS_PER_NORMAL, GLES20.GL_FLOAT, false, stride, COORDS_PER_VERTEX * BYTES_PER_FLOAT);
 
-        mColorHandle = GLES20.glGetAttribLocation(mProgram, "color");
+        //colors
+        int colorHandle = GLES20.glGetAttribLocation(programHandle, "color");
         GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, dataVBO);
-        GLES20.glEnableVertexAttribArray(mColorHandle);
-        GLES20.glVertexAttribPointer(mColorHandle, 4, GLES20.GL_FLOAT, false, stride, (3+4) * 4);
+        GLES20.glEnableVertexAttribArray(colorHandle);
+        GLES20.glVertexAttribPointer(colorHandle, COORDS_PER_COLOR, GLES20.GL_FLOAT, false, stride, (COORDS_PER_VERTEX + COORDS_PER_NORMAL) * BYTES_PER_FLOAT);
+
+        //texture
+        int textureUniformHandle = GLES20.glGetUniformLocation(programHandle, "u_Texture");
+
+        // Set the active texture unit to texture unit 0.
+        GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
+
+        // Bind the texture to this unit.
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureDataHandle);
+
+        // Tell the texture uniform sampler to use this texture in the shader by binding to texture unit 0.
+        GLES20.glUniform1i(textureUniformHandle, 0);
+
+        int textureCoordinateHandle = GLES20.glGetAttribLocation(programHandle, "a_TexCoordinate");
+        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, dataVBO);
+        GLES20.glEnableVertexAttribArray(textureCoordinateHandle);
+        GLES20.glVertexAttribPointer(textureCoordinateHandle, COORDS_PER_TEX, GLES20.GL_FLOAT, false, stride, (COORDS_PER_VERTEX + COORDS_PER_NORMAL + COORDS_PER_COLOR) * BYTES_PER_FLOAT);
 
         // get handle to shape's transformation matrix
-        mMVPMatrixHandle = GLES20.glGetUniformLocation( mProgram, "u_MVPMatrix" );
+        int mvpMatrixHandle = GLES20.glGetUniformLocation(programHandle, "u_MVPMatrix");
 
         //if resuming from a pause state, load previous matrix
         if (!resuming)
@@ -83,17 +93,17 @@ public abstract class Model
         }
 
         // Pass the projection and view transformation to the vertexshader
-        GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mvpMatrix, 0);
+        GLES20.glUniformMatrix4fv(mvpMatrixHandle, 1, false, mvpMatrix, 0);
 
-        mLightPosHandle = GLES20.glGetUniformLocation(mProgram, "u_LightPos");
+        mLightPosHandle = GLES20.glGetUniformLocation(programHandle, "u_LightPos");
 
-        int mMVMatrixHandle = GLES20.glGetUniformLocation(mProgram, "u_MVMatrix");
-        GLES20.glUniformMatrix4fv( mMVMatrixHandle, 1, false, mvMatrix, 0 );
+        int mMVMatrixHandle = GLES20.glGetUniformLocation(programHandle, "u_MVMatrix");
+        GLES20.glUniformMatrix4fv(mMVMatrixHandle, 1, false, mvMatrix, 0);
 
-        mLightPosHandle = GLES20.glGetUniformLocation(mProgram, "u_LightPos");
+        mLightPosHandle = GLES20.glGetUniformLocation(programHandle, "u_LightPos");
 
         // Pass in the light position in eye space.
-        GLES20.glUniform3f(mLightPosHandle, mLightPosInEyeSpace[0], mLightPosInEyeSpace[1], mLightPosInEyeSpace[2]);
+        GLES20.glUniform3f(mLightPosHandle, lightPosInEyeSpace[0], lightPosInEyeSpace[1], lightPosInEyeSpace[2]);
 
         GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, orderVBO);
 
@@ -114,48 +124,50 @@ public abstract class Model
         // initialize byte buffer for the draw list
         ByteBuffer dlb = ByteBuffer.allocateDirect(
                 // (# of coordinate values * 2 bytes per short)
-                vertexOrder.length * 2 );
-        dlb.order( ByteOrder.nativeOrder() );
+                vertexOrder.length * 2);
+        dlb.order(ByteOrder.nativeOrder());
         drawListBuffer = dlb.asShortBuffer();
         drawListBuffer.put(vertexOrder);
         drawListBuffer.position(0);
 
-        vertexShader = GamePlayRenderer.loadShader( GLES20.GL_VERTEX_SHADER, vertexShaderCode );
-        fragmentShader = GamePlayRenderer.loadShader( GLES20.GL_FRAGMENT_SHADER,
-                fragmentShaderCode );
+        vertexShader = GamePlayRenderer.loadShader(GLES20.GL_VERTEX_SHADER, vertexShaderCode);
+        fragmentShader = GamePlayRenderer.loadShader(GLES20.GL_FRAGMENT_SHADER,
+                fragmentShaderCode);
 
         // create empty OpenGL ES Program
-        mProgram = createAndLinkProgram(vertexShader, fragmentShader,
+        programHandle = createAndLinkProgram(vertexShader, fragmentShader,
                 new String[]{"position", "color", "normalVector"});
 
         int[] buffers = new int[2];
         GLES20.glGenBuffers(2, buffers, 0);
 
+        //vertex coordinates, normal vectors, color, texture coordinates
         GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, buffers[0]);
         GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, dataBuffer.capacity() * 4,
                 dataBuffer, GLES20.GL_STATIC_DRAW);
 
+        //vertex order
         GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, buffers[1]);
         GLES20.glBufferData(GLES20.GL_ELEMENT_ARRAY_BUFFER, drawListBuffer.capacity() * 2, drawListBuffer,
                 GLES20.GL_STATIC_DRAW);
 
-        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
-        GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
-
+        //texture data
+        textureDataHandle = GraphicsReader.loadTexture(MainApplication.getAppContext(), this.TEXTURE_RESOURCE);
 
         // IMPORTANT: Unbind from the buffer when we're done with it.
         GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
         GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
 
+        //get references to gl buffers
         dataVBO = buffers[0];
         orderVBO = buffers[1];
     }
 
-    public void initializeMatrix()
+    public void initializeMatrices(float[] viewMatrix, float[] projectionMatrix, float[] lightPosInEyeSpace)
     {
-        Log.e("blowme", this.getClass().toString());
-        // Set the camera position (View matrix)
-        Matrix.setLookAtM( viewMatrix, 0, 0, 0, 5f, 0, 0, 0.0f, 0, 1.0f, 0 );
+        this.setViewMatrix(viewMatrix);
+        this.setProjectionMatrix(projectionMatrix);
+        this.setLightPosInEyeSpace(lightPosInEyeSpace);
 
         //only call if resuming from pause state
         if (!resuming)
@@ -182,9 +194,9 @@ public abstract class Model
     /**
      * Helper function to compile and link a program.
      *
-     * @param vertexShaderHandle An OpenGL handle to an already-compiled vertex shader.
+     * @param vertexShaderHandle   An OpenGL handle to an already-compiled vertex shader.
      * @param fragmentShaderHandle An OpenGL handle to an already-compiled fragment shader.
-     * @param attributes Attributes that need to be bound to the program.
+     * @param attributes           Attributes that need to be bound to the program.
      * @return An OpenGL handle to the program.
      */
     private int createAndLinkProgram(final int vertexShaderHandle, final int fragmentShaderHandle, final String[] attributes)
@@ -242,7 +254,7 @@ public abstract class Model
         return bounds;
     }
 
-    public void setBounds( Bounds bounds )
+    public void setBounds(Bounds bounds)
     {
         this.bounds = bounds;
     }
@@ -252,17 +264,28 @@ public abstract class Model
         return size;
     }
 
-    public void setSize( float[] size )
+    public void setSize(float[] size)
     {
         this.size = size;
     }
 
-    public void setProjectionMatrix( float[] projectionMatrix )
+    public void setProjectionMatrix(float[] projectionMatrix)
     {
         this.projectionMatrix = projectionMatrix;
     }
 
-    public void setVertexOrder( short[] order )
+    public void setViewMatrix(float[] viewMatrix)
+    {
+        this.viewMatrix = viewMatrix;
+    }
+
+    public void setLightPosInEyeSpace(float[] lightPosInEyeSpace)
+    {
+        this.lightPosInEyeSpace = lightPosInEyeSpace;
+    }
+
+
+    public void setVertexOrder(short[] order)
     {
         vertexOrder = order;
     }
@@ -285,12 +308,10 @@ public abstract class Model
 
     public abstract float[] createTransformationMatrix();
 
-    public abstract void updatePosition( float x, float y );
+    public abstract void updatePosition(float x, float y);
 
     public String fragmentShaderCode;
     public String vertexShaderCode;
-    protected float[] colorData = { 0.63671875f, 0.76953125f, 0.22265625f, 0.0f };
-    float color[] = { 0.63671875f, 0.76953125f, 0.22265625f, 0.0f };
 
     /**
      * Center x position of model
@@ -312,15 +333,23 @@ public abstract class Model
 
     protected float[] interleavedData;
 
-    protected final float[] viewMatrix = new float[16];
+    protected float[] viewMatrix = new float[16];
 
     protected FloatBuffer vertexBuffer;
 
     protected FloatBuffer dataBuffer;
 
-    protected static final int COORDS_PER_VERTEX = 3;
+    private static final int COORDS_PER_VERTEX = 3;
 
-    protected int mProgram;
+    private static final int COORDS_PER_NORMAL = 3;
+
+    private static final int COORDS_PER_COLOR = 4;
+
+    private static final int COORDS_PER_TEX = 2;
+
+    private static final int BYTES_PER_FLOAT = 4;
+
+    protected int programHandle;
 
     private int mLightPosHandle;
     private int vertexShader;
@@ -337,17 +366,9 @@ public abstract class Model
 
     private float[] mvpMatrix;
 
-    private float[] mLightPosInEyeSpace = new float[4];
+    private float[] lightPosInEyeSpace = new float[4];
 
-    protected int mPositionHandle;
-
-    protected int mColorHandle;
-
-    protected int mNormalHandle;
-
-    protected int mMVPMatrixHandle;
-
-    protected final int vertexStride = COORDS_PER_VERTEX * 4; // 4 bytes per vertex
+    private int textureDataHandle;
 
     protected float scaleFactor = 1.0f;
 
@@ -358,6 +379,8 @@ public abstract class Model
     private Bounds bounds;
 
     private float[] size;
+
+    public int TEXTURE_RESOURCE;
 
     public int OBJ_FILE_RESOURCE;
 
