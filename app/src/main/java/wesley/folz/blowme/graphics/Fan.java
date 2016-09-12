@@ -28,7 +28,7 @@ public class Fan extends Model
         setBounds(new Bounds(xPos - getSize()[0] / 2, yPos - getSize()[1] / 2, xPos + getSize()
                 [0] / 2, yPos + getSize()[1] / 2));
 
-        scaleFactor = 0.05f;
+        scaleFactor = 0.03f;
 
         initialXPos = xPos;
         initialYPos = yPos;
@@ -240,7 +240,7 @@ public class Fan extends Model
 
     /**
      * Calculates the change in x and y position
-     *
+     * TODO: Make fan follow finger?
      * @param x - new x position
      * @param y - new y position
      */

@@ -11,15 +11,21 @@ public abstract class Physics
 {
     public static void calculateWindForce( Wind wind, FallingObject object )
     {
+        //calculate 2D euclidean distance between wind src and falling object
         float distance = (float) Math.sqrt( Math.pow( wind.getxPos() - object.getxPos(), 2 ) +
                 Math.pow( wind.getyPos() - object.getyPos(), 2 ) );
-        float displacement = wind.getWindDisplacement() - 1.5f * distance;
-        if( displacement < 0 )
+
+        //wind force decreases over distance
+        float totalForce = wind.getMaxWindForce() - 2.0f * distance;
+
+        //wind can't pull object
+        if (totalForce < 0)
         {
-            displacement = 0;
+            totalForce = 0;
         }
-        wind.setxForce( (- 1) * wind.getxPos() * (displacement) );
-        wind.setyForce( (- 1) * wind.getyPos() * (displacement) );
+        //calculate x and y components of force
+        wind.setxForce((-1) * wind.getxPos() * (totalForce));
+        wind.setyForce((-1) * wind.getyPos() * (totalForce));
     }
 
     public static boolean isBorderCollision( Bounds object )

@@ -16,7 +16,12 @@ public class FallingObject extends Model
 {
     public FallingObject()
     {
+        this(0);
+    }
+
+    public FallingObject(float dispenserX) {
         super();
+
         setBounds(new Bounds());
 
         this.OBJ_FILE_RESOURCE = R.raw.cube;
@@ -25,25 +30,24 @@ public class FallingObject extends Model
         GraphicsReader.readShader(this);
         GraphicsReader.readOBJFile(this);
 
-        for (int i = 0; i < interleavedData.length; i++)
-            Log.e("blowme interleaved", String.valueOf(interleavedData[i]));
-
         xPos = (float) (Math.random() - 0.5);
 
-        if( xPos > 0.35 )
+        if (xPos > 0.35)
             xPos = 0.35f;
-        if( xPos <= - 0.35 )
-            xPos = - 0.35f;
+        if (xPos <= -0.35)
+            xPos = -0.35f;
 
-        yPos = -0.85f;//- 1.0f;
+        xPos = dispenserX;
+
+        yPos = -1.0f;//- 1.0f;
 
         xVelocity = 0;
 
-        yVelocity = 0;//0.1f;
+        yVelocity = 0.5f;//0;//0.1f;
 
         previousTime = System.nanoTime();
 
-        scaleFactor = 0.05f;
+        scaleFactor = 0.03f;
 
         initialXPos = xPos;
         initialYPos = -yPos;
@@ -51,15 +55,18 @@ public class FallingObject extends Model
         Log.e("blowme", "new triangle");
     }
 
+
     @Override
     public float[] createTransformationMatrix()
     {
         float[] transformation = new float[16];
+        firstCall = false;
 
         //float[] result = new float[16];
 
         long time = SystemClock.uptimeMillis();// % 4000L;
         float angle = 0.1f * ((int) time);
+        long deltaT = time - prevRenderTime;
 
         //updatePosition( 0, 0 );
 
@@ -68,7 +75,11 @@ public class FallingObject extends Model
         //Matrix.translateM( transformation, 0, deltaX, deltaY, 0 );
 
         //Matrix.multiplyMM( result, 0, mvpMatrix, 0, transformation, 0 );
-
+        if (deltaT > 50) {
+            Log.e("vortex", String.valueOf(vortexX) + " " + String.valueOf(vortexY));
+            Matrix.scaleM(modelMatrix, 0, vortexX, vortexY, 1);
+            prevRenderTime = time;
+        }
         Matrix.translateM(modelMatrix, 0, deltaX, -deltaY, 0);
         Matrix.setRotateM(transformation, 0, angle, 1, 1, 1);
         Matrix.multiplyMM(transformation, 0, modelMatrix, 0, transformation, 0);
@@ -89,6 +100,9 @@ public class FallingObject extends Model
     public boolean isOffscreen()
     {
 //        return false;
+        if (firstCall || collectedCount >= 10) {
+            return true;
+        }
         return this.getBounds().getyTop() > Border.YBOTTOM /*|| this.getBounds().getYCorners()
                [1] < Border.YTOP */;
     }
@@ -99,6 +113,31 @@ public class FallingObject extends Model
         super.resumeGame();
         previousTime = System.nanoTime();
     }
+
+    public void travelOnVector(float xComponent, float yComponent) {
+        float time = (System.nanoTime() - previousTime) / 1000000000.0f;
+        previousTime = System.nanoTime();
+        float fallingTime = MASS * time;
+        deltaX = 5 * fallingTime * xComponent;
+        deltaY = 5 * fallingTime * yComponent;
+        xPos += deltaX;
+        yPos += deltaY;
+
+        float normalizedX = Math.abs(xComponent / (Math.max(Math.abs(xComponent), Math.abs(yComponent))));
+
+        float normalizedY = Math.abs(yComponent / (Math.max(Math.abs(xComponent), Math.abs(yComponent))));
+
+        Log.e("normalized x", String.valueOf(normalizedX));
+        Log.e("normalized y", String.valueOf(normalizedY));
+
+        float stretchFactor = 0.5f * (normalizedY - normalizedX);
+        Log.e("stretch factor", String.valueOf(stretchFactor));
+
+        vortexX = 1.0f - stretchFactor;
+        vortexY = 1.0f + stretchFactor;
+        collectedCount++;
+    }
+
 
     /**
      * TODO: make movement after wind collision look behave correctly
@@ -147,8 +186,13 @@ public class FallingObject extends Model
 
     }
 
+    private boolean firstCall = true;
+
+    private int collectedCount = 0;
+
     private long previousTime;
 
+    private long prevRenderTime;
 
     private float deltaX;
 
@@ -159,4 +203,8 @@ public class FallingObject extends Model
     private float yVelocity;
 
     private static final float MASS = 2.0f;
+
+    private float vortexX = 1.0f;
+
+    private float vortexY = 1.0f;
 }

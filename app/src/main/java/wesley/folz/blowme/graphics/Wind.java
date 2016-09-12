@@ -1,6 +1,5 @@
 package wesley.folz.blowme.graphics;
 
-import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 
 import wesley.folz.blowme.R;
@@ -65,21 +64,21 @@ public class Wind extends Model
         this.yForce = yForce;
     }
 
-    public float getWindDisplacement()
+    public float getMaxWindForce()
     {
-        return windDisplacement;
+        return maxWindForce;
     }
 
-    public void setWindDisplacement( float windDisplacement )
+    public void setMaxWindForce(float maxWindForce)
     {
-        this.windDisplacement = windDisplacement;
+        this.maxWindForce = maxWindForce;
     }
 
 
     public void calculateWindForce()
     {
-        xForce = (- 1) * xPos * windDisplacement;
-        yForce = (- 1) * yPos * windDisplacement;
+        xForce = (-1) * xPos * maxWindForce;
+        yForce = (-1) * yPos * maxWindForce;
     }
 
     /**
@@ -152,7 +151,7 @@ public class Wind extends Model
 
     private float yForce;
 
-    private float windDisplacement = 0.8f;
+    private float maxWindForce = 1.8f;
 
     private float[] rotationMatrix;
 }

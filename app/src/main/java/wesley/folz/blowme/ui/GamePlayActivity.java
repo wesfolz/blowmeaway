@@ -94,11 +94,9 @@ public class GamePlayActivity extends Activity
                         fan.setInitialX( x );
                         fan.setInitialY( y );
                         //Log.e( "blowme", "x " + event.getX() + " y " + event.getY() );
-
                         break;
 
                     case MotionEvent.ACTION_MOVE:
-
                         fan.updatePosition( x, y );
                         surfaceView.requestRender();
                         //Log.e( "blowme", "Move: X " + (event.getRawX() / WIDTH) + " Y " +

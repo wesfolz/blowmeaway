@@ -12,6 +12,7 @@ import wesley.folz.blowme.graphics.Background;
 import wesley.folz.blowme.graphics.Dispenser;
 import wesley.folz.blowme.graphics.FallingObject;
 import wesley.folz.blowme.graphics.Fan;
+import wesley.folz.blowme.graphics.Vortex;
 import wesley.folz.blowme.util.Physics;
 
 /**
@@ -26,6 +27,7 @@ public class GamePlayRenderer implements GLSurfaceView.Renderer
         triangle = new FallingObject();
         //line = new Line();
         dispenser = new Dispenser();
+        vortex = new Vortex();
         background = new Background();
 
     }
@@ -73,6 +75,7 @@ public class GamePlayRenderer implements GLSurfaceView.Renderer
         triangle.enableGraphics();
         //line.enableGraphics();
         dispenser.enableGraphics();
+        vortex.enableGraphics();
         background.enableGraphics();
     }
 
@@ -129,10 +132,11 @@ public class GamePlayRenderer implements GLSurfaceView.Renderer
 
         fan.initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
         fan.getWind().initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
-        triangle.initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
+        //triangle.initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
         //line.setProjectionMatrix( projectionMatrix );
         //line.initializeMatrices();
         dispenser.initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
+        vortex.initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
         background.initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
     }
 
@@ -157,6 +161,7 @@ public class GamePlayRenderer implements GLSurfaceView.Renderer
     {
         // Redraw background color
         GLES20.glClear( GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT );
+
         background.draw();
 
 //        fan.getWind().draw();
@@ -164,16 +169,36 @@ public class GamePlayRenderer implements GLSurfaceView.Renderer
 //        fan.drawLight();
         dispenser.updatePosition(0, 0);
         dispenser.draw();
+        vortex.updatePosition(0, 0);
+        vortex.draw();
         //triangle.enableGraphics();
         //fan.getWind().calculateWindForce();
-        Physics.calculateWindForce(fan.getWind(), triangle);
+
+        if (triangle.isOffscreen()) {
+            Log.e("blowme", "offscreen");
+            triangle = new FallingObject(dispenser.getxPos());
+            triangle.enableGraphics();
+            triangle.initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
+        }
 
         //Log.e( "blowme", "min bounds " + fan.getWind().getBounds().getyCorners()[0] + " max
         // bounds " +
         //        fan.getWind().getBounds().getyCorners()[1] );
 
-        if( Physics.isCollision( fan.getWind().getBounds(), triangle.getBounds() ) )
+        //vortex position - falling object position
+        if (Physics.isCollision(vortex.getBounds(), triangle.getBounds())) {
+            //Log.e("blowme", "vortex collision");
+            //triangle.updatePosition(100*vortex.getDeltaX(), 0);
+            triangle.travelOnVector(vortex.getxPos() - triangle.getxPos(), vortex.getyPos() - triangle.getyPos());
+        }
+
+        //falling object is being dispensed
+        else if (triangle.getyPos() < -0.95f) {
+            Log.e("dispenser", String.valueOf(dispenser.getDeltaX()));
+            triangle.updatePosition(100 * dispenser.getDeltaX(), 0);
+        } else if (Physics.isCollision(fan.getWind().getBounds(), triangle.getBounds()))
         {
+            Physics.calculateWindForce(fan.getWind(), triangle);
             triangle.updatePosition( fan.getWind().getxForce(), fan.getWind().getyForce() );
             //Log.e( "blowme", "True" );
             //Log.e( "blowme", "wind bounds " + triangle.getBounds().getyMin() + " triangle
@@ -184,13 +209,7 @@ public class GamePlayRenderer implements GLSurfaceView.Renderer
             triangle.updatePosition( 0, 0 );
             //Log.e( "blowme", "False" );
         }
-        if( triangle.isOffscreen() )
-        {
-            Log.e( "blowme", "offscreen" );
-            triangle = new FallingObject();
-            triangle.enableGraphics();
-            triangle.initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
-        }
+
         //triangle.drawLight();
 
         //triangle.updatePosition( 0, 0 );
@@ -199,6 +218,58 @@ public class GamePlayRenderer implements GLSurfaceView.Renderer
 
         //line.updatePosition( fan.deltaX, fan.deltaY );
         //line.draw();
+    }
+
+
+    /**
+     * Helper function to compile and link a program.
+     *
+     * @param vertexShaderHandle   An OpenGL handle to an already-compiled vertex shader.
+     * @param fragmentShaderHandle An OpenGL handle to an already-compiled fragment shader.
+     * @param attributes           Attributes that need to be bound to the program.
+     * @return An OpenGL handle to the program.
+     */
+    public static int createAndLinkProgram(final int vertexShaderHandle, final int fragmentShaderHandle, final String[] attributes) {
+        int programHandle = GLES20.glCreateProgram();
+
+        if (programHandle != 0) {
+            // Bind the vertex shader to the program.
+            GLES20.glAttachShader(programHandle, vertexShaderHandle);
+
+            // Bind the fragment shader to the program.
+            GLES20.glAttachShader(programHandle, fragmentShaderHandle);
+
+            // Bind attributes
+            if (attributes != null) {
+                final int size = attributes.length;
+                for (int i = 0; i < size; i++) {
+                    GLES20.glBindAttribLocation(programHandle, i, attributes[i]);
+                }
+            }
+
+            // Link the two shaders together into a program.
+            GLES20.glLinkProgram(programHandle);
+
+            // Get the link status.
+            final int[] linkStatus = new int[1];
+            GLES20.glGetProgramiv(programHandle, GLES20.GL_LINK_STATUS, linkStatus, 0);
+
+            // If the link failed, delete the program.
+            if (linkStatus[0] == 0) {
+                Log.e("openGl", "Error compiling program: " + GLES20.glGetProgramInfoLog(programHandle));
+                Log.e("openGl", "Error compiling program: " + GLES20.glGetShaderInfoLog(vertexShaderHandle));
+                Log.e("openGl", "Error compiling program: " + GLES20.glGetShaderInfoLog(fragmentShaderHandle));
+
+                GLES20.glDeleteProgram(programHandle);
+                programHandle = 0;
+            }
+        }
+
+        if (programHandle == 0) {
+            throw new RuntimeException("Error creating program.");
+        }
+
+        return programHandle;
     }
 
     public static int loadShader( int type, String shaderCode )
@@ -220,6 +291,7 @@ public class GamePlayRenderer implements GLSurfaceView.Renderer
         fan.pauseGame();
         triangle.pauseGame();
         dispenser.pauseGame();
+        vortex.pauseGame();
         fan.getWind().pauseGame();
     }
 
@@ -231,6 +303,7 @@ public class GamePlayRenderer implements GLSurfaceView.Renderer
             fan.resumeGame();
             triangle.resumeGame();
             dispenser.resumeGame();
+            vortex.resumeGame();
             fan.getWind().resumeGame();
         }
     }
@@ -241,12 +314,13 @@ public class GamePlayRenderer implements GLSurfaceView.Renderer
         return paused;
     }
 
-
     private Fan fan;
 
     private FallingObject triangle;
 
     private Dispenser dispenser;
+
+    private Vortex vortex;
 
     private Background background;
 
