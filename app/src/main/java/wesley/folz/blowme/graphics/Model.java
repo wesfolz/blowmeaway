@@ -87,7 +87,8 @@ public abstract class Model
             //TODO: scaling mvMatrix messes up shader, so scaling must be done last, not sure why
             Matrix.scaleM(mvpMatrix, 0, scaleFactor, scaleFactor, scaleFactor);
 
-        } else
+        }
+        else
         {
             this.resuming = false;
         }

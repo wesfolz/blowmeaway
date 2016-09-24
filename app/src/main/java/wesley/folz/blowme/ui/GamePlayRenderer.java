@@ -2,18 +2,12 @@ package wesley.folz.blowme.ui;
 
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
-import android.opengl.Matrix;
 import android.util.Log;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
-import wesley.folz.blowme.graphics.Background;
-import wesley.folz.blowme.graphics.Dispenser;
-import wesley.folz.blowme.graphics.FallingObject;
-import wesley.folz.blowme.graphics.Fan;
-import wesley.folz.blowme.graphics.Vortex;
-import wesley.folz.blowme.util.Physics;
+import wesley.folz.blowme.GameConfig.ModeConfig;
 
 /**
  * Created by wesley on 5/10/2015.
@@ -21,26 +15,12 @@ import wesley.folz.blowme.util.Physics;
 public class GamePlayRenderer implements GLSurfaceView.Renderer
 {
 
-    private Fan fan;
-    private FallingObject triangle;
-    private Dispenser dispenser;
-    private Vortex vortex;
-    private Background background;
+    private ModeConfig modeConfig;
     private boolean paused;
-    // mMVPMatrix is an abbreviation for "Model View Projection Matrix"
-    private float[] projectionMatrix = new float[16];
-    private float[] viewMatrix = new float[16];
-    private float[] lightPosInEyeSpace = new float[16];
 
-    public GamePlayRenderer( Fan f )
+    public GamePlayRenderer(ModeConfig config)
     {
-        fan = f;
-        triangle = new FallingObject();
-        //line = new Line();
-        dispenser = new Dispenser();
-        vortex = new Vortex();
-        background = new Background();
-
+        this.modeConfig = config;
     }
 
     /**
@@ -143,14 +123,7 @@ public class GamePlayRenderer implements GLSurfaceView.Renderer
 
         //GLES20.glEnable(GLES20.GL_BLEND);
         //GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
-        //fan = new Fan();
-        fan.enableGraphics();
-        fan.getWind().enableGraphics();
-        triangle.enableGraphics();
-        //line.enableGraphics();
-        dispenser.enableGraphics();
-        vortex.enableGraphics();
-        background.enableGraphics();
+        modeConfig.enableModelGraphics();
     }
 
     /**
@@ -182,36 +155,7 @@ public class GamePlayRenderer implements GLSurfaceView.Renderer
     {
         GLES20.glViewport( 0, 0, width, height );
 
-        float ratio = (float) width / height;
-
-        // Set the camera position (View matrix)
-        Matrix.setLookAtM(viewMatrix, 0, 0, 0, 5f, 0, 0, 0.0f, 0, 1.0f, 0);
-
-        // this projection matrix is applied to object coordinates
-        // in the onDrawFrame() method
-        //Matrix.frustumM( projectionMatrix, 0, - ratio, ratio, - 1, 1, 1, 10 );
-        Matrix.orthoM(projectionMatrix, 0, -ratio, ratio, -1, 1, 1, 10);
-
-        float[] mLightPosInWorldSpace = new float[4];
-        float[] mLightPosInModelSpace = new float[]{0.0f, 0.0f, 0.0f, 1.0f};
-        float[] mLightModelMatrix = new float[16];
-
-        // Calculate position of the light. Push into the distance.
-        Matrix.setIdentityM(mLightModelMatrix, 0);
-        Matrix.translateM(mLightModelMatrix, 0, 0.0f, 0.0f, 3.0f);
-
-        Matrix.multiplyMV(mLightPosInWorldSpace, 0, mLightModelMatrix, 0, mLightPosInModelSpace, 0);
-        Matrix.multiplyMV(lightPosInEyeSpace, 0, viewMatrix, 0, mLightPosInWorldSpace, 0);
-        //Matrix.multiplyMV(lightPosInEyeSpace, 0, projectionMatrix, 0, lightPosInEyeSpace, 0);
-
-        fan.initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
-        fan.getWind().initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
-        //triangle.initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
-        //line.setProjectionMatrix( projectionMatrix );
-        //line.initializeMatrices();
-        dispenser.initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
-        vortex.initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
-        background.initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
+        modeConfig.surfaceGraphicsChanged(width, height);
     }
 
     /**
@@ -235,73 +179,13 @@ public class GamePlayRenderer implements GLSurfaceView.Renderer
     {
         // Redraw background color
         GLES20.glClear( GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT );
-
-        background.draw();
-
-        //fan.getWind().draw();
-        fan.draw();
-        dispenser.updatePosition(0, 0);
-        dispenser.draw();
-        vortex.updatePosition(0, 0);
-        vortex.draw();
-        //triangle.enableGraphics();
-        //fan.getWind().calculateWindForce();
-
-        if (triangle.isOffscreen()) {
-            Log.e("blowme", "offscreen");
-            triangle = new FallingObject(dispenser.getxPos());
-            triangle.enableGraphics();
-            triangle.initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
-        }
-
-        //Log.e( "blowme", "min bounds " + fan.getWind().getBounds().getyCorners()[0] + " max
-        // bounds " +
-        //        fan.getWind().getBounds().getyCorners()[1] );
-
-        //vortex position - falling object position
-        if (Physics.isCollision(vortex.getBounds(), triangle.getBounds())) {
-            //Log.e("blowme", "vortex collision");
-            //triangle.updatePosition(100*vortex.getDeltaX(), 0);
-            triangle.travelOnVector(vortex.getxPos() - triangle.getxPos(), vortex.getyPos() - triangle.getyPos());
-        }
-
-        //falling object is being dispensed
-        else if (triangle.getyPos() < -0.95f) {
-            Log.e("dispenser", String.valueOf(dispenser.getDeltaX()));
-            triangle.updatePosition(100 * dispenser.getDeltaX(), 0);
-        } else if (Physics.isCollision(fan.getWind().getBounds(), triangle.getBounds()))
-        {
-            Physics.calculateWindForce(fan.getWind(), triangle);
-            Log.e("wind", "xforce " + fan.getWind().getxForce() + " yforce " + fan.getWind().getyForce());
-            triangle.updatePosition( fan.getWind().getxForce(), fan.getWind().getyForce() );
-            //Log.e( "wind", "wind collision" );
-            //Log.e( "blowme", "wind bounds " + triangle.getBounds().getyMin() + " triangle
-            // bounds " + triangle.getBounds().getyMax() );
-        }
-        else
-        {
-            triangle.updatePosition( 0, 0 );
-            //Log.e( "blowme", "False" );
-        }
-
-        //triangle.drawLight();
-
-        //triangle.updatePosition( 0, 0 );
-
-        triangle.draw();
-
-        //line.updatePosition( fan.deltaX, fan.deltaY );
-        //line.draw();
+        modeConfig.updatePositionsAndDrawModels();
     }
 
     public void pauseGame()
     {
         paused = true;
-        fan.pauseGame();
-        triangle.pauseGame();
-        dispenser.pauseGame();
-        vortex.pauseGame();
-        fan.getWind().pauseGame();
+        modeConfig.pauseGame();
     }
 
     public void resumeGame()
@@ -309,11 +193,7 @@ public class GamePlayRenderer implements GLSurfaceView.Renderer
         if (paused)
         {
             paused = false;
-            fan.resumeGame();
-            triangle.resumeGame();
-            dispenser.resumeGame();
-            vortex.resumeGame();
-            fan.getWind().resumeGame();
+            modeConfig.resumeGame();
         }
     }
 

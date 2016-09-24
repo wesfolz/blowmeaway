@@ -15,9 +15,9 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.PopupWindow;
 
+import wesley.folz.blowme.GameConfig.ActionModeConfig;
+import wesley.folz.blowme.GameConfig.ModeConfig;
 import wesley.folz.blowme.R;
-import wesley.folz.blowme.graphics.Fan;
-
 
 public class GamePlayActivity extends Activity
 {
@@ -62,7 +62,8 @@ public class GamePlayActivity extends Activity
         HEIGHT = p.y;
 
         //Log.e( "blowme", "WIDTH " + WIDTH + " HEIGHT " + HEIGHT );
-        fan = new Fan();
+
+        final ModeConfig gameMode = new ActionModeConfig();
 
         if( supportsEs2 )
         {
@@ -70,7 +71,7 @@ public class GamePlayActivity extends Activity
             surfaceView.setEGLContextClientVersion( 2 );
 
             // Set the renderer to our demo renderer, defined below.
-            surfaceView.setRenderer( new GamePlayRenderer( fan ) );
+            surfaceView.setRenderer(new GamePlayRenderer(gameMode));
             //surfaceView.setRenderMode( GLSurfaceView.RENDERMODE_WHEN_DIRTY );
         }
         else
@@ -91,13 +92,12 @@ public class GamePlayActivity extends Activity
                 switch( action )
                 {
                     case MotionEvent.ACTION_DOWN:
-                        fan.setInitialX( x );
-                        fan.setInitialY( y );
+                        gameMode.handleFanMovementDown(x, y);
                         //Log.e( "blowme", "x " + event.getX() + " y " + event.getY() );
                         break;
 
                     case MotionEvent.ACTION_MOVE:
-                        fan.updatePosition( x, y );
+                        gameMode.handleFanMovementMove(x, y);
                         surfaceView.requestRender();
                         //Log.e( "blowme", "Move: X " + (event.getRawX() / WIDTH) + " Y " +
                         // (event.getRawY() / HEIGHT) );
@@ -167,8 +167,6 @@ public class GamePlayActivity extends Activity
     public static final float X_EDGE_POSITION = 0.35f;
 
     public static final float Y_EDGE_POSITION = 0.7f;
-
-    private Fan fan;
 
     private int WIDTH;
 

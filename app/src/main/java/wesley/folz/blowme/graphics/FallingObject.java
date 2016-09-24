@@ -100,7 +100,8 @@ public class FallingObject extends Model
     public boolean isOffscreen()
     {
 //        return false;
-        if (firstCall || collectedCount >= 10) {
+        if (firstCall || collectedCount >= 10)
+        {
             return true;
         }
         return this.getBounds().getyTop() > Border.YBOTTOM /*|| this.getBounds().getYCorners()
@@ -140,7 +141,6 @@ public class FallingObject extends Model
 
 
     /**
-     * TODO: make movement after wind collision look behave correctly
      *
      * @param x - x component of wind force
      * @param y - y component of wind force

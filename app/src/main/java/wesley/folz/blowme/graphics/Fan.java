@@ -115,8 +115,10 @@ public class Fan extends Model
         long time = SystemClock.uptimeMillis();// % 4000L;
         float angle = 0.40f * ((int) time);
 
-//        if( deltaX != 0 || deltaY != 0 )
-//            moveParametric();
+        if (deltaX != 0 || deltaY != 0)
+        {
+            moveParametric();
+        }
 //            moveAroundClock();
         //moveAlongEdge();
 
@@ -329,7 +331,7 @@ public class Fan extends Model
         initialX = x;
         initialY = y;
 
-        moveParametric();
+        //moveParametric();
     }
 
     public Wind getWind()
