@@ -1,10 +1,10 @@
-package wesley.folz.blowme.graphics;
+package wesley.folz.blowme.graphics.models;
 
 import android.opengl.Matrix;
 import android.os.SystemClock;
-import android.util.Log;
 
 import wesley.folz.blowme.R;
+import wesley.folz.blowme.graphics.effects.Wind;
 import wesley.folz.blowme.ui.GamePlayActivity;
 import wesley.folz.blowme.util.Bounds;
 import wesley.folz.blowme.util.GraphicsReader;
@@ -14,17 +14,6 @@ import wesley.folz.blowme.util.GraphicsReader;
  */
 public class Fan extends Model
 {
-    private final float[] initialTransformationMatrix = new float[16];
-    private final float[] secondRotation = new float[16];
-    private final float[] initialRotation = new float[16];
-    public float deltaX;
-    public float deltaY;
-    private float parametricAngle = (float) Math.PI;
-    private float initialX;
-    private float initialY;
-    private Wind wind;
-    private boolean clockwise;
-
     public Fan()
     {
         super();
@@ -33,9 +22,9 @@ public class Fan extends Model
         this.FRAGMENT_SHADER = R.raw.texture_fragment_shader;
         GraphicsReader.readOBJFile(this);
         GraphicsReader.readShader(this);
-        xPos = - GamePlayActivity.X_EDGE_POSITION;//+.01f;
+        xPos = -GamePlayActivity.X_EDGE_POSITION;//+.01f;
         yPos = 0;
-        setWind( new Wind() );
+        setWind(new Wind());
         setSize(new float[]{0.5f, 0.5f});
         setBounds(new Bounds(xPos - getSize()[0] / 2, yPos - getSize()[1] / 2, xPos + getSize()
                 [0] / 2, yPos + getSize()[1] / 2));
@@ -56,46 +45,48 @@ public class Fan extends Model
     {
         float[] rotationMatrix = new float[16];
         float inwardRotation;
-        float cornerAngle = (float) (180 * Math.atan( GamePlayActivity.X_EDGE_POSITION /
-                GamePlayActivity.Y_EDGE_POSITION ) / Math
+        float cornerAngle = (float) (180 * Math.atan(GamePlayActivity.X_EDGE_POSITION /
+                GamePlayActivity.Y_EDGE_POSITION) / Math
                 .PI);
 
         float xRatio = (90 - cornerAngle) / GamePlayActivity.X_EDGE_POSITION;
         float yRatio = cornerAngle / GamePlayActivity.Y_EDGE_POSITION;
 
         //on negative x edge
-        if( xPos == (- GamePlayActivity.X_EDGE_POSITION) )
+        if (xPos == (-GamePlayActivity.X_EDGE_POSITION))
         {
             //inwardRotation = yRatio * ( yPos + (yPos/Math.abs(yPos))*(X_EDGE_POSITION + xPos) );
             inwardRotation = yRatio * yPos;
             //Log.e( "blowme", "negative x edge" );
         }
         //on positive x edge
-        else if( xPos == GamePlayActivity.X_EDGE_POSITION )
-        {
-            inwardRotation = 180 - cornerAngle + yRatio * (GamePlayActivity.Y_EDGE_POSITION - yPos);
-            //Log.e( "blowme", "negative x edge" );
-        }
-        //on y edge
         else
         {
-            inwardRotation = (yPos / Math.abs( yPos )) * (xRatio * xPos + 90);
-            //Log.e( "blowme", "negative y edge" );
+            if (xPos == GamePlayActivity.X_EDGE_POSITION)
+            {
+                inwardRotation = 180 - cornerAngle + yRatio * (GamePlayActivity.Y_EDGE_POSITION - yPos);
+                //Log.e( "blowme", "negative x edge" );
+            }
+            //on y edge
+            else
+            {
+                inwardRotation = (yPos / Math.abs(yPos)) * (xRatio * xPos + 90);
+                //Log.e( "blowme", "negative y edge" );
+            }
         }
 
-        Matrix.setRotateM( rotationMatrix, 0, inwardRotation, 0, 0, 1 );
+        Matrix.setRotateM(rotationMatrix, 0, inwardRotation, 0, 0, 1);
         return rotationMatrix;
     }
 
-    private float[] calculateInwardParametricRotation() {
+    private float[] calculateInwardParametricRotation()
+    {
         //if parametricAngle = Pi -> inwardRotation = 0
         //if parametricAngle = Pi/2 -> inwardRotation = Pi/2
         //if parametricAngle = 0 -> inwardRotation = Pi
         //if parametricAngle = 3Pi/4 -> inwardRotation = -Pi/2
 
         float inwardRotation = 180 * ((float) Math.PI - parametricAngle) / (float) Math.PI;
-
-        Log.e("rotation", "Inward rotation " + inwardRotation);
 
         float[] rotationMatrix = new float[16];
         Matrix.setRotateM(rotationMatrix, 0, inwardRotation, 0, 0, 1);
@@ -188,34 +179,34 @@ public class Fan extends Model
     {
         float[] rotationMatrix = new float[16];
         //x can't move, should be equal to the edge
-        if( Math.abs( yPos ) < GamePlayActivity.Y_EDGE_POSITION )
+        if (Math.abs(yPos) < GamePlayActivity.Y_EDGE_POSITION)
         {
             //move to edge if past it
-            if( xPos > 0 )
+            if (xPos > 0)
             {
                 deltaX = GamePlayActivity.X_EDGE_POSITION - xPos;
                 xPos = GamePlayActivity.X_EDGE_POSITION;
             }
             else
             {
-                deltaX = - 1 * GamePlayActivity.X_EDGE_POSITION - xPos;
-                xPos = - 1 * GamePlayActivity.X_EDGE_POSITION;
+                deltaX = -1 * GamePlayActivity.X_EDGE_POSITION - xPos;
+                xPos = -1 * GamePlayActivity.X_EDGE_POSITION;
             }
         }
         else
         {
             //move to edge if past it
-            if( Math.abs( xPos ) > GamePlayActivity.X_EDGE_POSITION )
+            if (Math.abs(xPos) > GamePlayActivity.X_EDGE_POSITION)
             {
-                if( xPos > 0 )
+                if (xPos > 0)
                 {
                     deltaX = GamePlayActivity.X_EDGE_POSITION - xPos;
                     xPos = GamePlayActivity.X_EDGE_POSITION;
                 }
                 else
                 {
-                    deltaX = - 1 * GamePlayActivity.X_EDGE_POSITION - xPos;
-                    xPos = - 1 * GamePlayActivity.X_EDGE_POSITION;
+                    deltaX = -1 * GamePlayActivity.X_EDGE_POSITION - xPos;
+                    xPos = -1 * GamePlayActivity.X_EDGE_POSITION;
                 }
             }
             else
@@ -225,35 +216,35 @@ public class Fan extends Model
         }
 
         //y can't move should be equal to the edge
-        if( Math.abs( xPos ) < GamePlayActivity.X_EDGE_POSITION )
+        if (Math.abs(xPos) < GamePlayActivity.X_EDGE_POSITION)
         {
             //move to edge if past it
-            if( yPos > 0 )
+            if (yPos > 0)
             {
                 deltaY = GamePlayActivity.Y_EDGE_POSITION - yPos;
                 yPos = GamePlayActivity.Y_EDGE_POSITION;
             }
             else
             {
-                deltaY = - 1 * GamePlayActivity.Y_EDGE_POSITION - yPos;
-                yPos = - 1 * GamePlayActivity.Y_EDGE_POSITION;
+                deltaY = -1 * GamePlayActivity.Y_EDGE_POSITION - yPos;
+                yPos = -1 * GamePlayActivity.Y_EDGE_POSITION;
             }
         }
         //update y position
         else
         {
             //move to edge if past it
-            if( Math.abs( yPos ) > GamePlayActivity.Y_EDGE_POSITION )
+            if (Math.abs(yPos) > GamePlayActivity.Y_EDGE_POSITION)
             {
-                if( yPos > 0 )
+                if (yPos > 0)
                 {
                     deltaY = GamePlayActivity.Y_EDGE_POSITION - yPos;
                     yPos = GamePlayActivity.Y_EDGE_POSITION;
                 }
                 else
                 {
-                    deltaY = - 1 * GamePlayActivity.Y_EDGE_POSITION - yPos;
-                    yPos = - 1 * GamePlayActivity.Y_EDGE_POSITION;
+                    deltaY = -1 * GamePlayActivity.Y_EDGE_POSITION - yPos;
+                    yPos = -1 * GamePlayActivity.Y_EDGE_POSITION;
                 }
             }
             else
@@ -265,8 +256,8 @@ public class Fan extends Model
 
         getWind().yPos = yPos;
 
-        getBounds().setBounds( xPos - getSize()[0] / 2, yPos - getSize()[1] / 2, xPos + getSize()
-                [0] / 2, yPos + getSize()[1] / 2 );
+        getBounds().setBounds(xPos - getSize()[0] / 2, yPos - getSize()[1] / 2, xPos + getSize()
+                [0] / 2, yPos + getSize()[1] / 2);
         //getWind().setBounds( new float[]{-0.4f, -0.25f, 0.4f, 0.25f} );
         //getWind().getBounds().calculateBounds( calculateInwardRotation() );
         getWind().getBounds().calculateBounds(calculateInwardParametricRotation());
@@ -277,7 +268,8 @@ public class Fan extends Model
 
     //arc = deg*2*pi*r/2Pi
     //deg = arc*2Pi/
-    private void moveParametric() {
+    private void moveParametric()
+    {
         float arcLength = Math.abs(deltaY) + Math.abs(deltaX);
 
         float a = GamePlayActivity.X_EDGE_POSITION;
@@ -286,9 +278,12 @@ public class Fan extends Model
         float newY;
         float slowdown = 0.85f;
 
-        if (clockwise) {
+        if (clockwise)
+        {
             parametricAngle += arcLength / slowdown;
-        } else {
+        }
+        else
+        {
             parametricAngle -= arcLength / slowdown;
         }
 
@@ -312,11 +307,12 @@ public class Fan extends Model
     /**
      * Calculates the change in x and y position
      * TODO: Make fan follow finger?
+     *
      * @param x - new x position
      * @param y - new y position
      */
     @Override
-    public void updatePosition( float x, float y )
+    public void updatePosition(float x, float y)
     {
         deltaX = (x - initialX);
         deltaY = (y - initialY);
@@ -339,19 +335,29 @@ public class Fan extends Model
         return wind;
     }
 
-    public void setWind( Wind wind )
+    public void setWind(Wind wind)
     {
         this.wind = wind;
     }
 
-    public void setInitialY( float initialY )
+    public void setInitialY(float initialY)
     {
         this.initialY = initialY;
     }
 
-    public void setInitialX( float initialX )
+    public void setInitialX(float initialX)
     {
         this.initialX = initialX;
     }
 
+    private final float[] initialTransformationMatrix = new float[16];
+    private final float[] secondRotation = new float[16];
+    private final float[] initialRotation = new float[16];
+    public float deltaX;
+    public float deltaY;
+    private float parametricAngle = (float) Math.PI;
+    private float initialX;
+    private float initialY;
+    private Wind wind;
+    private boolean clockwise;
 }

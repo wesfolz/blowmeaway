@@ -1,8 +1,9 @@
-package wesley.folz.blowme.graphics;
+package wesley.folz.blowme.graphics.effects;
 
 import android.opengl.Matrix;
 
 import wesley.folz.blowme.R;
+import wesley.folz.blowme.graphics.models.Model;
 import wesley.folz.blowme.ui.GamePlayActivity;
 import wesley.folz.blowme.util.Bounds;
 import wesley.folz.blowme.util.GraphicsReader;

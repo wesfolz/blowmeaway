@@ -3,6 +3,8 @@ package wesley.folz.blowme.graphics;
 import android.opengl.GLES20;
 import android.opengl.Matrix;
 
+import wesley.folz.blowme.graphics.models.Model;
+
 /**
  * Created by wesley on 7/3/2015.
  */

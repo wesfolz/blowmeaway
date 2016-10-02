@@ -1,6 +1,6 @@
 package wesley.folz.blowme.graphics;
 
-import android.opengl.GLSurfaceView;
+import wesley.folz.blowme.graphics.models.Model;
 
 /**
  * Created by wesley on 7/19/2015.

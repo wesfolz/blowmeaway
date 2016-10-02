@@ -5,7 +5,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.opengl.GLES20;
 import android.opengl.GLUtils;
-import android.util.Log;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -15,7 +14,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.StringTokenizer;
 
-import wesley.folz.blowme.graphics.Model;
+import wesley.folz.blowme.graphics.models.Model;
 import wesley.folz.blowme.ui.MainApplication;
 
 /**
@@ -257,12 +256,14 @@ public abstract class GraphicsReader
                 {
                     interleavedArrayList.add(vertices.get(3 * key + 2));
                     interleavedArrayList.add(vertices.get(3 * key + 1));
-                } else //x-y plane
+                }
+                else //x-y plane
                 {
                     interleavedArrayList.add(vertices.get(3 * key));
                     interleavedArrayList.add(vertices.get(3 * key + 1));
                 }
-            } else
+            }
+            else
             {
                 if (yn > zn) //x-z plane
                 {
@@ -282,7 +283,7 @@ public abstract class GraphicsReader
             //Log.e("interleaved", String.valueOf(interleavedData[i]));
         }
 
-        Log.e("interleave", String.valueOf(interleavedArrayList.size()));
+        //Log.e("interleave", String.valueOf(interleavedArrayList.size()));
 
         return interleavedData;
     }

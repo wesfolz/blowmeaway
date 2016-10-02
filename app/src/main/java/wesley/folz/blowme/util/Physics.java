@@ -1,8 +1,8 @@
 package wesley.folz.blowme.util;
 
 import wesley.folz.blowme.graphics.Border;
-import wesley.folz.blowme.graphics.FallingObject;
-import wesley.folz.blowme.graphics.Wind;
+import wesley.folz.blowme.graphics.effects.Wind;
+import wesley.folz.blowme.graphics.models.FallingObject;
 
 /**
  * Created by wesley on 7/3/2015.
@@ -39,6 +39,28 @@ public abstract class Physics
         return (object.getyTop() <= Border.YTOP);
     }
 
+    public static COLLISION calculateCollision(Bounds b1, Bounds b2)
+    {
+        float leftRight = b2.getxRight() - b1.getxLeft();
+        float rightLeft = b1.getxRight() - b2.getxLeft();
+        float topBottom = b2.getyBottom() - b1.getyTop();
+        float bottomTop = b1.getyBottom() - b2.getyTop();
+
+        if (Physics.isCollision(b1, b2))
+        {
+            if (Math.min(leftRight, rightLeft) < Math.min(topBottom, bottomTop))
+            {
+                return leftRight < rightLeft ? COLLISION.RIGHT_LEFT : COLLISION.LEFT_RIGHT;
+            }
+            else
+            {
+                return topBottom < bottomTop ? COLLISION.BOTTOM_TOP : COLLISION.TOP_BOTTOM;
+            }
+
+        }
+        return COLLISION.NONE;
+    }
+
 
     public static boolean isCollision( Bounds b1, Bounds b2 )
     {
@@ -64,6 +86,15 @@ public abstract class Physics
         sum[1] = yForce + GRAVITY - KINETIC_FRICTION;
 
         return sum;
+    }
+
+    public enum COLLISION
+    {
+        NONE,
+        LEFT_RIGHT,
+        RIGHT_LEFT,
+        TOP_BOTTOM,
+        BOTTOM_TOP
     }
 
 

@@ -3,6 +3,7 @@ package wesley.folz.blowme.graphics;
 import android.opengl.Matrix;
 
 import wesley.folz.blowme.R;
+import wesley.folz.blowme.graphics.models.Model;
 import wesley.folz.blowme.util.GraphicsReader;
 
 /**

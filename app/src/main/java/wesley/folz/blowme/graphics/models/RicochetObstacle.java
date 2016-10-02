@@ -1,8 +1,9 @@
-package wesley.folz.blowme.graphics;
+package wesley.folz.blowme.graphics.models;
 
 import android.opengl.Matrix;
 
 import wesley.folz.blowme.R;
+import wesley.folz.blowme.util.Bounds;
 import wesley.folz.blowme.util.GraphicsReader;
 
 /**
@@ -21,12 +22,23 @@ public class RicochetObstacle extends Model
         GraphicsReader.readOBJFile(this);
         GraphicsReader.readShader(this);
         xPos = 0;//+.01f;
-        yPos = 1.1f;//GamePlayActivity.Y_EDGE_POSITION;
+        yPos = 1.5f;//GamePlayActivity.Y_EDGE_POSITION;
 
-        scaleFactor = 0.2f;
+        previousTime = System.nanoTime();
+
+        setBounds(new Bounds());
+
+        scaleFactor = 0.1f;
 
         initialXPos = xPos;
         initialYPos = -yPos;
+    }
+
+    @Override
+    public void resumeGame()
+    {
+        super.resumeGame();
+        previousTime = System.nanoTime();
     }
 
 
@@ -46,19 +58,36 @@ public class RicochetObstacle extends Model
     }
 
     @Override
+    public void initializeMatrices(float[] viewMatrix, float[] projectionMatrix, float[] lightPositionInEyeSpace)
+    {
+        super.initializeMatrices(viewMatrix, projectionMatrix, lightPositionInEyeSpace);
+        if (!this.resuming)
+        {
+            //rotate 130 degrees about x-axis
+            //Matrix.rotateM(modelMatrix, 0, 20, 1, 0, 0);
+        }
+
+        //Log.e( "blowme", "xpos: " + xPos + " ypos " + yPos );
+    }
+
+    @Override
     public void updatePosition(float x, float y)
     {
-
         float deltaTime = (System.nanoTime() - previousTime) / 1000000000.0f;
         previousTime = System.nanoTime();
 
         deltaY = deltaTime * risingSpeed;
-        yPos += deltaY;
+        yPos -= deltaY;
+
+        getBounds().setBounds(xPos - scaleFactor, yPos - scaleFactor, xPos + scaleFactor, yPos + scaleFactor);
     }
 
     private float deltaY;
 
+    private float deltaX;
+
     private float previousTime;
 
     private float risingSpeed = 0.1f;
+
 }

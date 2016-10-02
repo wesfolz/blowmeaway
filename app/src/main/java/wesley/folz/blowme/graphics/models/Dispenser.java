@@ -1,4 +1,4 @@
-package wesley.folz.blowme.graphics;
+package wesley.folz.blowme.graphics.models;
 
 import android.opengl.Matrix;
 

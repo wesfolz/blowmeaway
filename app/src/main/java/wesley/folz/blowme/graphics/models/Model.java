@@ -1,8 +1,7 @@
-package wesley.folz.blowme.graphics;
+package wesley.folz.blowme.graphics.models;
 
 import android.opengl.GLES20;
 import android.opengl.Matrix;
-import android.util.Log;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -187,7 +186,7 @@ public abstract class Model
 
     public void resumeGame()
     {
-        Log.e("blowme", String.valueOf(paused));
+        //Log.e("blowme", String.valueOf(paused));
         resuming = paused;
         paused = false;
     }
@@ -282,36 +281,36 @@ public abstract class Model
 
     protected FloatBuffer dataBuffer;
 
-    private static final int COORDS_PER_VERTEX = 3;
+    protected static final int COORDS_PER_VERTEX = 3;
 
-    private static final int COORDS_PER_NORMAL = 3;
+    protected static final int COORDS_PER_NORMAL = 3;
 
-    private static final int COORDS_PER_COLOR = 4;
+    protected static final int COORDS_PER_COLOR = 4;
 
-    private static final int COORDS_PER_TEX = 2;
+    protected static final int COORDS_PER_TEX = 2;
 
-    private static final int BYTES_PER_FLOAT = 4;
+    protected static final int BYTES_PER_FLOAT = 4;
 
     protected int programHandle;
 
-    private int mLightPosHandle;
-    private int vertexShader;
-    private int fragmentShader;
+    protected int mLightPosHandle;
+    protected int vertexShader;
+    protected int fragmentShader;
 
-    private int dataVBO;
-    private int orderVBO;
+    protected int dataVBO;
+    protected int orderVBO;
 
     private boolean paused = false;
 
     protected boolean resuming = false;
 
-    private float[] mvMatrix;
+    protected float[] mvMatrix;
 
-    private float[] mvpMatrix;
+    protected float[] mvpMatrix;
 
-    private float[] lightPosInEyeSpace = new float[4];
+    protected float[] lightPosInEyeSpace = new float[4];
 
-    private int textureDataHandle;
+    protected int textureDataHandle;
 
     protected float scaleFactor = 1.0f;
 

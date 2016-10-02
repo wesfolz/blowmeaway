@@ -6,12 +6,14 @@ import android.util.Log;
 import java.util.ArrayList;
 
 import wesley.folz.blowme.graphics.Background;
-import wesley.folz.blowme.graphics.Dispenser;
-import wesley.folz.blowme.graphics.FallingObject;
-import wesley.folz.blowme.graphics.Fan;
-import wesley.folz.blowme.graphics.Model;
-import wesley.folz.blowme.graphics.RicochetObstacle;
-import wesley.folz.blowme.graphics.Vortex;
+import wesley.folz.blowme.graphics.effects.DustCloud;
+import wesley.folz.blowme.graphics.effects.ParticleSystem;
+import wesley.folz.blowme.graphics.models.Dispenser;
+import wesley.folz.blowme.graphics.models.FallingObject;
+import wesley.folz.blowme.graphics.models.Fan;
+import wesley.folz.blowme.graphics.models.Model;
+import wesley.folz.blowme.graphics.models.RicochetObstacle;
+import wesley.folz.blowme.graphics.models.Vortex;
 import wesley.folz.blowme.util.Physics;
 
 /**
@@ -31,7 +33,6 @@ public abstract class ModeConfig
 
         fan = new Fan();
         models.add(fan);
-        ;
 
         FallingObject fo = new FallingObject();
         models.add(fo);
@@ -50,6 +51,9 @@ public abstract class ModeConfig
         background = new Background();
         models.add(background);
 
+        //TODO: Determine best method for creating, storing and displaying Effects
+        particleSystem = new DustCloud(0, 1f);
+        models.add(particleSystem);
     }
 
     public void enableModelGraphics()
@@ -117,10 +121,12 @@ public abstract class ModeConfig
         boolean objectEffected;
         for (FallingObject falObj : fallingObjects)
         {
+            float xForce = 0;
+            float yForce = 0;
+
             objectEffected = false;
             if (falObj.isOffscreen())
             {
-                Log.e("blowme", "offscreen");
                 models.remove(falObj);
                 fallingObjects.remove(falObj);
                 falObj = new FallingObject(dispenser.getxPos());
@@ -128,15 +134,16 @@ public abstract class ModeConfig
                 falObj.initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
                 models.add(falObj);
                 fallingObjects.add(falObj);
-                Log.e("mode", "offscreen");
+                //Log.e("mode", "offscreen");
             }
 
             for (Vortex vortex : vortexes)
             {
                 //vortex position - falling object position
-                if (Physics.isCollision(vortex.getBounds(), falObj.getBounds()))
+                if (Physics.isCollision(vortex.getBounds(), falObj.getBounds()) || falObj.isCollected())
                 {
-                    falObj.travelOnVector(vortex.getxPos() - falObj.getxPos(), vortex.getyPos() - falObj.getyPos());
+                    //falObj.travelOnVector(vortex.getxPos() - falObj.getxPos(), vortex.getyPos() - falObj.getyPos());
+                    falObj.spiralIntoVortex(vortex.getxPos());
                     objectEffected = true;
                     Log.e("mode", "Collection");
                 }
@@ -144,25 +151,36 @@ public abstract class ModeConfig
             //falling object is being dispensed
             if (falObj.getyPos() < -0.95f && !objectEffected)
             {
-                falObj.updatePosition(100 * dispenser.getDeltaX(), 0);
-                Log.e("mode", "dispense");
+                //falObj.updatePosition(100 * dispenser.getDeltaX(), 0);
+                xForce = 100 * dispenser.getDeltaX();
+                objectEffected = true;
+                //Log.e("mode", "dispense");
             }
 
+            //determine forces due to collisions with obstacles
+            falObj.calculateRicochetCollisions(obstacles);
+
+            //calculate wind influence
             if (Physics.isCollision(fan.getWind().getBounds(), falObj.getBounds()) && !objectEffected)
             {
                 Physics.calculateWindForce(fan.getWind(), falObj);
                 //Log.e("wind", "xforce " + fan.getWind().getxForce() + " yforce " + fan.getWind().getyForce());
-                Log.e("mode", "wind collision");
-                falObj.updatePosition(fan.getWind().getxForce(), fan.getWind().getyForce());
+                //Log.e("mode", "wind collision");
+                //falObj.updatePosition(fan.getWind().getxForce(), fan.getWind().getyForce());
+                xForce = fan.getWind().getxForce();
+                yForce = fan.getWind().getyForce();
                 objectEffected = true;
             }
 
-            if (!objectEffected)
+            if (!falObj.isCollected())
             {
-                falObj.updatePosition(0, 0);
+                falObj.updatePosition(xForce, yForce);
             }
 
             falObj.draw();
+
+            particleSystem.updatePosition(0, 0);
+            particleSystem.draw();
         }
     }
 
@@ -175,6 +193,9 @@ public abstract class ModeConfig
     public void handleFanMovementMove(float x, float y)
     {
         fan.updatePosition(x, y);
+
+        // obstacles.get(0).updatePosition(x, y);
+        // fallingObjects.get(0).updatePosition(x, y);
     }
 
 
@@ -206,4 +227,6 @@ public abstract class ModeConfig
     private float[] viewMatrix = new float[16];
     private float[] projectionMatrix = new float[16];
     private float[] lightPosInEyeSpace = new float[16];
+
+    private ParticleSystem particleSystem;
 }
