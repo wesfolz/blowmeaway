@@ -15,9 +15,9 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.PopupWindow;
 
-import wesley.folz.blowme.GameConfig.ActionModeConfig;
-import wesley.folz.blowme.GameConfig.ModeConfig;
 import wesley.folz.blowme.R;
+import wesley.folz.blowme.gameMode.ActionModeConfig;
+import wesley.folz.blowme.gameMode.ModeConfig;
 
 public class GamePlayActivity extends Activity
 {
@@ -91,13 +91,38 @@ public class GamePlayActivity extends Activity
 
                 switch( action )
                 {
+                    case MotionEvent.ACTION_POINTER_UP:
+                        touchActionStarted = true;
+                        //gameMode.handleFanMovementDown(x, y);
+                        Log.e("pointer", "x " + event.getX() + " y " + event.getY() + " up");
+                        break;
+                    case MotionEvent.ACTION_POINTER_DOWN:
+                        //gameMode.handleFanMovementDown(x, y);
+                        touchActionStarted = true;
+                        Log.e("pointer", "x " + event.getX() + " y " + event.getY() + " down");
+                        break;
+
+
+                    case MotionEvent.ACTION_UP:
+                        touchActionStarted = true;
+                        //gameMode.handleFanMovementDown(x, y);
+                        Log.e("pointer", "x " + event.getX() + " y " + event.getY() + " up");
+                        break;
+
                     case MotionEvent.ACTION_DOWN:
-                        gameMode.handleFanMovementDown(x, y);
-                        //Log.e( "blowme", "x " + event.getX() + " y " + event.getY() );
+                        //gameMode.handleFanMovementDown(x, y);
+                        touchActionStarted = true;
+                        Log.e("pointer", "x " + event.getX() + " y " + event.getY() + " down");
                         break;
 
                     case MotionEvent.ACTION_MOVE:
+                        if (touchActionStarted)
+                        {
+                            gameMode.handleFanMovementDown(x, y);
+                            touchActionStarted = false;
+                        }
                         gameMode.handleFanMovementMove(x, y);
+
                         surfaceView.requestRender();
                         //Log.e( "blowme", "Move: X " + (event.getRawX() / WIDTH) + " Y " +
                         // (event.getRawY() / HEIGHT) );
@@ -106,7 +131,6 @@ public class GamePlayActivity extends Activity
                 return true;
             }
         } );
-        //setContentView( surfaceView );
     }
 
     protected void onPauseButtonClicked(View pauseButton)
@@ -171,4 +195,6 @@ public class GamePlayActivity extends Activity
     private int WIDTH;
 
     private int HEIGHT;
+
+    private boolean touchActionStarted = true;
 }

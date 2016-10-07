@@ -7,7 +7,7 @@ import android.util.Log;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
-import wesley.folz.blowme.GameConfig.ModeConfig;
+import wesley.folz.blowme.gameMode.ModeConfig;
 
 /**
  * Created by wesley on 5/10/2015.

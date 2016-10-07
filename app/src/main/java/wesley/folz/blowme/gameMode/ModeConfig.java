@@ -1,4 +1,4 @@
-package wesley.folz.blowme.GameConfig;
+package wesley.folz.blowme.gameMode;
 
 import android.opengl.Matrix;
 import android.util.Log;
@@ -102,6 +102,7 @@ public abstract class ModeConfig
         background.draw();
 
         fan.draw();
+
 
         dispenser.updatePosition(0, 0);
         dispenser.draw();
