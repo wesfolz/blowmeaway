@@ -1,4 +1,4 @@
-package wesley.folz.blowme.gameMode;
+package wesley.folz.blowme.gamemode;
 
 import android.opengl.Matrix;
 import android.util.Log;

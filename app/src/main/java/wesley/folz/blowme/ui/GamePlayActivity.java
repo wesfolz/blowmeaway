@@ -16,8 +16,8 @@ import android.view.WindowManager;
 import android.widget.PopupWindow;
 
 import wesley.folz.blowme.R;
-import wesley.folz.blowme.gameMode.ActionModeConfig;
-import wesley.folz.blowme.gameMode.ModeConfig;
+import wesley.folz.blowme.gamemode.ActionModeConfig;
+import wesley.folz.blowme.gamemode.ModeConfig;
 
 public class GamePlayActivity extends Activity
 {
