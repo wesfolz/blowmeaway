@@ -7,7 +7,6 @@ import android.util.Log;
 import java.util.ArrayList;
 
 import wesley.folz.blowme.graphics.Border;
-import wesley.folz.blowme.graphics.effects.Explosion;
 import wesley.folz.blowme.util.Bounds;
 import wesley.folz.blowme.util.GraphicsUtilities;
 import wesley.folz.blowme.util.Physics;
@@ -53,8 +52,6 @@ public class FallingObject extends Model
         initialXPos = xPos;
         initialYPos = yPos;
         collected = false;
-
-        explosion = new Explosion();
     }
 
     @Override
@@ -66,21 +63,12 @@ public class FallingObject extends Model
         numVertices = graphicsData.numVerticesMap.get("cube");
         programHandle = graphicsData.shaderProgramIdMap.get("texture");
         textureDataHandle = graphicsData.textureIdMap.get("wood");
-        explosion.enableGraphics(graphicsData);
-    }
-
-    @Override
-    public void initializeMatrices(float[] viewMatrix, float[] projectionMatrix, float[] lightPosInEyeSpace)
-    {
-        super.initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
-        explosion.initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
     }
 
     @Override
     public float[] createTransformationMatrix()
     {
         float[] transformation = new float[16];
-        firstCall = false;
 
         //float[] result = new float[16];
 
@@ -122,12 +110,11 @@ public class FallingObject extends Model
     public boolean isOffscreen()
     {
 //        return false;
-        if (firstCall || collectedCount >= 10)
+        if (collectedCount >= 10)
         {
             return true;
         }
-        return this.getBounds().getyTop() < Border.YBOTTOM /*|| this.getBounds().getYCorners()
-               [1] < Border.YTOP */;
+        return this.getBounds().getyTop() < Border.YBOTTOM || offscreen;
     }
 
     @Override
@@ -202,7 +189,6 @@ public class FallingObject extends Model
                 travelOnVector(0, 0.001f);
             }
         }
-
         collected = true;
     }
 
@@ -214,7 +200,7 @@ public class FallingObject extends Model
         float fallingTime = MASS * time;
         deltaX = 5 * fallingTime * xComponent;
         //deltaY = 5 * fallingTime * yComponent;
-        deltaY = 0.000001f;//fallingTime * yComponent;
+        deltaY = -0.001f;//fallingTime * yComponent;
 
         xPos += deltaX;
         yPos += deltaY;
@@ -250,9 +236,10 @@ public class FallingObject extends Model
     @Override
     public void updatePosition(float x, float y)
     {
-        float time = (System.nanoTime() - previousTime) / 1000000000.0f;
-        previousTime = System.nanoTime();
-        float fallingTime = MASS * time;
+        long time = System.nanoTime();
+        float deltaTime = (time - previousTime) / 1000000000.0f;
+        previousTime = time;//System.nanoTime();
+        float fallingTime = MASS * deltaTime;
 
         float[] force = Physics.sumOfForces(x, y);
         float elasticityCoefficient = 0.8f;
@@ -303,18 +290,15 @@ public class FallingObject extends Model
         //Log.e("blowme", "ycorners0 " + getBounds().getYCorners()[0] + " ycorners1 " + getBounds().getYCorners()[1]);
     }
 
-    public Explosion getExplosion()
+    public void setOffscreen(boolean offscreen)
     {
-        return explosion;
+        this.offscreen = offscreen;
     }
-
 
     public boolean isCollected()
     {
         return collected;
     }
-
-    private boolean firstCall = true;
 
     private int collectedCount = 0;
 
@@ -342,7 +326,6 @@ public class FallingObject extends Model
 
     private Physics.COLLISION collision;
 
-
     public void setInitialY(float initialY)
     {
         this.initialY = initialY;
@@ -366,5 +349,6 @@ public class FallingObject extends Model
 
     private int spiralCount = 0;
 
-    private Explosion explosion;
+    private boolean offscreen = false;
+
 }

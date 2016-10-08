@@ -2,6 +2,7 @@ package wesley.folz.blowme.graphics.models;
 
 import android.opengl.Matrix;
 import android.os.SystemClock;
+import android.util.Log;
 
 import wesley.folz.blowme.graphics.effects.Wind;
 import wesley.folz.blowme.ui.GamePlayActivity;
@@ -94,6 +95,12 @@ public class Fan extends Model
         // Note that the mMVPMatrix factor *must be first* in order
         // for the matrix multiplication product to be correct.
 
+
+        if (clockwise != ((((prevX - 1.0f) * (initialY - 1.0f)) - ((prevY - 1.0f) * (initialX - 1.0f))) > 0))
+        {
+            Log.e("parametric", "not equal");
+        }
+
         return bladeRotation;
     }
 
@@ -147,6 +154,8 @@ public class Fan extends Model
         deltaX = (x - initialX);
         deltaY = -(y - initialY); //invert to account for screen coordinates being inverted
 
+        prevX = initialX;
+        prevY = initialY;
         //deltaY < 0 -> moving up, deltaY > 0 -> moving down
         //deltaX < 0 -> moving left, deltaX > 0 -> moving right
 
@@ -188,6 +197,8 @@ public class Fan extends Model
     private float parametricAngle = (float) Math.PI;
     private float initialX;
     private float initialY;
+    private float prevX;
+    private float prevY;
     private Wind wind;
     private boolean clockwise;
 }

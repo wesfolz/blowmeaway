@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import wesley.folz.blowme.R;
 import wesley.folz.blowme.graphics.Background;
 import wesley.folz.blowme.graphics.effects.DustCloud;
+import wesley.folz.blowme.graphics.effects.Explosion;
 import wesley.folz.blowme.graphics.effects.ParticleSystem;
 import wesley.folz.blowme.graphics.models.DestructiveObstacle;
 import wesley.folz.blowme.graphics.models.Dispenser;
@@ -31,6 +32,7 @@ public abstract class ModeConfig
         models = new ArrayList<>();
         obstacles = new ArrayList<>();
         fallingObjects = new ArrayList<>();
+        explosions = new ArrayList<>();
         vortexes = new ArrayList<>();
         hazards = new ArrayList<>();
 
@@ -62,6 +64,10 @@ public abstract class ModeConfig
         DestructiveObstacle destObj = new DestructiveObstacle();
         models.add(destObj);
         hazards.add(destObj);
+
+        Explosion explosion = new Explosion();
+        models.add(explosion);
+        explosions.add(explosion);
     }
 
     public void enableModelGraphics()
@@ -147,11 +153,12 @@ public abstract class ModeConfig
 
         for (DestructiveObstacle h : hazards)
         {
-            //h.updatePosition(0, 0);
-            //h.draw();
+            h.updatePosition(0, 0);
+            h.draw();
         }
 
         boolean objectEffected;
+        int explosionIndex = 0;
         for (FallingObject falObj : fallingObjects)
         {
             float xForce = 0;
@@ -159,12 +166,26 @@ public abstract class ModeConfig
 
             objectEffected = false;
 
+            Explosion objectExplosion = explosions.get(explosionIndex);
+
             for(DestructiveObstacle h: hazards)
             {
                 if (Physics.isCollision(h.getBounds(), falObj.getBounds()))
                 {
-                    //falObj.getExplosion().reinitialize(falObj.getxPos(), falObj.getyPos());
-                    Log.e("explode", "explosion");
+                    objectExplosion.reinitialize(falObj.getxPos(), falObj.getyPos());
+                    falObj.setOffscreen(true);
+                    //rotate through all explosions
+                    //this is done to avoid creating new explosion objects during gameplay
+                    //since generating the particles is costly
+                    if (explosionIndex < explosions.size() - 1)
+                    {
+                        explosionIndex++;
+                    }
+                    else
+                    {
+                        explosionIndex = 0;
+                    }
+
                     break;
                 }
             }
@@ -221,12 +242,14 @@ public abstract class ModeConfig
                 falObj.updatePosition(xForce, yForce);
             }
 
-            falObj.draw();
-            if(falObj.getExplosion().isExploding())
+            if (objectExplosion.isExploding())
             {
-                falObj.getExplosion().updatePosition(0, 0);
-                falObj.getExplosion().draw();
+                objectExplosion.updatePosition(0, 0);
+                objectExplosion.draw();
             }
+
+            falObj.draw();
+
         }
 
         particleSystem.updatePosition(0, 0);
@@ -268,6 +291,7 @@ public abstract class ModeConfig
     private ArrayList<RicochetObstacle> obstacles;
     private ArrayList<DestructiveObstacle> hazards;
     private ArrayList<FallingObject> fallingObjects;
+    private ArrayList<Explosion> explosions;
     private ArrayList<Vortex> vortexes;
 
     private Fan fan;

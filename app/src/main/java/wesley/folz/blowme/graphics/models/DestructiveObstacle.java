@@ -14,8 +14,8 @@ public class DestructiveObstacle extends Model
     public DestructiveObstacle()
     {
         super();
-        xPos = 0.2f;//+.01f;
-        yPos = -1.5f;//GamePlayActivity.Y_EDGE_POSITION;
+        xPos = 0.3f;//+.01f;
+        yPos = -1.0f;//GamePlayActivity.Y_EDGE_POSITION;
 
         previousTime = System.nanoTime();
 
@@ -25,6 +25,8 @@ public class DestructiveObstacle extends Model
 
         initialXPos = xPos;
         initialYPos = yPos;
+
+        getBounds().setBounds(xPos - scaleFactor, yPos - scaleFactor, xPos + scaleFactor, yPos + scaleFactor);
 
     }
 
@@ -58,10 +60,12 @@ public class DestructiveObstacle extends Model
     @Override
     public void updatePosition(float x, float y)
     {
-        float deltaTime = (System.nanoTime() - previousTime) / 1000000000.0f;
-        previousTime = System.nanoTime();
+        long time = System.nanoTime();
+        float deltaTime = (time - previousTime) / 1000000000.0f;
+        previousTime = time;
 
-        deltaY = deltaTime * risingSpeed;
+        //deltaY = deltaTime * risingSpeed;
+        deltaY = 0.002f;
         yPos += deltaY;
 
         getBounds().setBounds(xPos - scaleFactor, yPos - scaleFactor, xPos + scaleFactor, yPos + scaleFactor);

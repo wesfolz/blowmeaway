@@ -80,6 +80,8 @@ public class GamePlayActivity extends Activity
             // renderer if you wanted to support both ES 1 and ES 2.
             return;
         }
+        //TODO: Possibly have fan constantly move in an a ellipse, user taps to change direction?
+        //or user taps and holds and fan moves towards their finger?
         surfaceView.setOnTouchListener( new View.OnTouchListener()
         {
             @Override

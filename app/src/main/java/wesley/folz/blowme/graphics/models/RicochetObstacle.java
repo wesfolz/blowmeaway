@@ -18,6 +18,7 @@ public class RicochetObstacle extends Model
         xPos = 0;//+.01f;
         yPos = -1.5f;//GamePlayActivity.Y_EDGE_POSITION;
 
+
         previousTime = System.nanoTime();
 
         setBounds(new Bounds());
@@ -79,11 +80,12 @@ public class RicochetObstacle extends Model
     @Override
     public void updatePosition(float x, float y)
     {
-        float time = (System.nanoTime() - previousTime) / 1000000000.0f;
-        previousTime = System.nanoTime();
+        long time = System.nanoTime();
+        float deltaTime = (time - previousTime) / 1000000000.0f;
+        previousTime = time;
 
-        deltaY = time * risingSpeed;
-        //deltaY = 0.002f;
+        //deltaY = deltaTime * risingSpeed;
+        deltaY = 0.002f;
         yPos += deltaY;
         Log.e("obstacle", "update delta " + deltaY);
 
@@ -94,7 +96,7 @@ public class RicochetObstacle extends Model
 
     private float deltaX;
 
-    private float previousTime;
+    private long previousTime;
 
     private float risingSpeed = 0.1f;
 

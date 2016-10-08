@@ -22,7 +22,7 @@ public class Explosion extends ParticleSystem
         GraphicsUtilities.readShader(this);
 
         initialXPos = xPos;
-        initialYPos = -yPos;
+        initialYPos = yPos;
 
         generateParticles();
     }
@@ -31,16 +31,33 @@ public class Explosion extends ParticleSystem
     public void reinitialize(float x, float y)
     {
         this.time = 0;
-        xPos = x;
-        yPos = -y;
+        //don't know why we have to multiply by 2
+        xPos = 2.0f * x;
+        yPos = 2.0f * y;
         exploding = true;
+    }
+
+    @Override
+    public void initializeMatrices(float[] viewMatrix, float[] projectionMatrix, float[] lightPosInEyeSpace)
+    {
+        this.setViewMatrix(viewMatrix);
+        this.setProjectionMatrix(projectionMatrix);
+        this.setLightPosInEyeSpace(lightPosInEyeSpace);
+
+        //only call if resuming from pause state
+        if (!resuming)
+        {
+            //initialize model matrix
+            Matrix.setIdentityM(modelMatrix, 0);
+            //translate model to initial position
+        }
     }
 
 
     @Override
     protected void generateParticles()
     {
-        int numParticles = 10000;
+        int numParticles = 1000;
         vertexOrder = new short[numParticles];
         int numAttributes = 8;
 
@@ -88,10 +105,23 @@ public class Explosion extends ParticleSystem
         return mvp;
     }
 
+
+    @Override
+    public void updatePosition(float x, float y)
+    {
+        //time = (System.nanoTime() - initialTime) / 1000000000.0f;
+        //time = (System.nanoTime()) / 1000000000.0f;
+
+        //time = 0;
+        time += 0.01f;
+
+        exploding = time < 1.0f;
+    }
     public boolean isExploding()
     {
         return exploding;
     }
 
     private boolean exploding = false;
+
 }
