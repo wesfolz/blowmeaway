@@ -12,7 +12,7 @@ import wesley.folz.blowme.R;
 import wesley.folz.blowme.graphics.models.Model;
 import wesley.folz.blowme.ui.GamePlayRenderer;
 import wesley.folz.blowme.ui.MainApplication;
-import wesley.folz.blowme.util.GraphicsReader;
+import wesley.folz.blowme.util.GraphicsUtilities;
 
 /**
  * Created by Wesley on 9/25/2016.
@@ -29,10 +29,9 @@ public abstract class ParticleSystem extends Model
         initialTime = System.nanoTime() / 1000000000.0f;
     }
 
-    //TODO: Add reinitialize method so that new particle systems can be created efficiently?
-
     protected abstract void generateParticles();
 
+    @Override
     public void draw()
     {
         // Add program to OpenGL ES environment
@@ -110,10 +109,10 @@ public abstract class ParticleSystem extends Model
         int timeHandle = GLES20.glGetUniformLocation(programHandle, "deltaT");
         GLES20.glUniform1f(timeHandle, time);
 
-        int positionHandle = GLES20.glGetUniformLocation(programHandle, "deltaT");
+        int positionHandle = GLES20.glGetUniformLocation(programHandle, "position");
         GLES20.glUniform4f(positionHandle, xPos, yPos, 0, 1);
 
-        int normalHandle = GLES20.glGetUniformLocation(programHandle, "deltaT");
+        int normalHandle = GLES20.glGetUniformLocation(programHandle, "normalVector");
         GLES20.glUniform3f(normalHandle, 0, 0, 1);
 
         GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, orderVBO);
@@ -136,7 +135,8 @@ public abstract class ParticleSystem extends Model
         GLES20.glDisable(GLES20.GL_TEXTURE_2D);
     }
 
-    public void enableGraphics()
+    @Override
+    public void enableGraphics(GraphicsUtilities graphicsData)
     {
         dataBuffer = ByteBuffer.allocateDirect(interleavedData.length * 4)
                 .order(ByteOrder.nativeOrder()).asFloatBuffer();
@@ -173,8 +173,8 @@ public abstract class ParticleSystem extends Model
                 GLES20.GL_STATIC_DRAW);
 
         //texture data
-        textureDataHandle = GraphicsReader.loadTexture(MainApplication.getAppContext(), this.TEXTURE_RESOURCE);
-        secondTexture = GraphicsReader.loadTexture(MainApplication.getAppContext(), R.raw.grey_circle);
+        textureDataHandle = GraphicsUtilities.loadTexture(MainApplication.getAppContext(), this.TEXTURE_RESOURCE);
+        secondTexture = GraphicsUtilities.loadTexture(MainApplication.getAppContext(), R.raw.grey_circle);
 
         // IMPORTANT: Unbind from the buffer when we're done with it.
         GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);

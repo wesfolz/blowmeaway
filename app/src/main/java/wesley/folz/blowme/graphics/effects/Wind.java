@@ -6,7 +6,7 @@ import wesley.folz.blowme.R;
 import wesley.folz.blowme.graphics.models.Model;
 import wesley.folz.blowme.ui.GamePlayActivity;
 import wesley.folz.blowme.util.Bounds;
-import wesley.folz.blowme.util.GraphicsReader;
+import wesley.folz.blowme.util.GraphicsUtilities;
 
 /**
  * Created by wesley on 7/3/2015.
@@ -34,10 +34,10 @@ public class Wind extends Model
 
 
         //this.OBJ_FILE_RESOURCE = R.raw.cube;
-        this.VERTEX_SHADER = R.raw.fan_vertex_shader;
-        this.FRAGMENT_SHADER = R.raw.fan_fragment_shader;
-        //GraphicsReader.readOBJFile(this);
-        GraphicsReader.readShader(this);
+        this.VERTEX_SHADER = R.raw.lighting_vertex_shader;
+        this.FRAGMENT_SHADER = R.raw.lighting_fragment_shader;
+        //GraphicsUtilities.readOBJFile(this);
+        GraphicsUtilities.readShader(this);
 
         setSize( new float[]{2.0f, 0.5f} );
         setBounds( new Bounds( - 1.0f, - 0.25f, 1.0f, 0.25f ) );

@@ -2,9 +2,8 @@ package wesley.folz.blowme.graphics;
 
 import android.opengl.Matrix;
 
-import wesley.folz.blowme.R;
 import wesley.folz.blowme.graphics.models.Model;
-import wesley.folz.blowme.util.GraphicsReader;
+import wesley.folz.blowme.util.GraphicsUtilities;
 
 /**
  * Created by Wesley on 9/10/2016.
@@ -15,11 +14,6 @@ public class Background extends Model
     public Background()
     {
         super();
-        this.VERTEX_SHADER = R.raw.texture_vertex_shader;
-        this.FRAGMENT_SHADER = R.raw.texture_fragment_shader;
-        this.TEXTURE_RESOURCE = R.raw.sky_texture;
-        GraphicsReader.readShader(this);
-
         interleavedData = new float[]{
                 -1.0f, 1.0f, -1.0f,    // top left
                 0.0f, 0.0f, 1.0f,      //normal
@@ -40,6 +34,14 @@ public class Background extends Model
         };
 
         vertexOrder = new short[]{0, 1, 2, 2, 3, 0};
+    }
+
+    @Override
+    public void enableGraphics(GraphicsUtilities graphicsData)
+    {
+        super.enableGraphics(graphicsData);
+        programHandle = graphicsData.shaderProgramIdMap.get("texture");
+        textureDataHandle = graphicsData.textureIdMap.get("sky");
     }
 
 

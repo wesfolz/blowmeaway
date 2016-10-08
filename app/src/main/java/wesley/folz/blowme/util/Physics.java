@@ -36,15 +36,15 @@ public abstract class Physics
 
     public static boolean isTopBorderCollision(Bounds object)
     {
-        return (object.getyTop() <= Border.YTOP);
+        return (object.getyTop() >= Border.YTOP);
     }
 
     public static COLLISION calculateCollision(Bounds b1, Bounds b2)
     {
         float leftRight = b2.getxRight() - b1.getxLeft();
         float rightLeft = b1.getxRight() - b2.getxLeft();
-        float topBottom = b2.getyBottom() - b1.getyTop();
-        float bottomTop = b1.getyBottom() - b2.getyTop();
+        float topBottom = b1.getyTop() - b2.getyBottom();
+        float bottomTop = b2.getyTop() - b1.getyBottom();
 
         if (Physics.isCollision(b1, b2))
         {
@@ -83,7 +83,7 @@ public abstract class Physics
 
         sum[0] = xForce;
 
-        sum[1] = yForce + GRAVITY - KINETIC_FRICTION;
+        sum[1] = yForce + KINETIC_FRICTION - GRAVITY;
 
         return sum;
     }
@@ -100,5 +100,5 @@ public abstract class Physics
 
     public static final float GRAVITY = 9.8f;
 
-    public static final float KINETIC_FRICTION = 9.75f;
+    public static final float KINETIC_FRICTION = 9.7f;
 }

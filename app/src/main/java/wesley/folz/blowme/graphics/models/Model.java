@@ -9,10 +9,8 @@ import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 
 import wesley.folz.blowme.R;
-import wesley.folz.blowme.ui.GamePlayRenderer;
-import wesley.folz.blowme.ui.MainApplication;
 import wesley.folz.blowme.util.Bounds;
-import wesley.folz.blowme.util.GraphicsReader;
+import wesley.folz.blowme.util.GraphicsUtilities;
 
 /**
  * Created by wesley on 5/11/2015.
@@ -21,11 +19,11 @@ public abstract class Model
 {
     public Model()
     {
-        //GraphicsReader.readOBJFile( this );
+        //GraphicsUtilities.readOBJFile( this );
         this.VERTEX_SHADER = R.raw.defaultvertexshader;
         this.FRAGMENT_SHADER = R.raw.defaultfragmentshader;
         this.TEXTURE_RESOURCE = R.raw.wood_texture;
-        GraphicsReader.readShader(this);
+        GraphicsUtilities.readShader(this);
     }
 
     public void draw()
@@ -108,14 +106,14 @@ public abstract class Model
         GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, orderVBO);
 
         // Draw the triangle
-        GLES20.glDrawElements(GLES20.GL_TRIANGLES, vertexOrder.length, GLES20.GL_UNSIGNED_SHORT, 0);
+        GLES20.glDrawElements(GLES20.GL_TRIANGLES, numVertices, GLES20.GL_UNSIGNED_SHORT, 0);
 
         //unbind buffers
         GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
         GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
     }
 
-    public void enableGraphics()
+    public void enableGraphics(GraphicsUtilities graphicsData)
     {
         dataBuffer = ByteBuffer.allocateDirect(interleavedData.length * 4)
                 .order(ByteOrder.nativeOrder()).asFloatBuffer();
@@ -130,14 +128,6 @@ public abstract class Model
         drawListBuffer.put(vertexOrder);
         drawListBuffer.position(0);
 
-        vertexShader = GamePlayRenderer.loadShader(GLES20.GL_VERTEX_SHADER, vertexShaderCode);
-        fragmentShader = GamePlayRenderer.loadShader(GLES20.GL_FRAGMENT_SHADER,
-                fragmentShaderCode);
-
-        // create empty OpenGL ES Program
-        programHandle = GamePlayRenderer.createAndLinkProgram(vertexShader, fragmentShader,
-                new String[]{"position", "color", "normalVector"});
-
         int[] buffers = new int[2];
         GLES20.glGenBuffers(2, buffers, 0);
 
@@ -151,8 +141,6 @@ public abstract class Model
         GLES20.glBufferData(GLES20.GL_ELEMENT_ARRAY_BUFFER, drawListBuffer.capacity() * 2, drawListBuffer,
                 GLES20.GL_STATIC_DRAW);
 
-        //texture data
-        textureDataHandle = GraphicsReader.loadTexture(MainApplication.getAppContext(), this.TEXTURE_RESOURCE);
 
         // IMPORTANT: Unbind from the buffer when we're done with it.
         GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
@@ -161,6 +149,8 @@ public abstract class Model
         //get references to gl buffers
         dataVBO = buffers[0];
         orderVBO = buffers[1];
+
+        numVertices = vertexOrder.length;
     }
 
     public void initializeMatrices(float[] viewMatrix, float[] projectionMatrix, float[] lightPosInEyeSpace)
@@ -317,6 +307,8 @@ public abstract class Model
     protected short[] vertexOrder;
 
     protected ShortBuffer drawListBuffer;
+
+    protected int numVertices;
 
     private Bounds bounds;
 

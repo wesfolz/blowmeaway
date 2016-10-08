@@ -3,9 +3,8 @@ package wesley.folz.blowme.graphics.models;
 import android.opengl.Matrix;
 import android.os.SystemClock;
 
-import wesley.folz.blowme.R;
 import wesley.folz.blowme.util.Bounds;
-import wesley.folz.blowme.util.GraphicsReader;
+import wesley.folz.blowme.util.GraphicsUtilities;
 
 /**
  * Created by Wesley on 9/11/2016.
@@ -17,21 +16,23 @@ public class Vortex extends Model
         super();
         setBounds(new Bounds());
 
-        this.OBJ_FILE_RESOURCE = R.raw.vortex_open_top;
-        this.VERTEX_SHADER = R.raw.fan_vertex_shader;
-        this.FRAGMENT_SHADER = R.raw.fan_fragment_shader;
-        this.TEXTURE_RESOURCE = R.raw.tornado_texture;
-        GraphicsReader.readOBJFile(this);
-        GraphicsReader.readShader(this);
         xPos = 0;//+.01f;
-        yPos = 1.0f;//0.935f;//GamePlayActivity.Y_EDGE_POSITION;
+        yPos = -1.0f;//0.935f;//GamePlayActivity.Y_EDGE_POSITION;
 
         scaleFactor = 0.04f;
 
-
         initialXPos = xPos;
-        initialYPos = -yPos;
-        yPos -= 0.07f;
+        initialYPos = yPos;
+        yPos = -0.65f;
+    }
+
+    @Override
+    public void enableGraphics(GraphicsUtilities graphicsData)
+    {
+        dataVBO = graphicsData.modelVBOMap.get("vortex");
+        orderVBO = graphicsData.orderVBOMap.get("vortex");
+        numVertices = graphicsData.numVerticesMap.get("vortex");
+        programHandle = graphicsData.shaderProgramIdMap.get("lighting");
     }
 
     //TODO: Apply rotation transformation about the z-axis to vertices only above a certain y-value to "bend vortex towards falling object"
@@ -52,7 +53,6 @@ public class Vortex extends Model
         Matrix.multiplyMM(mvp, 0, modelMatrix, 0, mvp, 0);
         Matrix.scaleM(mvp, 0, 1.0f, scaleCount, 1.0f);
         Matrix.translateM(mvp, 0, 0.0f, scaleCount / 500f, 0.0f);
-
 
         Matrix.rotateM(mvp, 0, angle, 0, -1, 0);
 

@@ -74,9 +74,9 @@ public class Bounds
     private void determineBounds()
     {
         xLeft = matrix[0];
-        yTop = matrix[1];
+        yBottom = matrix[1];
         xRight = matrix[4];
-        yBottom = matrix[5];
+        yTop = matrix[5];
     }
 
     public void setBounds( float xMin, float yMin, float xMax, float yMax )

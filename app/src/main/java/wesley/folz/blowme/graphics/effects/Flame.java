@@ -3,7 +3,7 @@ package wesley.folz.blowme.graphics.effects;
 import java.util.Random;
 
 import wesley.folz.blowme.R;
-import wesley.folz.blowme.util.GraphicsReader;
+import wesley.folz.blowme.util.GraphicsUtilities;
 
 /**
  * Created by Wesley on 10/1/2016.
@@ -17,7 +17,7 @@ public class Flame extends ParticleSystem
         this.VERTEX_SHADER = R.raw.flame_vertex_shader;
         this.FRAGMENT_SHADER = R.raw.flame_fragment_shader;
         this.TEXTURE_RESOURCE = R.raw.yellow_circle;
-        GraphicsReader.readShader(this);
+        GraphicsUtilities.readShader(this);
         xPos = x;
         yPos = y;//GamePlayActivity.Y_EDGE_POSITION;
 

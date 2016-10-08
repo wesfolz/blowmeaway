@@ -1,10 +1,10 @@
 package wesley.folz.blowme.graphics.models;
 
 import android.opengl.Matrix;
+import android.util.Log;
 
-import wesley.folz.blowme.R;
 import wesley.folz.blowme.util.Bounds;
-import wesley.folz.blowme.util.GraphicsReader;
+import wesley.folz.blowme.util.GraphicsUtilities;
 
 /**
  * Created by Wesley on 9/24/2016.
@@ -12,17 +12,11 @@ import wesley.folz.blowme.util.GraphicsReader;
 
 public class RicochetObstacle extends Model
 {
-
     public RicochetObstacle()
     {
         super();
-        this.OBJ_FILE_RESOURCE = R.raw.cube;
-        this.VERTEX_SHADER = R.raw.fan_vertex_shader;
-        this.FRAGMENT_SHADER = R.raw.fan_fragment_shader;
-        GraphicsReader.readOBJFile(this);
-        GraphicsReader.readShader(this);
         xPos = 0;//+.01f;
-        yPos = 1.5f;//GamePlayActivity.Y_EDGE_POSITION;
+        yPos = -1.5f;//GamePlayActivity.Y_EDGE_POSITION;
 
         previousTime = System.nanoTime();
 
@@ -31,7 +25,17 @@ public class RicochetObstacle extends Model
         scaleFactor = 0.1f;
 
         initialXPos = xPos;
-        initialYPos = -yPos;
+        initialYPos = yPos;
+    }
+
+    @Override
+    public void enableGraphics(GraphicsUtilities graphicsData)
+    {
+        //get dataVBO, orderVBO, program, texture handles
+        dataVBO = graphicsData.modelVBOMap.get("cube");
+        orderVBO = graphicsData.orderVBOMap.get("cube");
+        numVertices = graphicsData.numVerticesMap.get("cube");
+        programHandle = graphicsData.shaderProgramIdMap.get("lighting");
     }
 
     @Override
@@ -47,6 +51,8 @@ public class RicochetObstacle extends Model
     {
         float[] mvp = new float[16];
         Matrix.setIdentityM(mvp, 0);
+
+        Log.e("obstacle", "transform delta " + deltaY);
 
         //translate model matrix to new position
         Matrix.translateM(modelMatrix, 0, 0, deltaY, 0);
@@ -73,11 +79,13 @@ public class RicochetObstacle extends Model
     @Override
     public void updatePosition(float x, float y)
     {
-        float deltaTime = (System.nanoTime() - previousTime) / 1000000000.0f;
+        float time = (System.nanoTime() - previousTime) / 1000000000.0f;
         previousTime = System.nanoTime();
 
-        deltaY = deltaTime * risingSpeed;
-        yPos -= deltaY;
+        deltaY = time * risingSpeed;
+        //deltaY = 0.002f;
+        yPos += deltaY;
+        Log.e("obstacle", "update delta " + deltaY);
 
         getBounds().setBounds(xPos - scaleFactor, yPos - scaleFactor, xPos + scaleFactor, yPos + scaleFactor);
     }

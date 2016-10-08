@@ -86,6 +86,7 @@ public class GamePlayActivity extends Activity
             public boolean onTouch( View v, MotionEvent event )
             {
                 final int action = MotionEventCompat.getActionMasked( event );
+                //multiply by 2 because OpenGL coordinates go [-1,1] whereas screeen coordinates only go [0,1]
                 float x = 2 * event.getX() / WIDTH;
                 float y = 2 * event.getY() / HEIGHT;
 

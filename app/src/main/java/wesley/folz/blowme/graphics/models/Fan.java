@@ -3,11 +3,10 @@ package wesley.folz.blowme.graphics.models;
 import android.opengl.Matrix;
 import android.os.SystemClock;
 
-import wesley.folz.blowme.R;
 import wesley.folz.blowme.graphics.effects.Wind;
 import wesley.folz.blowme.ui.GamePlayActivity;
 import wesley.folz.blowme.util.Bounds;
-import wesley.folz.blowme.util.GraphicsReader;
+import wesley.folz.blowme.util.GraphicsUtilities;
 
 /**
  * Created by wesley on 5/11/2015.
@@ -17,11 +16,6 @@ public class Fan extends Model
     public Fan()
     {
         super();
-        this.OBJ_FILE_RESOURCE = R.raw.fan;
-        this.VERTEX_SHADER = R.raw.texture_vertex_shader;
-        this.FRAGMENT_SHADER = R.raw.texture_fragment_shader;
-        GraphicsReader.readOBJFile(this);
-        GraphicsReader.readShader(this);
         xPos = -GamePlayActivity.X_EDGE_POSITION;//+.01f;
         yPos = 0;
         setWind(new Wind());
@@ -35,6 +29,16 @@ public class Fan extends Model
         initialYPos = yPos;
     }
 
+    @Override
+    public void enableGraphics(GraphicsUtilities graphicsData)
+    {
+        dataVBO = graphicsData.modelVBOMap.get("fan");
+        orderVBO = graphicsData.orderVBOMap.get("fan");
+        numVertices = graphicsData.numVerticesMap.get("fan");
+        programHandle = graphicsData.shaderProgramIdMap.get("texture");
+        textureDataHandle = graphicsData.textureIdMap.get("wood");
+    }
+
     private float[] calculateInwardParametricRotation()
     {
         //if parametricAngle = Pi -> inwardRotation = 0
@@ -42,7 +46,7 @@ public class Fan extends Model
         //if parametricAngle = 0 -> inwardRotation = Pi
         //if parametricAngle = 3Pi/4 -> inwardRotation = -Pi/2
 
-        float inwardRotation = 180 * ((float) Math.PI - parametricAngle) / (float) Math.PI;
+        float inwardRotation = 180 * (parametricAngle - (float) Math.PI) / (float) Math.PI;
 
         float[] rotationMatrix = new float[16];
         Matrix.setRotateM(rotationMatrix, 0, inwardRotation, 0, 0, 1);
@@ -64,7 +68,7 @@ public class Fan extends Model
         }
         //don't use deltaX, otherwise it can be updated between the moveParametric
         //call and the translateM call
-        Matrix.translateM(modelMatrix, 0, parametricX, -parametricY, 0);
+        Matrix.translateM(modelMatrix, 0, parametricX, parametricY, 0);
 
         //Matrix.scaleM( translationMatrix, 0, 0.05f, 0.05f, 0.05f );
         //Log.e( "blowme", "DeltaX " + deltaX + "DeltaY " + deltaY );
@@ -107,11 +111,11 @@ public class Fan extends Model
 
         if (clockwise)
         {
-            parametricAngle += arcLength / slowdown;
+            parametricAngle -= arcLength / slowdown;
         }
         else
         {
-            parametricAngle -= arcLength / slowdown;
+            parametricAngle += arcLength / slowdown;
         }
 
         newX = a * (float) Math.cos(parametricAngle);
@@ -141,7 +145,7 @@ public class Fan extends Model
     public void updatePosition(float x, float y)
     {
         deltaX = (x - initialX);
-        deltaY = (y - initialY);
+        deltaY = -(y - initialY); //invert to account for screen coordinates being inverted
 
         //deltaY < 0 -> moving up, deltaY > 0 -> moving down
         //deltaX < 0 -> moving left, deltaX > 0 -> moving right

@@ -5,7 +5,7 @@ import android.opengl.Matrix;
 import java.util.Random;
 
 import wesley.folz.blowme.R;
-import wesley.folz.blowme.util.GraphicsReader;
+import wesley.folz.blowme.util.GraphicsUtilities;
 
 /**
  * Created by Wesley on 9/30/2016.
@@ -13,21 +13,29 @@ import wesley.folz.blowme.util.GraphicsReader;
 
 public class Explosion extends ParticleSystem
 {
-    public Explosion(float x, float y)
+    public Explosion()
     {
         super();
         this.VERTEX_SHADER = R.raw.particle_vertex_shader;
         this.FRAGMENT_SHADER = R.raw.particle_fragment_shader;
         this.TEXTURE_RESOURCE = R.raw.yellow_circle;
-        GraphicsReader.readShader(this);
-        xPos = x;
-        yPos = y;//GamePlayActivity.Y_EDGE_POSITION;
+        GraphicsUtilities.readShader(this);
 
         initialXPos = xPos;
         initialYPos = -yPos;
 
         generateParticles();
     }
+
+    //TODO: Add reinitialize method so that new particle systems can be created efficiently?
+    public void reinitialize(float x, float y)
+    {
+        this.time = 0;
+        xPos = x;
+        yPos = -y;
+        exploding = true;
+    }
+
 
     @Override
     protected void generateParticles()
@@ -80,4 +88,10 @@ public class Explosion extends ParticleSystem
         return mvp;
     }
 
+    public boolean isExploding()
+    {
+        return exploding;
+    }
+
+    private boolean exploding = false;
 }

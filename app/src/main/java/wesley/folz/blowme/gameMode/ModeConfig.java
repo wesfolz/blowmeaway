@@ -5,15 +5,18 @@ import android.util.Log;
 
 import java.util.ArrayList;
 
+import wesley.folz.blowme.R;
 import wesley.folz.blowme.graphics.Background;
 import wesley.folz.blowme.graphics.effects.DustCloud;
 import wesley.folz.blowme.graphics.effects.ParticleSystem;
+import wesley.folz.blowme.graphics.models.DestructiveObstacle;
 import wesley.folz.blowme.graphics.models.Dispenser;
 import wesley.folz.blowme.graphics.models.FallingObject;
 import wesley.folz.blowme.graphics.models.Fan;
 import wesley.folz.blowme.graphics.models.Model;
 import wesley.folz.blowme.graphics.models.RicochetObstacle;
 import wesley.folz.blowme.graphics.models.Vortex;
+import wesley.folz.blowme.util.GraphicsUtilities;
 import wesley.folz.blowme.util.Physics;
 
 /**
@@ -25,11 +28,11 @@ public abstract class ModeConfig
     public ModeConfig()
     {
         //read config file to determine game play parameters
-
         models = new ArrayList<>();
         obstacles = new ArrayList<>();
         fallingObjects = new ArrayList<>();
         vortexes = new ArrayList<>();
+        hazards = new ArrayList<>();
 
         fan = new Fan();
         models.add(fan);
@@ -37,6 +40,7 @@ public abstract class ModeConfig
         FallingObject fo = new FallingObject();
         models.add(fo);
         fallingObjects.add(fo);
+
         RicochetObstacle ro = new RicochetObstacle();
         models.add(ro);
         obstacles.add(ro);
@@ -54,15 +58,40 @@ public abstract class ModeConfig
         //TODO: Determine best method for creating, storing and displaying Effects
         particleSystem = new DustCloud(0, 1f);
         models.add(particleSystem);
+
+        DestructiveObstacle destObj = new DestructiveObstacle();
+        models.add(destObj);
+        hazards.add(destObj);
     }
 
     public void enableModelGraphics()
     {
+        graphicsData = new GraphicsUtilities();
+
+        //initialize data
+        graphicsData.storeModelData("fan", R.raw.fan);
+        graphicsData.storeModelData("vortex", R.raw.vortex_open_top);
+        graphicsData.storeModelData("cube", R.raw.cube);
+        graphicsData.storeModelData("dispenser", R.raw.triangle_collector);
+
+        graphicsData.storeTexture("wood", R.raw.wood_texture);
+        graphicsData.storeTexture("yellow_circle", R.raw.yellow_circle);
+        graphicsData.storeTexture("sky", R.raw.sky_texture);
+        graphicsData.storeTexture("grey_circle", R.raw.grey_circle);
+
+        String[] particleAttributes = new String[]{"position", "direction", "normalVector", "speed", "color"};
+        String[] modelAttributes = new String[]{"position", "color", "normalVector"};
+
+        graphicsData.storeShader("dust_cloud", R.raw.dust_cloud_vertex_shader, R.raw.dust_cloud_fragment_shader, particleAttributes);
+        graphicsData.storeShader("explosion", R.raw.particle_vertex_shader, R.raw.particle_fragment_shader, particleAttributes);
+        graphicsData.storeShader("texture", R.raw.texture_vertex_shader, R.raw.texture_fragment_shader, modelAttributes);
+        graphicsData.storeShader("lighting", R.raw.lighting_vertex_shader, R.raw.lighting_fragment_shader, modelAttributes);
+
         for (Model m : models)
         {
-            m.enableGraphics();
+            m.enableGraphics(graphicsData);
         }
-        fan.getWind().enableGraphics();
+        fan.getWind().enableGraphics(graphicsData);
     }
 
     public void surfaceGraphicsChanged(int width, int height)
@@ -96,13 +125,10 @@ public abstract class ModeConfig
         fan.getWind().initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
     }
 
-
     public void updatePositionsAndDrawModels()
     {
         background.draw();
-
         fan.draw();
-
 
         dispenser.updatePosition(0, 0);
         dispenser.draw();
@@ -119,6 +145,12 @@ public abstract class ModeConfig
             o.draw();
         }
 
+        for (DestructiveObstacle h : hazards)
+        {
+            //h.updatePosition(0, 0);
+            //h.draw();
+        }
+
         boolean objectEffected;
         for (FallingObject falObj : fallingObjects)
         {
@@ -126,12 +158,23 @@ public abstract class ModeConfig
             float yForce = 0;
 
             objectEffected = false;
+
+            for(DestructiveObstacle h: hazards)
+            {
+                if (Physics.isCollision(h.getBounds(), falObj.getBounds()))
+                {
+                    //falObj.getExplosion().reinitialize(falObj.getxPos(), falObj.getyPos());
+                    Log.e("explode", "explosion");
+                    break;
+                }
+            }
+
             if (falObj.isOffscreen())
             {
                 models.remove(falObj);
                 fallingObjects.remove(falObj);
                 falObj = new FallingObject(dispenser.getxPos());
-                falObj.enableGraphics();
+                falObj.enableGraphics(graphicsData);
                 falObj.initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
                 models.add(falObj);
                 fallingObjects.add(falObj);
@@ -150,12 +193,12 @@ public abstract class ModeConfig
                 }
             }
             //falling object is being dispensed
-            if (falObj.getyPos() < -0.95f && !objectEffected)
+            if (falObj.getyPos() > 0.95f && !objectEffected)
             {
                 //falObj.updatePosition(100 * dispenser.getDeltaX(), 0);
-                xForce = 100 * dispenser.getDeltaX();
-                objectEffected = true;
-                //Log.e("mode", "dispense");
+                //xForce = 100 * dispenser.getDeltaX();
+                //objectEffected = true;
+                Log.e("mode", "dispense");
             }
 
             //determine forces due to collisions with obstacles
@@ -179,10 +222,15 @@ public abstract class ModeConfig
             }
 
             falObj.draw();
-
-            particleSystem.updatePosition(0, 0);
-            particleSystem.draw();
+            if(falObj.getExplosion().isExploding())
+            {
+                falObj.getExplosion().updatePosition(0, 0);
+                falObj.getExplosion().draw();
+            }
         }
+
+        particleSystem.updatePosition(0, 0);
+        particleSystem.draw();
     }
 
     public void handleFanMovementDown(float x, float y)
@@ -218,6 +266,7 @@ public abstract class ModeConfig
 
     private ArrayList<Model> models;
     private ArrayList<RicochetObstacle> obstacles;
+    private ArrayList<DestructiveObstacle> hazards;
     private ArrayList<FallingObject> fallingObjects;
     private ArrayList<Vortex> vortexes;
 
@@ -230,4 +279,6 @@ public abstract class ModeConfig
     private float[] lightPosInEyeSpace = new float[16];
 
     private ParticleSystem particleSystem;
+
+    protected GraphicsUtilities graphicsData;
 }

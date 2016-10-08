@@ -6,10 +6,10 @@ import android.util.Log;
 
 import java.util.ArrayList;
 
-import wesley.folz.blowme.R;
 import wesley.folz.blowme.graphics.Border;
+import wesley.folz.blowme.graphics.effects.Explosion;
 import wesley.folz.blowme.util.Bounds;
-import wesley.folz.blowme.util.GraphicsReader;
+import wesley.folz.blowme.util.GraphicsUtilities;
 import wesley.folz.blowme.util.Physics;
 
 /**
@@ -21,18 +21,11 @@ public class FallingObject extends Model
     {
         this(0);
     }
-
     public FallingObject(float dispenserX)
     {
         super();
 
         setBounds(new Bounds());
-
-        this.OBJ_FILE_RESOURCE = R.raw.cube;
-        this.VERTEX_SHADER = R.raw.texture_vertex_shader;
-        this.FRAGMENT_SHADER = R.raw.texture_fragment_shader;
-        GraphicsReader.readShader(this);
-        GraphicsReader.readOBJFile(this);
 
         xPos = (float) (Math.random() - 0.5);
 
@@ -47,19 +40,40 @@ public class FallingObject extends Model
 
         xPos = dispenserX;
 
-        yPos = -1.0f;
+        yPos = 1.0f;
 
         xVelocity = 0;
 
-        yVelocity = 0.5f;//0;//0.1f;
+        yVelocity = -0.3f;//0;//0.1f;
 
         previousTime = System.nanoTime();
 
         scaleFactor = 0.03f;
 
         initialXPos = xPos;
-        initialYPos = -yPos;
+        initialYPos = yPos;
         collected = false;
+
+        explosion = new Explosion();
+    }
+
+    @Override
+    public void enableGraphics(GraphicsUtilities graphicsData)
+    {
+        //get dataVBO, orderVBO, program, texture handles
+        dataVBO = graphicsData.modelVBOMap.get("cube");
+        orderVBO = graphicsData.orderVBOMap.get("cube");
+        numVertices = graphicsData.numVerticesMap.get("cube");
+        programHandle = graphicsData.shaderProgramIdMap.get("texture");
+        textureDataHandle = graphicsData.textureIdMap.get("wood");
+        explosion.enableGraphics(graphicsData);
+    }
+
+    @Override
+    public void initializeMatrices(float[] viewMatrix, float[] projectionMatrix, float[] lightPosInEyeSpace)
+    {
+        super.initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
+        explosion.initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
     }
 
     @Override
@@ -88,7 +102,7 @@ public class FallingObject extends Model
             Matrix.scaleM(modelMatrix, 0, vortexX, vortexY, 1);
             prevRenderTime = time;
         }
-        Matrix.translateM(modelMatrix, 0, deltaX, -deltaY, deltaZ);
+        Matrix.translateM(modelMatrix, 0, deltaX, deltaY, deltaZ);
         Matrix.setRotateM(transformation, 0, angle, 1, 1, 1);
         Matrix.multiplyMM(transformation, 0, modelMatrix, 0, transformation, 0);
 
@@ -112,7 +126,7 @@ public class FallingObject extends Model
         {
             return true;
         }
-        return this.getBounds().getyTop() > Border.YBOTTOM /*|| this.getBounds().getYCorners()
+        return this.getBounds().getyTop() < Border.YBOTTOM /*|| this.getBounds().getYCorners()
                [1] < Border.YTOP */;
     }
 
@@ -241,9 +255,10 @@ public class FallingObject extends Model
         float fallingTime = MASS * time;
 
         float[] force = Physics.sumOfForces(x, y);
-        float elasticityCoefficient = 0.9f;
+        float elasticityCoefficient = 0.8f;
 
         xVelocity += force[0] * fallingTime;
+        yVelocity += force[1] * fallingTime;
 
         //reflection of falling object off of side border
         //if object collides of off right border, xVelocity must be negative
@@ -253,30 +268,26 @@ public class FallingObject extends Model
         }
         //if object collides of off left border, xVelocity must be positive
         else
-        {
             if (this.getBounds().getxLeft() <= Border.XLEFT || collision == Physics.COLLISION.LEFT_RIGHT)
             {
                 xVelocity = elasticityCoefficient * Math.abs(xVelocity);
             }
-
-            //reflection of falling object off of top border, yVelocity must be positive
+            //reflection of falling object off of top border, yVelocity must be negative
             else
             {
                 if (Physics.isTopBorderCollision(this.getBounds()) || collision == Physics.COLLISION.TOP_BOTTOM)
                 {
-                    yVelocity = elasticityCoefficient * Math.abs(yVelocity);
+                    yVelocity = -elasticityCoefficient * Math.abs(yVelocity);
                 }
                 else
                 {
                     if (collision == Physics.COLLISION.BOTTOM_TOP)
                     {
-                        yVelocity = -elasticityCoefficient * Math.abs(yVelocity);
+                        yVelocity = elasticityCoefficient * Math.abs(yVelocity);
                     }
                 }
             }
-        }
 
-        yVelocity += force[1] * fallingTime;
 
         deltaX = fallingTime * xVelocity;
 
@@ -286,10 +297,17 @@ public class FallingObject extends Model
         yPos += deltaY;
 
         getBounds().setBounds(xPos - scaleFactor, yPos - scaleFactor, xPos + scaleFactor, yPos + scaleFactor);
+//        getBounds().setBounds(xPos - scaleFactor, yPos + scaleFactor, xPos + scaleFactor, yPos - scaleFactor );
 
         //Log.e("blowme", "xpos " + xPos + " ypos " + yPos);
         //Log.e("blowme", "ycorners0 " + getBounds().getYCorners()[0] + " ycorners1 " + getBounds().getYCorners()[1]);
     }
+
+    public Explosion getExplosion()
+    {
+        return explosion;
+    }
+
 
     public boolean isCollected()
     {
@@ -348,4 +366,5 @@ public class FallingObject extends Model
 
     private int spiralCount = 0;
 
+    private Explosion explosion;
 }

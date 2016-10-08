@@ -2,9 +2,8 @@ package wesley.folz.blowme.graphics.models;
 
 import android.opengl.Matrix;
 
-import wesley.folz.blowme.R;
 import wesley.folz.blowme.ui.GamePlayActivity;
-import wesley.folz.blowme.util.GraphicsReader;
+import wesley.folz.blowme.util.GraphicsUtilities;
 
 /**
  * Created by wesley on 7/25/2015.
@@ -14,20 +13,24 @@ public class Dispenser extends Model
     public Dispenser()
     {
         super();
-        this.OBJ_FILE_RESOURCE = R.raw.triangle_collector;
-        this.VERTEX_SHADER = R.raw.fan_vertex_shader;
-        this.FRAGMENT_SHADER = R.raw.fan_fragment_shader;
-        GraphicsReader.readOBJFile(this);
-        GraphicsReader.readShader(this);
         xPos = 0;//+.01f;
-        yPos = -0.935f;//GamePlayActivity.Y_EDGE_POSITION;
+        yPos = 0.935f;//GamePlayActivity.Y_EDGE_POSITION;
         initialRotation = new float[16];
         motionMultiplier = 1;
 
         scaleFactor = 0.2f;
 
         initialXPos = xPos;
-        initialYPos = -yPos;
+        initialYPos = yPos;
+    }
+
+    @Override
+    public void enableGraphics(GraphicsUtilities graphicsData)
+    {
+        dataVBO = graphicsData.modelVBOMap.get("dispenser");
+        orderVBO = graphicsData.orderVBOMap.get("dispenser");
+        numVertices = graphicsData.numVerticesMap.get("dispenser");
+        programHandle = graphicsData.shaderProgramIdMap.get("lighting");
     }
 
     @Override

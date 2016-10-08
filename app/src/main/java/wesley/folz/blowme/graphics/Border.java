@@ -31,9 +31,9 @@ public class Border extends Model
     public static final float XRIGHT = 0.5f;
 
     //top
-    public static final float YTOP = -1.0f;
+    public static final float YTOP = 1.0f;
 
     //bottom
-    public static final float YBOTTOM = 1.0f;
+    public static final float YBOTTOM = -1.0f;
 
 }
