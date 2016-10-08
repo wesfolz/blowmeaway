@@ -144,29 +144,62 @@ public class Fan extends Model
 
     /**
      * Calculates the change in x and y position
-     \     *
      * @param x - new x position
      * @param y - new y position
      */
     @Override
     public void updatePosition(float x, float y)
     {
+        // 0<= x <= 2
+        // 0<= y <= 2
         deltaX = (x - initialX);
         deltaY = -(y - initialY); //invert to account for screen coordinates being inverted
 
         prevX = initialX;
         prevY = initialY;
-        //deltaY < 0 -> moving up, deltaY > 0 -> moving down
+        //deltaY > 0 -> moving up, deltaY < 0 -> moving down
         //deltaX < 0 -> moving left, deltaX > 0 -> moving right
 
+
         //determine if finger is moving clockwise or counter-clockwise
-        clockwise = (((initialX - 1.0f) * (y - 1.0f)) - ((initialY - 1.0f) * (x - 1.0f))) > 0;
+        directions[updateCount % 10] = (((initialX - 1.0f) * (y - 1.0f)) - ((initialY - 1.0f) * (x - 1.0f))) > 0;
+
+        if (Math.abs(deltaY) > Math.abs(deltaX))
+        {
+            if (!(x < 1.1 && x > 0.9))
+            {
+                if (x < 1)
+                {
+                    clockwise = deltaY > 0;
+                }
+                else
+                {
+                    clockwise = deltaY < 0;
+                }
+            }
+        }
+        else
+        {
+            if (!(y < 1.1 && y > 0.9))
+            {
+                if (y < 1)
+                {
+                    clockwise = deltaX > 0;
+                }
+                else
+                {
+                    clockwise = deltaX < 0;
+                }
+            }
+        }
+
 
         //update initial position
         initialX = x;
         initialY = y;
 
         //moveParametric();
+        updateCount++;
     }
 
     public Wind getWind()
@@ -201,4 +234,7 @@ public class Fan extends Model
     private float prevY;
     private Wind wind;
     private boolean clockwise;
+    private int updateCount;
+    private boolean directions[] = new boolean[10];
+
 }

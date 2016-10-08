@@ -2,6 +2,7 @@ package wesley.folz.blowme.graphics.models;
 
 import android.opengl.Matrix;
 
+import wesley.folz.blowme.graphics.Border;
 import wesley.folz.blowme.util.Bounds;
 import wesley.folz.blowme.util.GraphicsUtilities;
 
@@ -11,11 +12,13 @@ import wesley.folz.blowme.util.GraphicsUtilities;
 
 public class DestructiveObstacle extends Model
 {
-    public DestructiveObstacle()
+    public DestructiveObstacle(float x, float y)
     {
         super();
-        xPos = 0.3f;//+.01f;
-        yPos = -1.0f;//GamePlayActivity.Y_EDGE_POSITION;
+        xPos = x;//+.01f;
+        yPos = y;//GamePlayActivity.Y_EDGE_POSITION;
+
+        deltaY = 0;
 
         previousTime = System.nanoTime();
 
@@ -69,6 +72,11 @@ public class DestructiveObstacle extends Model
         yPos += deltaY;
 
         getBounds().setBounds(xPos - scaleFactor, yPos - scaleFactor, xPos + scaleFactor, yPos + scaleFactor);
+    }
+
+    public boolean isOffscreen()
+    {
+        return this.getBounds().getyBottom() > Border.YTOP;
     }
 
     private float deltaY;

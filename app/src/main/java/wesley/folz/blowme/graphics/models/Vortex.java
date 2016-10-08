@@ -11,12 +11,12 @@ import wesley.folz.blowme.util.GraphicsUtilities;
  */
 public class Vortex extends Model
 {
-    public Vortex()
+    public Vortex(float x)
     {
         super();
         setBounds(new Bounds());
 
-        xPos = 0;//+.01f;
+        xPos = x;//+.01f;
         yPos = -1.0f;//0.935f;//GamePlayActivity.Y_EDGE_POSITION;
 
         scaleFactor = 0.04f;
@@ -88,6 +88,17 @@ public class Vortex extends Model
         getBounds().setBounds(xPos - 0.15f, yPos - 0.21f, xPos + 0.15f, yPos - 0.1f);
     }
 
+
+    public boolean isCollecting()
+    {
+        return collecting;
+    }
+
+    public void setCollecting(boolean collecting)
+    {
+        this.collecting = collecting;
+    }
+
     public float getDeltaX()
     {
         return deltaX;
@@ -96,5 +107,7 @@ public class Vortex extends Model
     private float deltaX;
 
     private float scaleCount = 1.0f;
+
+    private boolean collecting = false;
 
 }

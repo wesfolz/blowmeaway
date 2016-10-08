@@ -1,8 +1,8 @@
 package wesley.folz.blowme.graphics.models;
 
 import android.opengl.Matrix;
-import android.util.Log;
 
+import wesley.folz.blowme.graphics.Border;
 import wesley.folz.blowme.util.Bounds;
 import wesley.folz.blowme.util.GraphicsUtilities;
 
@@ -12,13 +12,13 @@ import wesley.folz.blowme.util.GraphicsUtilities;
 
 public class RicochetObstacle extends Model
 {
-    public RicochetObstacle()
+    public RicochetObstacle(float x, float y)
     {
         super();
-        xPos = 0;//+.01f;
-        yPos = -1.5f;//GamePlayActivity.Y_EDGE_POSITION;
+        xPos = x;//+.01f;
+        yPos = y;//GamePlayActivity.Y_EDGE_POSITION;
 
-
+        deltaY = 0;
         previousTime = System.nanoTime();
 
         setBounds(new Bounds());
@@ -53,8 +53,6 @@ public class RicochetObstacle extends Model
         float[] mvp = new float[16];
         Matrix.setIdentityM(mvp, 0);
 
-        Log.e("obstacle", "transform delta " + deltaY);
-
         //translate model matrix to new position
         Matrix.translateM(modelMatrix, 0, 0, deltaY, 0);
 
@@ -87,9 +85,14 @@ public class RicochetObstacle extends Model
         //deltaY = deltaTime * risingSpeed;
         deltaY = 0.002f;
         yPos += deltaY;
-        Log.e("obstacle", "update delta " + deltaY);
+        //Log.e("obstacle", "ypos " + yPos);
 
         getBounds().setBounds(xPos - scaleFactor, yPos - scaleFactor, xPos + scaleFactor, yPos + scaleFactor);
+    }
+
+    public boolean isOffscreen()
+    {
+        return this.getBounds().getyBottom() > Border.YTOP;
     }
 
     private float deltaY;

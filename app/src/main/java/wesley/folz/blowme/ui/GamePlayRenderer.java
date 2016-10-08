@@ -180,6 +180,7 @@ public class GamePlayRenderer implements GLSurfaceView.Renderer
         // Redraw background color
         GLES20.glClear( GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT );
         modeConfig.updatePositionsAndDrawModels();
+        //modeConfig.drawModels();
     }
 
     public void pauseGame()

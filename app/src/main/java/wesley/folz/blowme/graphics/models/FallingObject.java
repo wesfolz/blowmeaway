@@ -147,7 +147,7 @@ public class FallingObject extends Model
         float newX;
         float newZ;
 
-        newX = radius * (float) Math.cos(parametricAngle + initialAngle);
+        newX = radius * (float) Math.cos(parametricAngle + initialAngle) + vortexX;
         newZ = radius * (float) Math.sin(parametricAngle + initialAngle);
 
         //counter clockwise rotation
@@ -225,6 +225,7 @@ public class FallingObject extends Model
             if (collision != Physics.COLLISION.NONE)
             {
                 Log.e("titans", "Collision: " + collision);
+                break;
             }
         }
     }
@@ -290,6 +291,16 @@ public class FallingObject extends Model
         //Log.e("blowme", "ycorners0 " + getBounds().getYCorners()[0] + " ycorners1 " + getBounds().getYCorners()[1]);
     }
 
+    public int getCollectingVortexIndex()
+    {
+        return collectingVortexIndex;
+    }
+
+    public void setCollectingVortexIndex(int collectingVortexIndex)
+    {
+        this.collectingVortexIndex = collectingVortexIndex;
+    }
+
     public void setOffscreen(boolean offscreen)
     {
         this.offscreen = offscreen;
@@ -348,6 +359,8 @@ public class FallingObject extends Model
     private float initialAngle;
 
     private int spiralCount = 0;
+
+    private int collectingVortexIndex = -1;
 
     private boolean offscreen = false;
 
