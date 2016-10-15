@@ -92,45 +92,8 @@ public class GamePlayActivity extends Activity
                 float x = 2 * event.getX() / WIDTH;
                 float y = 2 * event.getY() / HEIGHT;
 
-                switch( action )
-                {
-                    case MotionEvent.ACTION_POINTER_UP:
-                        touchActionStarted = true;
-                        //gameMode.handleFanMovementDown(x, y);
-                        Log.e("pointer", "x " + event.getX() + " y " + event.getY() + " up");
-                        break;
-                    case MotionEvent.ACTION_POINTER_DOWN:
-                        //gameMode.handleFanMovementDown(x, y);
-                        touchActionStarted = true;
-                        Log.e("pointer", "x " + event.getX() + " y " + event.getY() + " down");
-                        break;
+                gameMode.handleTouchDrag(action, x, y);
 
-
-                    case MotionEvent.ACTION_UP:
-                        touchActionStarted = true;
-                        //gameMode.handleFanMovementDown(x, y);
-                        Log.e("pointer", "x " + event.getX() + " y " + event.getY() + " up");
-                        break;
-
-                    case MotionEvent.ACTION_DOWN:
-                        //gameMode.handleFanMovementDown(x, y);
-                        touchActionStarted = true;
-                        Log.e("pointer", "x " + event.getX() + " y " + event.getY() + " down");
-                        break;
-
-                    case MotionEvent.ACTION_MOVE:
-                        if (touchActionStarted)
-                        {
-                            gameMode.handleFanMovementDown(x, y);
-                            touchActionStarted = false;
-                        }
-                        gameMode.handleFanMovementMove(x, y);
-
-                        surfaceView.requestRender();
-                        //Log.e( "blowme", "Move: X " + (event.getRawX() / WIDTH) + " Y " +
-                        // (event.getRawY() / HEIGHT) );
-                        break;
-                }
                 return true;
             }
         } );
@@ -143,7 +106,7 @@ public class GamePlayActivity extends Activity
         {
             View pauseView = getLayoutInflater().inflate(R.layout.pause_window_layout, null);
             pauseWindow = new PopupWindow(pauseView, ViewPager.LayoutParams.WRAP_CONTENT, ViewPager.LayoutParams.WRAP_CONTENT);
-            surfaceView.onPause();
+            surfaceView.pauseGame();
             pauseWindow.showAtLocation(pauseView, Gravity.CENTER, 10, 10);
         }
     }
@@ -165,7 +128,7 @@ public class GamePlayActivity extends Activity
     protected void onResume()
     {
         super.onResume();
-        surfaceView.onResume();
+        surfaceView.resumeGame();
     }
 
     @Override

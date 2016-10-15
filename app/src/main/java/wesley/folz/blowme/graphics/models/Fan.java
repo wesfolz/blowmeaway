@@ -50,7 +50,10 @@ public class Fan extends Model
         float inwardRotation = 180 * (parametricAngle - (float) Math.PI) / (float) Math.PI;
 
         float[] rotationMatrix = new float[16];
+        Matrix.setIdentityM(rotationMatrix, 0);
         Matrix.setRotateM(rotationMatrix, 0, inwardRotation, 0, 0, 1);
+        getWind().setRotationMatrix(rotationMatrix);
+
         return rotationMatrix;
     }
 
@@ -63,10 +66,10 @@ public class Fan extends Model
         long time = SystemClock.uptimeMillis();// % 4000L;
         float angle = 0.40f * ((int) time);
 
-        if (deltaX != 0 || deltaY != 0)
-        {
+        //if (deltaX != 0 || deltaY != 0)
+        // {
             moveParametric();
-        }
+        // }
         //don't use deltaX, otherwise it can be updated between the moveParametric
         //call and the translateM call
         Matrix.translateM(modelMatrix, 0, parametricX, parametricY, 0);
@@ -108,13 +111,17 @@ public class Fan extends Model
     //deg = arc*2Pi/
     private void moveParametric()
     {
-        float arcLength = Math.abs(deltaY) + Math.abs(deltaX);
+        float arcLength;
+        //if(stop)
+        //    arcLength = 0;
+        //else
+        arcLength = Math.abs(deltaX) + Math.abs(deltaY);
 
         float a = GamePlayActivity.X_EDGE_POSITION;
         float b = GamePlayActivity.Y_EDGE_POSITION;
         float newX;
         float newY;
-        float slowdown = 0.85f;
+        float slowdown = 1.0f;//0.85f;
 
         if (clockwise)
         {
@@ -140,6 +147,7 @@ public class Fan extends Model
                 [0] / 2, yPos + getSize()[1] / 2);
         //getWind().setBounds( new float[]{-0.4f, -0.25f, 0.4f, 0.25f} );
         getWind().getBounds().calculateBounds(calculateInwardParametricRotation());
+        getWind().updatePosition(parametricX, parametricY);
     }
 
     /**
@@ -193,7 +201,7 @@ public class Fan extends Model
             }
         }
 
-
+        stop = false;
         //update initial position
         initialX = x;
         initialY = y;
@@ -201,6 +209,12 @@ public class Fan extends Model
         //moveParametric();
         updateCount++;
     }
+
+    public void touch(float x)
+    {
+        clockwise = x < 1;
+    }
+
 
     public Wind getWind()
     {
@@ -237,4 +251,5 @@ public class Fan extends Model
     private int updateCount;
     private boolean directions[] = new boolean[10];
 
+    public boolean stop = true;
 }

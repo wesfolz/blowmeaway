@@ -39,7 +39,7 @@ public class DustCloud extends ParticleSystem
     @Override
     protected void generateParticles()
     {
-        int numParticles = 5000;
+        int numParticles = 10000;
         vertexOrder = new short[numParticles];
         int numAttributes = 8;
 

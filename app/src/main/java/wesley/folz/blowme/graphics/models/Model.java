@@ -294,9 +294,9 @@ public abstract class Model
 
     protected boolean resuming = false;
 
-    protected float[] mvMatrix;
+    protected float[] mvMatrix = new float[16];
 
-    protected float[] mvpMatrix;
+    protected float[] mvpMatrix = new float[16];
 
     protected float[] lightPosInEyeSpace = new float[4];
 

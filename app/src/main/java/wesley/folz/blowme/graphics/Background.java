@@ -41,9 +41,8 @@ public class Background extends Model
     {
         super.enableGraphics(graphicsData);
         programHandle = graphicsData.shaderProgramIdMap.get("texture");
-        textureDataHandle = graphicsData.textureIdMap.get("grid");
+        textureDataHandle = graphicsData.textureIdMap.get("sky");
     }
-
 
     @Override
     public float[] createTransformationMatrix()

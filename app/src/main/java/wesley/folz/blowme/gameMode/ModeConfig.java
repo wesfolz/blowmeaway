@@ -2,6 +2,7 @@ package wesley.folz.blowme.gamemode;
 
 import android.opengl.Matrix;
 import android.util.Log;
+import android.view.MotionEvent;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -35,7 +36,6 @@ public abstract class ModeConfig
         numFallingObjects = 2;
         numVortexes = 2;
 
-        Random rand = new Random();
         models = new ArrayList<>();
         obstacles = new ArrayList<>();
         fallingObjects = new ArrayList<>();
@@ -97,6 +97,8 @@ public abstract class ModeConfig
 
         background = new Background();
         models.add(background);
+        Log.e("pause", "constructor mode");
+
 
     }
 
@@ -122,6 +124,7 @@ public abstract class ModeConfig
 
         graphicsData.storeShader("dust_cloud", R.raw.dust_cloud_vertex_shader, R.raw.dust_cloud_fragment_shader, particleAttributes);
         graphicsData.storeShader("explosion", R.raw.particle_vertex_shader, R.raw.particle_fragment_shader, particleAttributes);
+        graphicsData.storeShader("wind", R.raw.wind_vertex_shader, R.raw.wind_fragment_shader, particleAttributes);
         graphicsData.storeShader("texture", R.raw.texture_vertex_shader, R.raw.texture_fragment_shader, modelAttributes);
         graphicsData.storeShader("lighting", R.raw.lighting_vertex_shader, R.raw.lighting_fragment_shader, modelAttributes);
 
@@ -130,6 +133,9 @@ public abstract class ModeConfig
             m.enableGraphics(graphicsData);
         }
         fan.getWind().enableGraphics(graphicsData);
+        Log.e("pause", "enable graphics mode");
+
+
     }
 
     public void surfaceGraphicsChanged(int width, int height)
@@ -161,6 +167,9 @@ public abstract class ModeConfig
             m.initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
         }
         fan.getWind().initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
+
+        Log.e("pause", "surface changed mode");
+
     }
 
     public void updatePositionsAndDrawModels()
@@ -168,7 +177,9 @@ public abstract class ModeConfig
         background.updatePosition(0, 0);
         background.draw();
 
+        //fan.updatePosition(0, 0);
         fan.draw();
+        //fan.getWind().updatePosition(0, 0);
 
         dispenser.updatePosition(0, 0);
         dispenser.draw();
@@ -334,6 +345,8 @@ public abstract class ModeConfig
             dc.updatePosition(0, 0);
             dc.draw();
         }
+        fan.getWind().draw();
+
     }
 
     private float[] generateRandomLocation()
@@ -385,6 +398,64 @@ public abstract class ModeConfig
         return locations;
     }
 
+    public void handleTouch(int action, float x, float y)
+    {
+        Log.e("touch", "touch");
+        switch (action)
+        {
+            case MotionEvent.ACTION_UP:
+                //gameMode.handleFanMovementDown(x, y);
+                fan.stop = true;
+                break;
+
+            case MotionEvent.ACTION_DOWN:
+                //gameMode.handleFanMovementDown(x, y);
+                //fan.updatePosition(x, y);
+                fan.touch(x);
+                fan.stop = false;
+                break;
+        }
+    }
+
+    public void handleTouchDrag(int action, float x, float y)
+    {
+        switch (action)
+        {
+            case MotionEvent.ACTION_POINTER_UP:
+                touchActionStarted = true;
+                //gameMode.handleFanMovementDown(x, y);
+                break;
+            case MotionEvent.ACTION_POINTER_DOWN:
+                //gameMode.handleFanMovementDown(x, y);
+                touchActionStarted = true;
+                break;
+
+
+            case MotionEvent.ACTION_UP:
+                touchActionStarted = true;
+                //gameMode.handleFanMovementDown(x, y);
+                break;
+
+            case MotionEvent.ACTION_DOWN:
+                //gameMode.handleFanMovementDown(x, y);
+                touchActionStarted = true;
+                break;
+
+            case MotionEvent.ACTION_MOVE:
+                if (touchActionStarted)
+                {
+                    this.handleFanMovementDown(x, y);
+                    touchActionStarted = false;
+                }
+                this.handleFanMovementMove(x, y);
+
+                //Log.e( "blowme", "Move: X " + (event.getRawX() / WIDTH) + " Y " +
+                // (event.getRawY() / HEIGHT) );
+                break;
+        }
+    }
+
+
 
     public void handleFanMovementDown(float x, float y)
     {
@@ -402,6 +473,7 @@ public abstract class ModeConfig
 
     public void pauseGame()
     {
+        Log.e("pause", "pause mode");
         for (Model m : models)
         {
             m.pauseGame();
@@ -410,6 +482,7 @@ public abstract class ModeConfig
 
     public void resumeGame()
     {
+        Log.e("pause", "resume mode");
         for (Model m : models)
         {
             m.resumeGame();
@@ -446,5 +519,7 @@ public abstract class ModeConfig
     private int numDestructiveObstacles;
     private int numFallingObjects;
     private int numVortexes;
+
+    private boolean touchActionStarted;
 
 }

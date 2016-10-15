@@ -14,18 +14,33 @@ public class GamePlaySurfaceView extends GLSurfaceView
         super(context, attrs);
     }
 
+    public void pauseGame()
+    {
+        this.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
+        renderer.pauseGame();
+    }
+
+
     @Override
     public void onPause()
     {
         super.onPause();
-        renderer.pauseGame();
+        this.pauseGame();
     }
+
+
+    public void resumeGame()
+    {
+        this.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
+        renderer.resumeGame();
+    }
+
 
     @Override
     public void onResume()
     {
         super.onResume();
-        renderer.resumeGame();
+        this.resumeGame();
     }
 
     @Override
