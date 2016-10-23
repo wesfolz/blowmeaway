@@ -114,7 +114,7 @@ public class GamePlayActivity extends Activity
     protected void onResumeButtonClicked(View resumeButton)
     {
         pauseWindow.dismiss();
-        surfaceView.onResume();
+        surfaceView.resumeGame();
     }
 
     @Override
@@ -128,7 +128,7 @@ public class GamePlayActivity extends Activity
     protected void onResume()
     {
         super.onResume();
-        surfaceView.resumeGame();
+        surfaceView.onResume();
     }
 
     @Override

@@ -62,7 +62,6 @@ public class Background extends Model
     @Override
     public void updatePosition(float x, float y)
     {
-
         long time = System.nanoTime();
         float deltaTime = (time - previousTime) / 1000000000.0f;
         previousTime = time;
@@ -76,7 +75,6 @@ public class Background extends Model
             yPos = 0;
             deltaY = -2;
         }
-
     }
 
     private long previousTime;

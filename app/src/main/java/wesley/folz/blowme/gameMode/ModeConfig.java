@@ -72,7 +72,16 @@ public abstract class ModeConfig
         for (int i = 0; i < numDestructiveObstacles; i++)
         {
             float pos[] = generateRandomLocation();
-            DestructiveObstacle destObj = new DestructiveObstacle(pos[0], pos[1]);
+            float xLoc;
+            if (Math.random() > 0.5)
+            {
+                xLoc = Border.XLEFT;
+            }
+            else
+            {
+                xLoc = Border.XRIGHT;
+            }
+            DestructiveObstacle destObj = new DestructiveObstacle(xLoc, pos[1]);
             models.add(destObj);
             hazards.add(destObj);
         }
@@ -218,7 +227,16 @@ public abstract class ModeConfig
             {
                 models.remove(h);
                 float pos[] = generateRandomLocation();
-                h = new DestructiveObstacle(pos[0], pos[1]);
+                float x;
+                if (Math.random() > 0.5)
+                {
+                    x = Border.XLEFT;
+                }
+                else
+                {
+                    x = Border.XRIGHT;
+                }
+                h = new DestructiveObstacle(x, pos[1]);
                 hazards.set(modelCount, h);
                 h.enableGraphics(graphicsData);
                 h.initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
@@ -429,7 +447,6 @@ public abstract class ModeConfig
                 //gameMode.handleFanMovementDown(x, y);
                 touchActionStarted = true;
                 break;
-
 
             case MotionEvent.ACTION_UP:
                 touchActionStarted = true;

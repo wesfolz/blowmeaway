@@ -24,6 +24,11 @@ public class Vortex extends Model
         initialXPos = xPos;
         initialYPos = yPos;
         yPos = -0.65f;
+
+        for (int i = 0; i < 3; i++)
+        {
+            orbitingObjects[i] = new OrbitingObject(xPos, -1.0f, (float) i * (float) Math.PI / 2);
+        }
     }
 
     @Override
@@ -33,9 +38,22 @@ public class Vortex extends Model
         orderVBO = graphicsData.orderVBOMap.get("vortex");
         numVertices = graphicsData.numVerticesMap.get("vortex");
         programHandle = graphicsData.shaderProgramIdMap.get("lighting");
+        for (OrbitingObject orbitingObject : orbitingObjects)
+        {
+            orbitingObject.enableGraphics(graphicsData);
+        }
     }
 
-    //TODO: Apply rotation transformation about the z-axis to vertices only above a certain y-value to "bend vortex towards falling object"
+    @Override
+    public void draw()
+    {
+        super.draw();
+        for (OrbitingObject orbitingObject : orbitingObjects)
+        {
+            orbitingObject.draw();
+        }
+    }
+
     @Override
     public float[] createTransformationMatrix()
     {
@@ -47,12 +65,12 @@ public class Vortex extends Model
         Matrix.setIdentityM(mvp, 0);
 
         //translate model matrix to new position
-        Matrix.translateM(modelMatrix, 0, deltaX, 0, 0);
+        //Matrix.translateM(modelMatrix, 0, deltaX, 0, 0);
 
         //copy modelMatrix to separate matrix for return, (returning modelMatrix doesn't work)
         Matrix.multiplyMM(mvp, 0, modelMatrix, 0, mvp, 0);
         Matrix.scaleM(mvp, 0, 1.0f, scaleCount, 1.0f);
-        Matrix.translateM(mvp, 0, 0.0f, scaleCount / 500f, 0.0f);
+        Matrix.translateM(mvp, 0, 0.0f, deltaY, 0.0f);
 
         Matrix.rotateM(mvp, 0, angle, 0, -1, 0);
 
@@ -70,20 +88,25 @@ public class Vortex extends Model
             Matrix.scaleM(modelMatrix, 0, 1.0f, 0.01f, 1.0f);
         }
 
+        for (OrbitingObject orbitingObject : orbitingObjects)
+        {
+            orbitingObject.initializeMatrices(viewMatrix, projectionMatrix, lightPositionInEyeSpace);
+        }
+
         //Log.e( "blowme", "xpos: " + xPos + " ypos " + yPos );
     }
 
     @Override
     public void updatePosition(float x, float y)
     {
-        //long time = SystemClock.uptimeMillis()% 10000L;
-        //deltaX = 0.01f;//* ((int) time);
-
-        //deltaX *= motionMultiplier;
-        //xPos += deltaX;//*motionMultiplier;
         if (scaleCount < 100)
         {
             scaleCount++;
+            deltaY = scaleCount / 500f;
+        }
+        for (OrbitingObject orbitingObject : orbitingObjects)
+        {
+            orbitingObject.updatePosition(0, deltaY);
         }
         getBounds().setBounds(xPos - 0.15f, yPos - 0.21f, xPos + 0.15f, yPos - 0.1f);
     }
@@ -99,15 +122,12 @@ public class Vortex extends Model
         this.collecting = collecting;
     }
 
-    public float getDeltaX()
-    {
-        return deltaX;
-    }
-
-    private float deltaX;
+    private float deltaY = 0;
 
     private float scaleCount = 1.0f;
 
     private boolean collecting = false;
+
+    private OrbitingObject[] orbitingObjects = new OrbitingObject[3];
 
 }

@@ -20,7 +20,6 @@ public class GamePlaySurfaceView extends GLSurfaceView
         renderer.pauseGame();
     }
 
-
     @Override
     public void onPause()
     {
@@ -28,13 +27,11 @@ public class GamePlaySurfaceView extends GLSurfaceView
         this.pauseGame();
     }
 
-
     public void resumeGame()
     {
         this.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
         renderer.resumeGame();
     }
-
 
     @Override
     public void onResume()
