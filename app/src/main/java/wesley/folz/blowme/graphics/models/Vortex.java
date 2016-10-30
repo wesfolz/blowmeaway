@@ -11,9 +11,11 @@ import wesley.folz.blowme.util.GraphicsUtilities;
  */
 public class Vortex extends Model
 {
-    public Vortex(float x)
+    public Vortex(String collectionType, float x)
     {
         super();
+
+        type = collectionType;
         setBounds(new Bounds());
 
         xPos = x;//+.01f;
@@ -27,7 +29,7 @@ public class Vortex extends Model
 
         for (int i = 0; i < 3; i++)
         {
-            orbitingObjects[i] = new OrbitingObject(xPos, -1.0f, (float) i * (float) Math.PI / 2);
+            orbitingObjects[i] = new OrbitingObject(type, xPos, -1.0f, (float) Math.PI + i * (float) Math.PI / 2);
         }
     }
 
@@ -129,5 +131,7 @@ public class Vortex extends Model
     private boolean collecting = false;
 
     private OrbitingObject[] orbitingObjects = new OrbitingObject[3];
+
+    private String type;
 
 }

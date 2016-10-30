@@ -10,6 +10,7 @@ import java.util.Random;
 import wesley.folz.blowme.R;
 import wesley.folz.blowme.graphics.Background;
 import wesley.folz.blowme.graphics.Border;
+import wesley.folz.blowme.graphics.Line;
 import wesley.folz.blowme.graphics.effects.DustCloud;
 import wesley.folz.blowme.graphics.effects.Explosion;
 import wesley.folz.blowme.graphics.models.DestructiveObstacle;
@@ -34,7 +35,11 @@ public abstract class ModeConfig
         numRicochetObstacles = 2;
         numDestructiveObstacles = 2;
         numFallingObjects = 2;
+        numRings = 1;
+        numCubes = 1;
         numVortexes = 2;
+        numRingVortexes = 1;
+        numCubeVortexes = 1;
 
         models = new ArrayList<>();
         obstacles = new ArrayList<>();
@@ -47,9 +52,16 @@ public abstract class ModeConfig
         fan = new Fan();
         models.add(fan);
 
-        for (int i = 0; i < numFallingObjects; i++)
+        for (int i = 0; i < numRings; i++)
         {
-            FallingObject fo = new FallingObject();
+            FallingObject fo = new FallingObject("ring");
+            models.add(fo);
+            fallingObjects.add(fo);
+        }
+
+        for (int i = 0; i < numCubes; i++)
+        {
+            FallingObject fo = new FallingObject("cube");
             models.add(fo);
             fallingObjects.add(fo);
         }
@@ -75,21 +87,32 @@ public abstract class ModeConfig
             float xLoc;
             if (Math.random() > 0.5)
             {
-                xLoc = Border.XLEFT;
+                xLoc = -0.56f;//Border.XLEFT;
             }
             else
             {
-                xLoc = Border.XRIGHT;
+                xLoc = 0.56f;//Border.XRIGHT;
             }
             DestructiveObstacle destObj = new DestructiveObstacle(xLoc, pos[1]);
             models.add(destObj);
             hazards.add(destObj);
         }
 
+        //create array list of different vortex type strings
+        ArrayList<String> vortexTypes = new ArrayList<>(numVortexes);
+        for (int i = 0; i < numRingVortexes; i++)
+        {
+            vortexTypes.add("ring");
+        }
+        for (int i = 0; i < numCubeVortexes; i++)
+        {
+            vortexTypes.add("cube");
+        }
+
         //numVortexes=2 -> x1=-0.5
         for (int i = 0; i < numVortexes; i++)
         {
-            Vortex v = new Vortex((float) (i + 1) * (2.0f / (numVortexes + 1.0f)) - 1);
+            Vortex v = new Vortex(vortexTypes.get(i), (float) (i + 1) * (2.0f / (numVortexes + 1.0f)) - 1);
             models.add(v);
             vortexes.add(v);
         }
@@ -106,9 +129,10 @@ public abstract class ModeConfig
 
         background = new Background();
         models.add(background);
+
+        //line =  new Line();
+        //models.add(line);
         Log.e("pause", "constructor mode");
-
-
     }
 
     public void enableModelGraphics()
@@ -120,8 +144,12 @@ public abstract class ModeConfig
         graphicsData.storeModelData("vortex", R.raw.vortex_open_top);
         graphicsData.storeModelData("cube", R.raw.cube);
         graphicsData.storeModelData("dispenser", R.raw.triangle_collector);
+        graphicsData.storeModelData("short_spikes", R.raw.short_spikes);
+        graphicsData.storeModelData("ring", R.raw.ring);
+
 
         graphicsData.storeTexture("wood", R.raw.wood_texture);
+        graphicsData.storeTexture("brick", R.raw.brick_texture);
         graphicsData.storeTexture("yellow_circle", R.raw.yellow_circle);
         graphicsData.storeTexture("sky", R.raw.sky_texture);
         graphicsData.storeTexture("grid", R.raw.grid);
@@ -178,7 +206,6 @@ public abstract class ModeConfig
         fan.getWind().initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
 
         Log.e("pause", "surface changed mode");
-
     }
 
     public void updatePositionsAndDrawModels()
@@ -230,11 +257,11 @@ public abstract class ModeConfig
                 float x;
                 if (Math.random() > 0.5)
                 {
-                    x = Border.XLEFT;
+                    x = -0.56f;//Border.XLEFT;
                 }
                 else
                 {
-                    x = Border.XRIGHT;
+                    x = 0.56f;//Border.XRIGHT;
                 }
                 h = new DestructiveObstacle(x, pos[1]);
                 hazards.set(modelCount, h);
@@ -285,12 +312,21 @@ public abstract class ModeConfig
 
             if (falObj.isOffscreen())
             {
-                models.remove(falObj);
-                falObj = new FallingObject(dispenser.getxPos());
-                fallingObjects.set(modelCount, falObj);
-                falObj.enableGraphics(graphicsData);
-                falObj.initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
-                models.add(falObj);
+                try
+                {
+                    models.remove(falObj);
+                    //falObj = falObj.getClass().getConstructor(float.class).newInstance(dispenser.getxPos());
+                    String type = falObj.getType();
+                    falObj = new FallingObject(type, dispenser.getxPos());
+                    fallingObjects.set(modelCount, falObj);
+                    falObj.enableGraphics(graphicsData);
+                    falObj.initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
+                    models.add(falObj);
+                }
+                catch (Exception e)
+                {
+                    Log.e("error", e.getMessage());
+                }
                 //Log.e("mode", "offscreen");
             }
 
@@ -365,6 +401,8 @@ public abstract class ModeConfig
         }
         fan.getWind().draw();
 
+        //line.updatePosition(0, 0);
+        //line.draw();
     }
 
     private float[] generateRandomLocation()
@@ -517,6 +555,7 @@ public abstract class ModeConfig
     private Fan fan;
     private Background background;
     private Dispenser dispenser;
+    private Line line;
 
     private float[] viewMatrix = new float[16];
     private float[] projectionMatrix = new float[16];
@@ -535,7 +574,11 @@ public abstract class ModeConfig
     private int numRicochetObstacles;
     private int numDestructiveObstacles;
     private int numFallingObjects;
+    private int numRings;
+    private int numCubes;
     private int numVortexes;
+    private int numRingVortexes;
+    private int numCubeVortexes;
 
     private boolean touchActionStarted;
 

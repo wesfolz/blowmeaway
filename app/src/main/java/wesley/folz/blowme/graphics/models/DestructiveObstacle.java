@@ -20,11 +20,11 @@ public class DestructiveObstacle extends Model
 
         deltaY = 0;
 
-        previousTime = System.nanoTime();
+        //previousTime = System.nanoTime();
 
         setBounds(new Bounds());
 
-        scaleFactor = 0.1f;
+        scaleFactor = 0.025f;
 
         initialXPos = xPos;
         initialYPos = yPos;
@@ -34,15 +34,20 @@ public class DestructiveObstacle extends Model
     }
 
     @Override
+    public void resumeGame()
+    {
+        super.resumeGame();
+        previousTime = System.currentTimeMillis();
+    }
+
+    @Override
     public void enableGraphics(GraphicsUtilities graphicsData)
     {
         //get dataVBO, orderVBO, program, texture handles
-
-        dataVBO = graphicsData.modelVBOMap.get("cube");
-        orderVBO = graphicsData.orderVBOMap.get("cube");
-        numVertices = graphicsData.numVerticesMap.get("cube");
-        programHandle = graphicsData.shaderProgramIdMap.get("texture");
-        textureDataHandle = graphicsData.textureIdMap.get("wood");
+        dataVBO = graphicsData.modelVBOMap.get("short_spikes");
+        orderVBO = graphicsData.orderVBOMap.get("short_spikes");
+        numVertices = graphicsData.numVerticesMap.get("short_spikes");
+        programHandle = graphicsData.shaderProgramIdMap.get("lighting");
     }
 
     @Override
@@ -57,21 +62,30 @@ public class DestructiveObstacle extends Model
         //copy modelMatrix to separate matrix for return, (returning modelMatrix doesn't work)
         Matrix.multiplyMM(mvp, 0, modelMatrix, 0, mvp, 0);
 
+        Matrix.rotateM(mvp, 0, 90 * (Math.abs(xPos) / xPos), 0, 0, 1);
+        Matrix.rotateM(mvp, 0, 10, 1, 0, 0);
+
         return mvp;
     }
+
 
     @Override
     public void updatePosition(float x, float y)
     {
-        long time = System.nanoTime();
-        float deltaTime = (time - previousTime) / 1000000000.0f;
+        if (previousTime == 0)
+        {
+            previousTime = System.currentTimeMillis();
+        }
+        long time = System.currentTimeMillis();
+        float deltaTime = (time - previousTime) / 10000.0f;
+
         previousTime = time;
 
-        //deltaY = deltaTime * risingSpeed;
-        deltaY = 0.002f;
+        deltaY = deltaTime;// * risingSpeed;
+        //deltaY = 0.002f;
         yPos += deltaY;
 
-        getBounds().setBounds(xPos - scaleFactor, yPos - scaleFactor, xPos + scaleFactor, yPos + scaleFactor);
+        getBounds().setBounds(xPos - xRadius, yPos - 4 * scaleFactor, xPos + xRadius, yPos + 4 * scaleFactor);
     }
 
     public boolean isOffscreen()
@@ -83,8 +97,10 @@ public class DestructiveObstacle extends Model
 
     private float deltaX;
 
-    private float previousTime;
+    private long previousTime = 0;
 
     private float risingSpeed = 0.1f;
+
+    private static final float xRadius = 0.06f;
 
 }

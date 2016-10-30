@@ -19,7 +19,7 @@ public class RicochetObstacle extends Model
         yPos = y;//GamePlayActivity.Y_EDGE_POSITION;
 
         deltaY = 0;
-        previousTime = System.nanoTime();
+        //previousTime = System.currentTimeMillis();
 
         setBounds(new Bounds());
 
@@ -36,14 +36,15 @@ public class RicochetObstacle extends Model
         dataVBO = graphicsData.modelVBOMap.get("cube");
         orderVBO = graphicsData.orderVBOMap.get("cube");
         numVertices = graphicsData.numVerticesMap.get("cube");
-        programHandle = graphicsData.shaderProgramIdMap.get("lighting");
+        programHandle = graphicsData.shaderProgramIdMap.get("texture");
+        textureDataHandle = graphicsData.textureIdMap.get("brick");
     }
 
     @Override
     public void resumeGame()
     {
         super.resumeGame();
-        previousTime = System.nanoTime();
+        previousTime = System.currentTimeMillis();
     }
 
 
@@ -78,14 +79,17 @@ public class RicochetObstacle extends Model
     @Override
     public void updatePosition(float x, float y)
     {
-        long time = System.nanoTime();
-        float deltaTime = (time - previousTime) / 1000000000.0f;
+        if (previousTime == 0)
+        {
+            previousTime = System.currentTimeMillis();
+        }
+        long time = System.currentTimeMillis();
+        float deltaTime = (time - previousTime) / 10000.0f;
         previousTime = time;
 
-        //deltaY = deltaTime * risingSpeed;
-        deltaY = 0.002f;
+        deltaY = deltaTime;// * risingSpeed;
+        //deltaY = 0.002f;
         yPos += deltaY;
-        //Log.e("obstacle", "ypos " + yPos);
 
         getBounds().setBounds(xPos - scaleFactor, yPos - scaleFactor, xPos + scaleFactor, yPos + scaleFactor);
     }
@@ -99,7 +103,7 @@ public class RicochetObstacle extends Model
 
     private float deltaX;
 
-    private long previousTime;
+    private long previousTime = 0;
 
     private float risingSpeed = 0.1f;
 

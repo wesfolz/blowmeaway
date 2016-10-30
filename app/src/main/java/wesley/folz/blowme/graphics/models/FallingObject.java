@@ -16,14 +16,16 @@ import wesley.folz.blowme.util.Physics;
  */
 public class FallingObject extends Model
 {
-    public FallingObject()
+    public FallingObject(String modelType)
     {
-        this(0);
+        this(modelType, 0);
     }
-    public FallingObject(float dispenserX)
+
+    public FallingObject(String modelType, float dispenserX)
     {
         super();
 
+        this.type = modelType;
         setBounds(new Bounds());
 
         xPos = (float) (Math.random() - 0.5);
@@ -58,9 +60,9 @@ public class FallingObject extends Model
     public void enableGraphics(GraphicsUtilities graphicsData)
     {
         //get dataVBO, orderVBO, program, texture handles
-        dataVBO = graphicsData.modelVBOMap.get("cube");
-        orderVBO = graphicsData.orderVBOMap.get("cube");
-        numVertices = graphicsData.numVerticesMap.get("cube");
+        dataVBO = graphicsData.modelVBOMap.get(type);
+        orderVBO = graphicsData.orderVBOMap.get(type);
+        numVertices = graphicsData.numVerticesMap.get(type);
         programHandle = graphicsData.shaderProgramIdMap.get("texture");
         textureDataHandle = graphicsData.textureIdMap.get("wood");
     }
@@ -122,12 +124,14 @@ public class FallingObject extends Model
     {
         super.resumeGame();
         previousTime = System.nanoTime();
+        spiralTime = System.currentTimeMillis();
     }
 
     public void spiralIntoVortex(float vortexX)
     {
         if (!collected)
         {
+            spiralTime = System.currentTimeMillis();
             initialRadius = Math.abs(xPos - vortexX);
             if (xPos - vortexX > 0)
             {
@@ -139,7 +143,9 @@ public class FallingObject extends Model
             }
         }
 
-        float arcLength = (float) Math.PI / 5.0f;//Math.abs(deltaY) + Math.abs(deltaX);
+        long time = System.currentTimeMillis();
+        float arcLength = 2.0f * (float) (Math.PI / 180.0f) * (float) (time - spiralTime); //(float) Math.PI / 5.0f;//Math.abs(deltaY) + Math.abs(deltaX);
+        spiralTime = time;
 
         float spiralIncrement = 0.01f;
 
@@ -291,6 +297,11 @@ public class FallingObject extends Model
         //Log.e("blowme", "ycorners0 " + getBounds().getYCorners()[0] + " ycorners1 " + getBounds().getYCorners()[1]);
     }
 
+    public String getType()
+    {
+        return type;
+    }
+
     public int getCollectingVortexIndex()
     {
         return collectingVortexIndex;
@@ -353,6 +364,8 @@ public class FallingObject extends Model
     private float parametricAngle = 0;
     private float spiralFactor = 0;
 
+    private long spiralTime = 0;
+
     private boolean collected;
 
     private float initialRadius;
@@ -364,4 +377,5 @@ public class FallingObject extends Model
 
     private boolean offscreen = false;
 
+    private String type;
 }

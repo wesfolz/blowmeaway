@@ -170,8 +170,11 @@ public class Fan extends Model
 
 
         //determine if finger is moving clockwise or counter-clockwise
-        directions[updateCount % 10] = (((initialX - 1.0f) * (y - 1.0f)) - ((initialY - 1.0f) * (x - 1.0f))) > 0;
+        //directions[updateCount % 10] = (((initialX - 1.0f) * (y - 1.0f)) - ((initialY - 1.0f) * (x - 1.0f))) > 0;
 
+        clockwise = (((initialX - 1.0f) * (y - 1.0f)) - ((initialY - 1.0f) * (x - 1.0f))) > 0;
+
+/*
         if (Math.abs(deltaY) > Math.abs(deltaX))
         {
             if (!(x < 1.1 && x > 0.9))
@@ -200,7 +203,7 @@ public class Fan extends Model
                 }
             }
         }
-
+*/
         stop = false;
         //update initial position
         initialX = x;

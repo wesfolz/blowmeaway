@@ -1,7 +1,7 @@
 package wesley.folz.blowme.graphics.models;
 
 import android.opengl.Matrix;
-import android.os.SystemClock;
+import android.util.Log;
 
 import wesley.folz.blowme.util.GraphicsUtilities;
 
@@ -11,9 +11,11 @@ import wesley.folz.blowme.util.GraphicsUtilities;
 
 public class OrbitingObject extends Model
 {
-    public OrbitingObject(float x, float y, float angle)
+    public OrbitingObject(String modelType, float x, float y, float angle)
     {
         super();
+
+        this.type = modelType;
 
         xPos = x;
 
@@ -23,19 +25,21 @@ public class OrbitingObject extends Model
 
         initialAngle = angle;
 
-        scaleFactor = 0.02f;
+        scaleFactor = 0.015f;
 
         initialXPos = xPos;
         initialYPos = yPos;
+
+        previousTime = System.currentTimeMillis();
     }
 
     @Override
     public void enableGraphics(GraphicsUtilities graphicsData)
     {
         //get dataVBO, orderVBO, program, texture handles
-        dataVBO = graphicsData.modelVBOMap.get("cube");
-        orderVBO = graphicsData.orderVBOMap.get("cube");
-        numVertices = graphicsData.numVerticesMap.get("cube");
+        dataVBO = graphicsData.modelVBOMap.get(type);
+        orderVBO = graphicsData.orderVBOMap.get(type);
+        numVertices = graphicsData.numVerticesMap.get(type);
         programHandle = graphicsData.shaderProgramIdMap.get("texture");
         textureDataHandle = graphicsData.textureIdMap.get("wood");
     }
@@ -44,10 +48,6 @@ public class OrbitingObject extends Model
     public float[] createTransformationMatrix()
     {
         float[] mvp = new float[16];
-
-        long time = SystemClock.uptimeMillis();// % 4000L;
-        float angle = 0.40f * ((int) time);
-
         Matrix.setIdentityM(mvp, 0);
 
         //translate model matrix to new position
@@ -79,24 +79,26 @@ public class OrbitingObject extends Model
     @Override
     public void updatePosition(float x, float y)
     {
-        long time = SystemClock.uptimeMillis();// % 4000L;
-        float angle = 0.40f * ((int) time) * (float) Math.PI / 180.0f; //convert to radians
+        long time = System.currentTimeMillis();// % 4000L;
+        float angle = (float) (Math.PI / 180.0f) * (time - previousTime) / 4.0f; //convert to radians
+        previousTime = time;
 
-        float arcLength = (float) Math.PI / 10.0f;//Math.abs(deltaY) + Math.abs(deltaX);
+        float newX = 0.1f * (float) Math.cos(parametricAngle + initialAngle);
+        float newZ = 0.35f * (float) Math.sin(parametricAngle + initialAngle);
 
-        float newX = 0.3f * (float) Math.cos(parametricAngle + initialAngle);
-        float newZ = 0.3f * (float) Math.sin(parametricAngle + initialAngle);
+        Log.e("orbit", "newZ " + newZ);
+        parametricAngle += angle;
 
-        parametricAngle += arcLength;
-
-        deltaX = newX - xPos;
-        deltaZ = newZ - zPos;
+        deltaX = newX;// - xPos;
+        deltaZ = newZ;// - zPos;
 
         xPos = newX;
         zPos = newZ;
 
         deltaY = y;
     }
+
+    private long previousTime;
 
     private float parametricAngle = 0;
 
@@ -106,4 +108,6 @@ public class OrbitingObject extends Model
     private float deltaY;
     private float deltaZ;
     private float zPos;
+
+    private String type;
 }

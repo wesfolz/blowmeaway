@@ -16,7 +16,7 @@ public abstract class Physics
                 Math.pow( wind.getyPos() - object.getyPos(), 2 ) );
 
         //wind force decreases over distance
-        float totalForce = wind.getMaxWindForce() - 2.0f * distance;
+        float totalForce = wind.getMaxWindForce() - distance;
 
         //wind can't pull object
         if (totalForce < 0)
