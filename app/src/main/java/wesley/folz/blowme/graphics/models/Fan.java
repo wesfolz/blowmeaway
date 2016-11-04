@@ -121,7 +121,7 @@ public class Fan extends Model
         float b = GamePlayActivity.Y_EDGE_POSITION;
         float newX;
         float newY;
-        float slowdown = 1.0f;//0.85f;
+        float slowdown = 0.95f;
 
         if (clockwise)
         {

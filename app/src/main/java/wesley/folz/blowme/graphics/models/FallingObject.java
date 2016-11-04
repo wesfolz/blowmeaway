@@ -249,7 +249,7 @@ public class FallingObject extends Model
         float fallingTime = MASS * deltaTime;
 
         float[] force = Physics.sumOfForces(x, y);
-        float elasticityCoefficient = 0.8f;
+        float elasticityCoefficient = 0.6f;
 
         xVelocity += force[0] * fallingTime;
         yVelocity += force[1] * fallingTime;

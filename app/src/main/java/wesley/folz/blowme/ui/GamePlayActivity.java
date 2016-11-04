@@ -117,6 +117,12 @@ public class GamePlayActivity extends Activity
         surfaceView.resumeGame();
     }
 
+    protected void onExitGamePlayButtonClicked(View exitButton)
+    {
+        this.finish();
+    }
+
+
     @Override
     protected void onPause()
     {
