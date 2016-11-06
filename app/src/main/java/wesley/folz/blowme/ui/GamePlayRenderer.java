@@ -14,10 +14,6 @@ import wesley.folz.blowme.gamemode.ModeConfig;
  */
 public class GamePlayRenderer implements GLSurfaceView.Renderer
 {
-
-    private ModeConfig modeConfig;
-    private boolean paused;
-
     public GamePlayRenderer(ModeConfig config)
     {
         this.modeConfig = config;
@@ -203,4 +199,8 @@ public class GamePlayRenderer implements GLSurfaceView.Renderer
     {
         return paused;
     }
+
+    private ModeConfig modeConfig;
+    private boolean paused;
+
 }

@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.pm.ConfigurationInfo;
 import android.graphics.Point;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.support.v4.view.MotionEventCompat;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
@@ -14,6 +15,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.PopupWindow;
+import android.widget.TextView;
 
 import wesley.folz.blowme.R;
 import wesley.folz.blowme.gamemode.ActionModeConfig;
@@ -47,6 +49,7 @@ public class GamePlayActivity extends Activity
             }
         } );
 
+        timerView = (TextView) this.findViewById(R.id.textView2);
         //surfaceView = new GLSurfaceView( this );
         surfaceView = (GamePlaySurfaceView) findViewById(R.id.surfaceView);
 
@@ -97,6 +100,8 @@ public class GamePlayActivity extends Activity
                 return true;
             }
         } );
+
+        startTiming(60);
     }
 
     protected void onPauseButtonClicked(View pauseButton)
@@ -104,6 +109,7 @@ public class GamePlayActivity extends Activity
         Log.e("blowme", "pause");
         if (!surfaceView.getRenderer().isPaused())
         {
+            timer.cancel();
             View pauseView = getLayoutInflater().inflate(R.layout.pause_window_layout, null);
             pauseWindow = new PopupWindow(pauseView, ViewPager.LayoutParams.WRAP_CONTENT, ViewPager.LayoutParams.WRAP_CONTENT);
             surfaceView.pauseGame();
@@ -115,6 +121,7 @@ public class GamePlayActivity extends Activity
     {
         pauseWindow.dismiss();
         surfaceView.resumeGame();
+        startTiming(timeLeft);
     }
 
     protected void onExitGamePlayButtonClicked(View exitButton)
@@ -153,6 +160,26 @@ public class GamePlayActivity extends Activity
         }
     }
 
+    public void startTiming(long timeInterval)
+    {
+        timer = new CountDownTimer(timeInterval * 1000, 1000)
+        {
+            public void onTick(long millisUntilFinished)
+            {
+                timeLeft = millisUntilFinished / 1000;
+                timerView.setText(Long.toString(timeLeft));
+            }
+
+            public void onFinish()
+            {
+                //finish activity
+                finish();
+                //timerView.setText("done!");
+            }
+        }.start();
+    }
+
+
     /**
      * View where OpenGL objects are drawn
      */
@@ -169,4 +196,11 @@ public class GamePlayActivity extends Activity
     private int HEIGHT;
 
     private boolean touchActionStarted = true;
+
+    private CountDownTimer timer;
+
+    private long timeLeft = 0;
+
+    TextView timerView;
+
 }

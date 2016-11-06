@@ -24,4 +24,14 @@
         android:src="@android:drawable/ic_media_pause"
         android:onClick="onPauseButtonClicked"/>
 
+    <TextView
+        android:text="TextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/pauseButton"
+        android:layout_toLeftOf="@+id/pauseButton"
+        android:layout_toStartOf="@+id/pauseButton"
+        android:layout_marginBottom="16dp"
+        android:id="@+id/textView2"/>
+
 </RelativeLayout>
