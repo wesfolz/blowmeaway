@@ -45,7 +45,7 @@ public class FallingObject extends Model
 
         xVelocity = 0;
 
-        yVelocity = -0.3f;//0;//0.1f;
+        yVelocity = -1.0f;//-0.3f;//0;//0.1f;
 
         previousTime = System.nanoTime();
 
