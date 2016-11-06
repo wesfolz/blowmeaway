@@ -171,8 +171,6 @@ public abstract class ModeConfig
         }
         fan.getWind().enableGraphics(graphicsData);
         Log.e("pause", "enable graphics mode");
-
-
     }
 
     public void surfaceGraphicsChanged(int width, int height)
@@ -292,6 +290,7 @@ public abstract class ModeConfig
             {
                 if (Physics.isCollision(h.getBounds(), falObj.getBounds()))
                 {
+                    Log.e("falobj", "destruction");
                     objectExplosion.reinitialize(falObj.getxPos(), falObj.getyPos());
                     falObj.setOffscreen(true);
                     //rotate through all explosions
@@ -312,6 +311,7 @@ public abstract class ModeConfig
 
             if (falObj.isOffscreen())
             {
+                Log.e("falobj", "offscreen");
                 try
                 {
                     models.remove(falObj);
@@ -327,7 +327,6 @@ public abstract class ModeConfig
                 {
                     Log.e("error", e.getMessage());
                 }
-                //Log.e("mode", "offscreen");
             }
 
             int vortexCount = 0;
@@ -335,14 +334,21 @@ public abstract class ModeConfig
             {
                 //vortex position - falling object position
                 if (Physics.isCollision(vortex.getBounds(), falObj.getBounds())
-                        || (falObj.isCollected() && vortex.isCollecting() && vortexCount == falObj.getCollectingVortexIndex()))
+                        || (falObj.isSpiraling() && vortex.isCollecting() && vortexCount == falObj.getCollectingVortexIndex()))
                 {
+                    Log.e("falobj", "vortex " + Physics.isCollision(vortex.getBounds(), falObj.getBounds()));
                     vortex.setCollecting(true);
                     //falObj.travelOnVector(vortex.getxPos() - falObj.getxPos(), vortex.getyPos() - falObj.getyPos());
                     falObj.setCollectingVortexIndex(vortexCount);
-                    falObj.spiralIntoVortex(vortex.getxPos());
+                    if (vortex.getType() == falObj.getType())
+                    {
+                        falObj.spiralIntoVortex(vortex.getxPos());
+                    }
+                    else
+                    {
+                        falObj.spiralOutOfVortex(vortex);
+                    }
                     objectEffected = true;
-                    Log.e("mode", "Collection " + vortexCount + " xpos " + vortex.getxPos());
                     break;
                 }
                 else
@@ -357,7 +363,7 @@ public abstract class ModeConfig
                 //falObj.updatePosition(100 * dispenser.getDeltaX(), 0);
                 xForce = 100 * dispenser.getDeltaX();
                 //objectEffected = true;
-                Log.e("mode", "dispense");
+                Log.e("falobj", "dispense");
             }
 
             //determine forces due to collisions with obstacles
@@ -366,6 +372,7 @@ public abstract class ModeConfig
             //calculate wind influence
             if (Physics.isCollision(fan.getWind().getBounds(), falObj.getBounds()) && !objectEffected)
             {
+                Log.e("falobj", "wind collision");
                 Physics.calculateWindForce(fan.getWind(), falObj);
                 //Log.e("wind", "xforce " + fan.getWind().getxForce() + " yforce " + fan.getWind().getyForce());
                 //Log.e("mode", "wind collision");
@@ -378,6 +385,8 @@ public abstract class ModeConfig
             if (!falObj.isCollected())
             {
                 falObj.updatePosition(xForce, yForce);
+
+                Log.e("falobj", "update");
             }
 
             falObj.draw();

@@ -17,6 +17,7 @@ public class Vortex extends Model
 
         type = collectionType;
         setBounds(new Bounds());
+        setSize(new float[]{0.3f, 0.3f});
 
         xPos = x;//+.01f;
         yPos = -1.0f;//0.935f;//GamePlayActivity.Y_EDGE_POSITION;
@@ -110,9 +111,13 @@ public class Vortex extends Model
         {
             orbitingObject.updatePosition(0, deltaY);
         }
-        getBounds().setBounds(xPos - 0.15f, yPos - 0.21f, xPos + 0.15f, yPos - 0.1f);
+        getBounds().setBounds(xPos - getSize()[0] / 2.0f, yPos - 0.21f, xPos + getSize()[0] / 2.0f, yPos - 0.1f);
     }
 
+    public String getType()
+    {
+        return type;
+    }
 
     public boolean isCollecting()
     {
