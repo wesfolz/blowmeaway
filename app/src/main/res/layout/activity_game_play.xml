@@ -25,13 +25,56 @@
         android:onClick="onPauseButtonClicked"/>
 
     <TextView
-        android:text="TextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignBottom="@+id/pauseButton"
         android:layout_toLeftOf="@+id/pauseButton"
         android:layout_toStartOf="@+id/pauseButton"
         android:layout_marginBottom="16dp"
-        android:id="@+id/textView2"/>
+        android:id="@+id/timerTextView"
+        android:text="Seconds"/>
+
+    <TextView
+        android:text="10"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="10dp"
+        android:layout_marginEnd="10dp"
+        android:id="@+id/cubeTextView"
+        android:layout_alignBaseline="@+id/timerTextView"
+        android:layout_alignBottom="@+id/timerTextView"
+        android:layout_toLeftOf="@+id/timerTextView"
+        android:layout_toStartOf="@+id/timerTextView"/>
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@android:drawable/checkbox_off_background"
+        android:id="@+id/imageView"
+        android:layout_alignBottom="@+id/cubeTextView"
+        android:layout_toLeftOf="@+id/cubeTextView"
+        android:layout_toStartOf="@+id/cubeTextView"/>
+
+    <TextView
+        android:text="10"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/cubeTextView"
+        android:layout_toLeftOf="@+id/imageView"
+        android:layout_toStartOf="@+id/imageView"
+        android:layout_marginRight="9dp"
+        android:layout_marginEnd="9dp"
+        android:id="@+id/ringTextView"/>
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@android:drawable/btn_radio"
+        android:id="@+id/imageView2"
+        android:layout_alignParentTop="true"
+        android:layout_toLeftOf="@+id/ringTextView"
+        android:layout_toStartOf="@+id/ringTextView"
+        android:layout_marginTop="8dp"
+        android:layout_alignBottom="@+id/pauseButton"/>
 
 </RelativeLayout>

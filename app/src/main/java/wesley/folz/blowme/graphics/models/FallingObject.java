@@ -170,8 +170,6 @@ public class FallingObject extends Model
         spiralY += deltaY;
         zPos = newZ;//zPos + deltaZ;
 
-
-        collected = true;
         spiraling = true;
 
         //move inwards
@@ -203,7 +201,6 @@ public class FallingObject extends Model
                 deltaY = 0;
                 yPos = spiralY;
                 spiralY = 0;
-                collected = false;
                 spiraling = false;
                 vortex.setCollecting(false);
                 spiralFactor = 0;
@@ -286,7 +283,6 @@ public class FallingObject extends Model
                 travelOnVector(0, 0.001f);
             }
         }
-        collected = true;
         spiraling = true;
 
         getBounds().setBounds(xPos - scaleFactor, yPos - scaleFactor, xPos + scaleFactor, yPos + scaleFactor);
@@ -313,6 +309,10 @@ public class FallingObject extends Model
 
         stretchX = 1.0f - stretchFactor;
         stretchY = 1.0f + stretchFactor;
+        if (collectedCount == 0)
+        {
+            collected = true;
+        }
         collectedCount++;
     }
 
@@ -421,7 +421,10 @@ public class FallingObject extends Model
         return collected;
     }
 
-
+    public void setCollected(boolean collected)
+    {
+        this.collected = collected;
+    }
     public boolean isSpiraling()
     {
         return spiraling;
@@ -471,9 +474,9 @@ public class FallingObject extends Model
 
     private long spiralTime = 0;
 
-    private boolean collected;
+    private boolean collected = false;
 
-    private boolean spiraling;
+    private boolean spiraling = false;
 
     private float initialRadius;
     private float initialAngle;

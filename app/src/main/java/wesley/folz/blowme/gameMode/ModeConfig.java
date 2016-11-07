@@ -40,6 +40,8 @@ public abstract class ModeConfig
         numVortexes = 2;
         numRingVortexes = 1;
         numCubeVortexes = 1;
+        numCubesRemaining = 10;
+        numRingsRemaining = 10;
 
         models = new ArrayList<>();
         obstacles = new ArrayList<>();
@@ -382,11 +384,32 @@ public abstract class ModeConfig
                 objectEffected = true;
             }
 
-            if (!falObj.isCollected())
+            if (!falObj.isSpiraling())
             {
                 falObj.updatePosition(xForce, yForce);
 
                 Log.e("falobj", "update");
+            }
+            if (falObj.isCollected())
+            {
+                falObj.setCollected(false);
+                switch (falObj.getType())
+                {
+                    case "cube":
+                        if (numCubesRemaining > 0)
+                        {
+                            numCubesRemaining--;
+                        }
+                        break;
+                    case "ring":
+                        if (numRingsRemaining > 0)
+                        {
+                            numRingsRemaining--;
+                        }
+                        break;
+                    default:
+                        break;
+                }
             }
 
             falObj.draw();
@@ -553,6 +576,16 @@ public abstract class ModeConfig
         }
     }
 
+    public int getNumCubesRemaining()
+    {
+        return numCubesRemaining;
+    }
+
+    public int getNumRingsRemaining()
+    {
+        return numRingsRemaining;
+    }
+
     private ArrayList<Model> models;
     private ArrayList<RicochetObstacle> obstacles;
     private ArrayList<DestructiveObstacle> hazards;
@@ -579,7 +612,7 @@ public abstract class ModeConfig
     private ArrayList<Integer> xLocations = new ArrayList<>();
     private ArrayList<Integer> yLocations = new ArrayList<>();
 
-    //game parameters:
+    //initial game parameters:
     private int numRicochetObstacles;
     private int numDestructiveObstacles;
     private int numFallingObjects;
@@ -588,6 +621,10 @@ public abstract class ModeConfig
     private int numVortexes;
     private int numRingVortexes;
     private int numCubeVortexes;
+
+    //dynamic game parameters
+    private int numCubesRemaining;
+    private int numRingsRemaining;
 
     private boolean touchActionStarted;
 

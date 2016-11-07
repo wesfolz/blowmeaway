@@ -23,7 +23,6 @@ import wesley.folz.blowme.gamemode.ModeConfig;
 
 public class GamePlayActivity extends Activity
 {
-
     @Override
     protected void onCreate( Bundle savedInstanceState )
     {
@@ -49,7 +48,9 @@ public class GamePlayActivity extends Activity
             }
         } );
 
-        timerView = (TextView) this.findViewById(R.id.textView2);
+        cubes = (TextView) findViewById(R.id.cubeTextView);
+        rings = (TextView) findViewById(R.id.ringTextView);
+        timerView = (TextView) this.findViewById(R.id.timerTextView);
         //surfaceView = new GLSurfaceView( this );
         surfaceView = (GamePlaySurfaceView) findViewById(R.id.surfaceView);
 
@@ -66,7 +67,7 @@ public class GamePlayActivity extends Activity
 
         //Log.e( "blowme", "WIDTH " + WIDTH + " HEIGHT " + HEIGHT );
 
-        final ModeConfig gameMode = new ActionModeConfig();
+        gameMode = new ActionModeConfig();
 
         if( supportsEs2 )
         {
@@ -129,7 +130,6 @@ public class GamePlayActivity extends Activity
         this.finish();
     }
 
-
     @Override
     protected void onPause()
     {
@@ -168,6 +168,8 @@ public class GamePlayActivity extends Activity
             {
                 timeLeft = millisUntilFinished / 1000;
                 timerView.setText(Long.toString(timeLeft));
+                cubes.setText(Integer.toString(gameMode.getNumCubesRemaining()));
+                rings.setText(Integer.toString(gameMode.getNumRingsRemaining()));
             }
 
             public void onFinish()
@@ -178,7 +180,6 @@ public class GamePlayActivity extends Activity
             }
         }.start();
     }
-
 
     /**
      * View where OpenGL objects are drawn
@@ -201,6 +202,12 @@ public class GamePlayActivity extends Activity
 
     private long timeLeft = 0;
 
-    TextView timerView;
+    private ModeConfig gameMode;
+
+    private TextView timerView;
+
+    private TextView cubes;
+
+    private TextView rings;
 
 }
