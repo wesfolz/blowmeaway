@@ -40,8 +40,8 @@ public abstract class ModeConfig
         numVortexes = 2;
         numRingVortexes = 1;
         numCubeVortexes = 1;
-        numCubesRemaining = 10;
-        numRingsRemaining = 10;
+        numCubesRemaining = 1;
+        numRingsRemaining = 1;
 
         models = new ArrayList<>();
         obstacles = new ArrayList<>();
@@ -410,6 +410,7 @@ public abstract class ModeConfig
                     default:
                         break;
                 }
+                objectiveComplete = (numCubesRemaining == 0) & (numRingsRemaining == 0);
             }
 
             falObj.draw();
@@ -542,8 +543,6 @@ public abstract class ModeConfig
         }
     }
 
-
-
     public void handleFanMovementDown(float x, float y)
     {
         fan.setInitialX(x);
@@ -574,6 +573,11 @@ public abstract class ModeConfig
         {
             m.resumeGame();
         }
+    }
+
+    public boolean isObjectiveComplete()
+    {
+        return objectiveComplete;
     }
 
     public int getNumCubesRemaining()
@@ -625,6 +629,8 @@ public abstract class ModeConfig
     //dynamic game parameters
     private int numCubesRemaining;
     private int numRingsRemaining;
+
+    private boolean objectiveComplete = false;
 
     private boolean touchActionStarted;
 

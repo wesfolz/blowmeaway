@@ -102,7 +102,7 @@ public class GamePlayActivity extends Activity
             }
         } );
 
-        startTiming(60);
+        startTiming(10);
     }
 
     protected void onPauseButtonClicked(View pauseButton)
@@ -128,6 +128,12 @@ public class GamePlayActivity extends Activity
     protected void onExitGamePlayButtonClicked(View exitButton)
     {
         this.finish();
+    }
+
+    protected void onReplayGameButtonClicked(View replayButton)
+    {
+        resultsWindow.dismiss();
+        this.recreate();
     }
 
     @Override
@@ -170,16 +176,40 @@ public class GamePlayActivity extends Activity
                 timerView.setText(Long.toString(timeLeft));
                 cubes.setText(Integer.toString(gameMode.getNumCubesRemaining()));
                 rings.setText(Integer.toString(gameMode.getNumRingsRemaining()));
+                //game is complete
+                if (gameMode.isObjectiveComplete())
+                {
+                    timer.cancel(); //stop timer
+                    displayGameResults(true); //display results
+                }
             }
 
             public void onFinish()
             {
                 //finish activity
-                finish();
+                displayGameResults(false);
                 //timerView.setText("done!");
             }
         }.start();
     }
+
+    private void displayGameResults(boolean objectiveComplete)
+    {
+        View resultsView = getLayoutInflater().inflate(R.layout.results_window_layout, null);
+        resultsWindow = new PopupWindow(resultsView, ViewPager.LayoutParams.WRAP_CONTENT, ViewPager.LayoutParams.WRAP_CONTENT);
+        TextView resultsText = (TextView) resultsWindow.getContentView().findViewById(R.id.resultsTextView);
+        if (objectiveComplete)
+        {
+            resultsText.setText("Success!!");
+        }
+        else
+        {
+            resultsText.setText("Failure!!");
+        }
+        surfaceView.pauseGame();
+        resultsWindow.showAtLocation(resultsView, Gravity.CENTER, 10, 10);
+    }
+
 
     /**
      * View where OpenGL objects are drawn
@@ -187,6 +217,8 @@ public class GamePlayActivity extends Activity
     private GamePlaySurfaceView surfaceView;
 
     private PopupWindow pauseWindow;
+
+    private PopupWindow resultsWindow;
 
     public static final float X_EDGE_POSITION = 0.35f;
 
