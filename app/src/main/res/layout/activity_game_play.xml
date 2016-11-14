@@ -6,6 +6,7 @@
                 android:paddingRight="0dp"
                 android:paddingTop="0dp"
                 android:paddingBottom="0dp"
+                android:id="@+id/gamePlayViewGroup"
                 tools:context="wesley.folz.blowme.ui.GamePlayActivity">
 
     <wesley.folz.blowme.ui.GamePlaySurfaceView
@@ -18,33 +19,27 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/pauseButton"
+        android:src="@android:drawable/ic_media_pause"
+        android:onClick="onPauseButtonClicked"
+        android:background="@null"
+        android:layout_marginTop="9dp"
         android:layout_alignParentTop="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
-        android:src="@android:drawable/ic_media_pause"
-        android:onClick="onPauseButtonClicked"/>
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/pauseButton"
-        android:layout_toLeftOf="@+id/pauseButton"
-        android:layout_toStartOf="@+id/pauseButton"
-        android:layout_marginBottom="16dp"
-        android:id="@+id/timerTextView"
-        android:text="Seconds"/>
+        android:layout_marginRight="10dp"
+        android:layout_marginEnd="10dp"/>
 
     <TextView
         android:text="10"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginRight="10dp"
-        android:layout_marginEnd="10dp"
         android:id="@+id/cubeTextView"
         android:layout_alignBaseline="@+id/timerTextView"
         android:layout_alignBottom="@+id/timerTextView"
         android:layout_toLeftOf="@+id/timerTextView"
-        android:layout_toStartOf="@+id/timerTextView"/>
+        android:layout_toStartOf="@+id/timerTextView"
+        android:layout_marginRight="19dp"
+        android:layout_marginEnd="19dp"/>
 
     <ImageView
         android:layout_width="wrap_content"
@@ -53,28 +48,42 @@
         android:id="@+id/imageView"
         android:layout_alignBottom="@+id/cubeTextView"
         android:layout_toLeftOf="@+id/cubeTextView"
-        android:layout_toStartOf="@+id/cubeTextView"/>
+        android:layout_toStartOf="@+id/cubeTextView"
+        android:layout_marginRight="7dp"
+        android:layout_marginEnd="7dp"/>
 
     <TextView
         android:text="10"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignTop="@+id/cubeTextView"
+        android:id="@+id/ringTextView"
+        android:layout_alignBottom="@+id/imageView"
         android:layout_toLeftOf="@+id/imageView"
         android:layout_toStartOf="@+id/imageView"
-        android:layout_marginRight="9dp"
-        android:layout_marginEnd="9dp"
-        android:id="@+id/ringTextView"/>
+        android:layout_marginRight="23dp"
+        android:layout_marginEnd="23dp"/>
 
     <ImageView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@android:drawable/btn_radio"
+        android:src="@android:drawable/radiobutton_on_background"
+        android:layout_marginRight="9dp"
+        android:layout_marginEnd="9dp"
         android:id="@+id/imageView2"
-        android:layout_alignParentTop="true"
+        android:layout_alignBottom="@+id/ringTextView"
         android:layout_toLeftOf="@+id/ringTextView"
-        android:layout_toStartOf="@+id/ringTextView"
-        android:layout_marginTop="8dp"
-        android:layout_alignBottom="@+id/pauseButton"/>
+        android:layout_toStartOf="@+id/ringTextView"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/timerTextView"
+        android:text="60"
+        android:layout_marginTop="7dp"
+        android:layout_alignTop="@+id/pauseButton"
+        android:layout_toLeftOf="@+id/pauseButton"
+        android:layout_toStartOf="@+id/pauseButton"
+        android:layout_marginRight="23dp"
+        android:layout_marginEnd="23dp"/>
 
 </RelativeLayout>

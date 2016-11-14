@@ -2,7 +2,8 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:orientation="vertical"
               android:layout_width="match_parent"
-              android:layout_height="match_parent">
+              android:layout_height="match_parent"
+              android:transitionGroup="false">
 
     <TextView
         android:layout_width="wrap_content"
@@ -10,7 +11,8 @@
         android:id="@+id/resultsTextView"
         android:layout_gravity="center_horizontal"
         android:clickable="false"
-        android:text="Game Complete!"/>
+        android:text="Game Complete!"
+        android:layout_margin="10dp"/>
 
     <ImageButton
         android:layout_width="wrap_content"
@@ -18,7 +20,9 @@
         android:id="@+id/replayButton"
         android:layout_gravity="center_horizontal"
         android:src="@android:drawable/ic_menu_rotate"
-        android:onClick="onReplayGameButtonClicked"/>
+        android:onClick="onReplayGameButtonClicked"
+        android:background="@null"
+        android:layout_margin="10dp"/>
 
     <ImageButton
         android:layout_width="wrap_content"
@@ -27,6 +31,8 @@
         android:layout_gravity="center_horizontal"
         android:src="@android:drawable/ic_menu_revert"
         android:clickable="false"
-        android:onClick="onExitGamePlayButtonClicked"/>
+        android:onClick="onExitGamePlayButtonClicked"
+        android:background="@null"
+        android:layout_margin="10dp"/>
 
 </LinearLayout>

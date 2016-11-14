@@ -11,14 +11,18 @@
         android:layout_gravity="center_horizontal"
         android:src="@android:drawable/ic_media_play"
         android:clickable="false"
-        android:onClick="onResumeButtonClicked"/>
+        android:onClick="onResumeButtonClicked"
+        android:background="@null"
+        android:layout_margin="10dp"/>
 
     <ImageButton
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/helpButton"
         android:layout_gravity="center_horizontal"
-        android:src="@android:drawable/ic_menu_help"/>
+        android:src="@android:drawable/ic_menu_help"
+        android:background="@null"
+        android:layout_margin="10dp"/>
 
     <ImageButton
         android:layout_width="wrap_content"
@@ -27,6 +31,8 @@
         android:layout_gravity="center_horizontal"
         android:src="@android:drawable/ic_menu_close_clear_cancel"
         android:clickable="false"
-        android:onClick="onExitGamePlayButtonClicked"/>
+        android:onClick="onExitGamePlayButtonClicked"
+        android:background="@null"
+        android:layout_margin="10dp"/>
 
 </LinearLayout>

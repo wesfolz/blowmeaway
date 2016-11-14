@@ -21,14 +21,19 @@
         android:onClick="startGame"
         android:text="Play"
         android:textColor="@android:color/white"
-        android:textSize="18sp"/>
+        android:textSize="18sp"
+        tools:alpha="1"/>
 
     <SurfaceView
         android:id="@+id/surfaceView2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"/>
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"/>
 
     <Button
         android:id="@+id/modeButton"
@@ -40,7 +45,8 @@
         android:backgroundTint="@android:color/holo_orange_light"
         android:fontFamily="sans-serif"
         android:text="Mode"
-        android:textSize="18sp"/>
+        android:textSize="18sp"
+        android:alpha="1"/>
 
     <Button
         android:id="@+id/shopButton"
@@ -54,7 +60,8 @@
         android:backgroundTint="@android:color/holo_green_light"
         android:fontFamily="sans-serif"
         android:text="Shop"
-        android:textSize="18sp"/>
+        android:textSize="18sp"
+        android:alpha="1"/>
 
     <TextView
         android:id="@+id/titleView"
@@ -67,5 +74,6 @@
         android:textAppearance="@style/TextAppearance.AppCompat.Display2"
         android:textColor="@android:color/holo_blue_dark"
         android:textSize="45sp"
-        android:textStyle="normal|bold"/>
+        android:textStyle="normal|bold"
+        android:alpha="0.5"/>
 </RelativeLayout>
