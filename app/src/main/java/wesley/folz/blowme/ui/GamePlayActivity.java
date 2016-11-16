@@ -187,7 +187,7 @@ public class GamePlayActivity extends Activity
             public void onFinish()
             {
                 //finish activity
-                displayGameResults(false);
+                displayGameResults(gameMode.isObjectiveComplete());
                 //timerView.setText("done!");
             }
         }.start();
