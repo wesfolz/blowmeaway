@@ -38,7 +38,23 @@ public class Fan extends Model
         numVertices = graphicsData.numVerticesMap.get("fan");
         programHandle = graphicsData.shaderProgramIdMap.get("texture");
         textureDataHandle = graphicsData.textureIdMap.get("wood");
+        //      getWind().enableGraphics(graphicsData);
     }
+
+    @Override
+    public void initializeMatrices(float[] viewMatrix, float[] projectionMatrix, float[] lightPosInEyeSpace)
+    {
+        super.initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
+        //      getWind().initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
+    }
+
+    @Override
+    public void draw()
+    {
+        super.draw();
+        //     getWind().draw();
+    }
+
 
     private float[] calculateInwardParametricRotation()
     {

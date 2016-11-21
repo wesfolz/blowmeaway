@@ -6,8 +6,8 @@ android {
 
     defaultConfig {
         applicationId "wesley.folz.blowme"
-        minSdkVersion 14
-        targetSdkVersion 21
+        minSdkVersion 19
+        targetSdkVersion 23
         versionCode 1
         versionName "1.0"
     }

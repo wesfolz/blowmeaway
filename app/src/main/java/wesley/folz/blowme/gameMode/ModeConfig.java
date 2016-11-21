@@ -20,6 +20,7 @@ import wesley.folz.blowme.graphics.models.Fan;
 import wesley.folz.blowme.graphics.models.Model;
 import wesley.folz.blowme.graphics.models.RicochetObstacle;
 import wesley.folz.blowme.graphics.models.Vortex;
+import wesley.folz.blowme.ui.GamePlaySurfaceView;
 import wesley.folz.blowme.util.GraphicsUtilities;
 import wesley.folz.blowme.util.Physics;
 
@@ -171,7 +172,6 @@ public abstract class ModeConfig
         {
             m.enableGraphics(graphicsData);
         }
-        fan.getWind().enableGraphics(graphicsData);
         Log.e("pause", "enable graphics mode");
     }
 
@@ -203,7 +203,6 @@ public abstract class ModeConfig
         {
             m.initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
         }
-        fan.getWind().initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
 
         Log.e("pause", "surface changed mode");
     }
@@ -306,7 +305,6 @@ public abstract class ModeConfig
                     {
                         explosionIndex = 0;
                     }
-
                     break;
                 }
             }
@@ -338,7 +336,6 @@ public abstract class ModeConfig
                 if (Physics.isCollision(vortex.getBounds(), falObj.getBounds())
                         || (falObj.isSpiraling() && vortex.isCollecting() && vortexCount == falObj.getCollectingVortexIndex()))
                 {
-                    Log.e("falobj", "vortex " + Physics.isCollision(vortex.getBounds(), falObj.getBounds()));
                     vortex.setCollecting(true);
                     //falObj.travelOnVector(vortex.getxPos() - falObj.getxPos(), vortex.getyPos() - falObj.getyPos());
                     falObj.setCollectingVortexIndex(vortexCount);
@@ -365,7 +362,6 @@ public abstract class ModeConfig
                 //falObj.updatePosition(100 * dispenser.getDeltaX(), 0);
                 xForce = 100 * dispenser.getDeltaX();
                 //objectEffected = true;
-                Log.e("falobj", "dispense");
             }
 
             //determine forces due to collisions with obstacles
@@ -374,7 +370,6 @@ public abstract class ModeConfig
             //calculate wind influence
             if (Physics.isCollision(fan.getWind().getBounds(), falObj.getBounds()) && !objectEffected)
             {
-                Log.e("falobj", "wind collision");
                 Physics.calculateWindForce(fan.getWind(), falObj);
                 //Log.e("wind", "xforce " + fan.getWind().getxForce() + " yforce " + fan.getWind().getyForce());
                 //Log.e("mode", "wind collision");
@@ -387,8 +382,6 @@ public abstract class ModeConfig
             if (!falObj.isSpiraling())
             {
                 falObj.updatePosition(xForce, yForce);
-
-                Log.e("falobj", "update");
             }
             if (falObj.isCollected())
             {
@@ -432,13 +425,11 @@ public abstract class ModeConfig
             dc.updatePosition(0, 0);
             dc.draw();
         }
-        fan.getWind().draw();
-
         //line.updatePosition(0, 0);
         //line.draw();
     }
 
-    private float[] generateRandomLocation()
+    protected float[] generateRandomLocation()
     {
         Random rand = new Random();
         //screen dimensions: -0.5 <= x <= 0.5, -1 <= y <= 1
@@ -575,6 +566,41 @@ public abstract class ModeConfig
         }
     }
 
+    public GraphicsUtilities getGraphicsData()
+    {
+        return graphicsData;
+    }
+
+    public void setGraphicsData(ModeConfig mode, GamePlaySurfaceView surfaceView)
+    {
+        this.graphicsData = mode.graphicsData;
+        this.projectionMatrix = mode.projectionMatrix;
+        this.viewMatrix = mode.viewMatrix;
+        this.lightPosInEyeSpace = mode.lightPosInEyeSpace;
+        this.background = mode.background;
+        this.fan = mode.fan;
+        this.dispenser = mode.dispenser;
+        for (Model m : models)
+        {
+            m.initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
+        }
+
+        surfaceView.queueEvent(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                Log.e("clone", "view matrix " + viewMatrix + "projection matrix " + projectionMatrix + "light position " + lightPosInEyeSpace);
+
+                for (Model m : models)
+                {
+                    m.enableGraphics(graphicsData);
+                }
+            }
+        });
+
+    }
+
     public boolean isObjectiveComplete()
     {
         return objectiveComplete;
@@ -590,22 +616,22 @@ public abstract class ModeConfig
         return numRingsRemaining;
     }
 
-    private ArrayList<Model> models;
-    private ArrayList<RicochetObstacle> obstacles;
-    private ArrayList<DestructiveObstacle> hazards;
-    private ArrayList<FallingObject> fallingObjects;
-    private ArrayList<Explosion> explosions;
-    private ArrayList<Vortex> vortexes;
-    private ArrayList<DustCloud> dustClouds;
+    protected ArrayList<Model> models;
+    protected ArrayList<RicochetObstacle> obstacles;
+    protected ArrayList<DestructiveObstacle> hazards;
+    protected ArrayList<FallingObject> fallingObjects;
+    protected ArrayList<Explosion> explosions;
+    protected ArrayList<Vortex> vortexes;
+    protected ArrayList<DustCloud> dustClouds;
 
-    private Fan fan;
-    private Background background;
-    private Dispenser dispenser;
-    private Line line;
+    protected Fan fan;
+    protected Background background;
+    protected Dispenser dispenser;
+    protected Line line;
 
-    private float[] viewMatrix = new float[16];
-    private float[] projectionMatrix = new float[16];
-    private float[] lightPosInEyeSpace = new float[16];
+    protected float[] viewMatrix = new float[16];
+    protected float[] projectionMatrix = new float[16];
+    protected float[] lightPosInEyeSpace = new float[16];
 
     private boolean draw;
 

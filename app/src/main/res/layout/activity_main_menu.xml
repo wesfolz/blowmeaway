@@ -18,22 +18,12 @@
         android:layout_marginTop="161dp"
         android:backgroundTint="@android:color/holo_red_light"
         android:fontFamily="sans-serif"
-        android:onClick="startGame"
         android:text="Play"
         android:textColor="@android:color/white"
         android:textSize="18sp"
-        tools:alpha="1"/>
+        tools:alpha="1"
+        android:onClick="onPlayButtonClicked"/>
 
-    <SurfaceView
-        android:id="@+id/surfaceView2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"/>
 
     <Button
         android:id="@+id/modeButton"

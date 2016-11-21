@@ -9,16 +9,22 @@ import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.support.v4.view.MotionEventCompat;
 import android.support.v4.view.ViewPager;
+import android.transition.Scene;
+import android.transition.Transition;
+import android.transition.TransitionInflater;
+import android.transition.TransitionManager;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 
 import wesley.folz.blowme.R;
 import wesley.folz.blowme.gamemode.ActionModeConfig;
+import wesley.folz.blowme.gamemode.MenuModeConfig;
 import wesley.folz.blowme.gamemode.ModeConfig;
 
 public class GamePlayActivity extends Activity
@@ -27,7 +33,7 @@ public class GamePlayActivity extends Activity
     protected void onCreate( Bundle savedInstanceState )
     {
         super.onCreate( savedInstanceState );
-        setContentView( R.layout.activity_game_play );
+        setContentView(R.layout.main_scene_containter_layout);
         getWindow().addFlags( WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON | WindowManager
                 .LayoutParams.FLAG_FULLSCREEN );
 
@@ -48,10 +54,17 @@ public class GamePlayActivity extends Activity
             }
         } );
 
-        cubes = (TextView) findViewById(R.id.cubeTextView);
-        rings = (TextView) findViewById(R.id.ringTextView);
-        timerView = (TextView) this.findViewById(R.id.timerTextView);
-        //surfaceView = new GLSurfaceView( this );
+// Create the scene root for the scenes in this app
+        sceneRoot = (ViewGroup) findViewById(R.id.scene_root);
+
+// Create the scenes
+        mainMenuScene = Scene.getSceneForLayout(sceneRoot, R.layout.activity_main_menu, this);
+        gamePlayScene = Scene.getSceneForLayout(sceneRoot, R.layout.activity_game_play, this);
+
+        transitionAnimation =
+                TransitionInflater.from(this).
+                        inflateTransition(R.transition.fade_transition);
+
         surfaceView = (GamePlaySurfaceView) findViewById(R.id.surfaceView);
 
         // Check if the system supports OpenGL ES 2.0.
@@ -67,15 +80,16 @@ public class GamePlayActivity extends Activity
 
         //Log.e( "blowme", "WIDTH " + WIDTH + " HEIGHT " + HEIGHT );
 
-        gameMode = new ActionModeConfig();
-
         if( supportsEs2 )
         {
             // Request an OpenGL ES 2.0 compatible context.
             surfaceView.setEGLContextClientVersion( 2 );
 
+            menuMode = new MenuModeConfig();//new ActionModeConfig();
+
+            surfaceView.setRenderer(new GamePlayRenderer(menuMode));
+
             // Set the renderer to our demo renderer, defined below.
-            surfaceView.setRenderer(new GamePlayRenderer(gameMode));
             //surfaceView.setRenderMode( GLSurfaceView.RENDERMODE_WHEN_DIRTY );
         }
         else
@@ -84,6 +98,32 @@ public class GamePlayActivity extends Activity
             // renderer if you wanted to support both ES 1 and ES 2.
             return;
         }
+
+    }
+
+    protected void onPauseButtonClicked(View pauseButton)
+    {
+        Log.e("blowme", "pause");
+        if (!surfaceView.getRenderer().isPaused())
+        {
+            timer.cancel();
+            View pauseView = getLayoutInflater().inflate(R.layout.pause_window_layout, null);
+            pauseWindow = new PopupWindow(pauseView, ViewPager.LayoutParams.WRAP_CONTENT, ViewPager.LayoutParams.WRAP_CONTENT);
+            surfaceView.pauseGame();
+            pauseWindow.showAtLocation(pauseView, Gravity.CENTER, 10, 10);
+        }
+    }
+
+    private void initializeGame()
+    {
+        gameMode = new ActionModeConfig();
+
+        gameMode.setGraphicsData(menuMode, surfaceView);
+        surfaceView.getRenderer().setModeConfig(gameMode);
+        cubes = (TextView) findViewById(R.id.cubeTextView);
+        rings = (TextView) findViewById(R.id.ringTextView);
+        timerView = (TextView) this.findViewById(R.id.timerTextView);
+
         //TODO: Possibly have fan constantly move in an a ellipse, user taps to change direction?
         //or user taps and holds and fan moves towards their finger?
         surfaceView.setOnTouchListener( new View.OnTouchListener()
@@ -105,17 +145,12 @@ public class GamePlayActivity extends Activity
         startTiming(10);
     }
 
-    protected void onPauseButtonClicked(View pauseButton)
+    protected void onPlayButtonClicked(View playButton)
     {
-        Log.e("blowme", "pause");
-        if (!surfaceView.getRenderer().isPaused())
-        {
-            timer.cancel();
-            View pauseView = getLayoutInflater().inflate(R.layout.pause_window_layout, null);
-            pauseWindow = new PopupWindow(pauseView, ViewPager.LayoutParams.WRAP_CONTENT, ViewPager.LayoutParams.WRAP_CONTENT);
-            surfaceView.pauseGame();
-            pauseWindow.showAtLocation(pauseView, Gravity.CENTER, 10, 10);
-        }
+        Log.e("surface view", "renderer " + surfaceView.getRenderer());
+        TransitionManager.go(gamePlayScene, transitionAnimation);
+        Log.e("surface view", "renderer " + surfaceView.getRenderer());
+        initializeGame();
     }
 
     protected void onResumeButtonClicked(View resumeButton)
@@ -127,13 +162,25 @@ public class GamePlayActivity extends Activity
 
     protected void onExitGamePlayButtonClicked(View exitButton)
     {
-        this.finish();
+        if (pauseWindow != null)
+        {
+            pauseWindow.dismiss();
+        }
+        if (resultsWindow != null)
+        {
+            resultsWindow.dismiss();
+        }
+        surfaceView.resumeGame();
+        TransitionManager.go(mainMenuScene, transitionAnimation);
+        //this.finish();
     }
 
     protected void onReplayGameButtonClicked(View replayButton)
     {
         resultsWindow.dismiss();
-        this.recreate();
+        this.initializeGame();
+        surfaceView.resumeGame();
+        //this.recreate();
     }
 
     @Override
@@ -174,10 +221,10 @@ public class GamePlayActivity extends Activity
             {
                 timeLeft = millisUntilFinished / 1000;
                 timerView.setText(Long.toString(timeLeft));
-                cubes.setText(Integer.toString(gameMode.getNumCubesRemaining()));
-                rings.setText(Integer.toString(gameMode.getNumRingsRemaining()));
+                cubes.setText(Integer.toString(menuMode.getNumCubesRemaining()));
+                rings.setText(Integer.toString(menuMode.getNumRingsRemaining()));
                 //game is complete
-                if (gameMode.isObjectiveComplete())
+                if (menuMode.isObjectiveComplete())
                 {
                     timer.cancel(); //stop timer
                     displayGameResults(true); //display results
@@ -187,7 +234,7 @@ public class GamePlayActivity extends Activity
             public void onFinish()
             {
                 //finish activity
-                displayGameResults(gameMode.isObjectiveComplete());
+                displayGameResults(menuMode.isObjectiveComplete());
                 //timerView.setText("done!");
             }
         }.start();
@@ -234,6 +281,8 @@ public class GamePlayActivity extends Activity
 
     private long timeLeft = 0;
 
+    private ModeConfig menuMode;
+
     private ModeConfig gameMode;
 
     private TextView timerView;
@@ -241,5 +290,11 @@ public class GamePlayActivity extends Activity
     private TextView cubes;
 
     private TextView rings;
+
+    private ViewGroup sceneRoot;
+
+    private Scene mainMenuScene;
+    private Scene gamePlayScene;
+    private Transition transitionAnimation;
 
 }

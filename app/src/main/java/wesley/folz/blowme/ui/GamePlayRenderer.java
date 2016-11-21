@@ -200,6 +200,12 @@ public class GamePlayRenderer implements GLSurfaceView.Renderer
         return paused;
     }
 
+
+    public void setModeConfig(ModeConfig modeConfig)
+    {
+        this.modeConfig = modeConfig;
+    }
+
     private ModeConfig modeConfig;
     private boolean paused;
 
