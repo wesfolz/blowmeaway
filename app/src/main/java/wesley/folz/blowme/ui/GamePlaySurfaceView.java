@@ -9,28 +9,20 @@ import android.util.AttributeSet;
  */
 public class GamePlaySurfaceView extends GLSurfaceView
 {
+    /*-----------------------------------------Constructors---------------------------------------*/
+
     public GamePlaySurfaceView(Context context, AttributeSet attrs)
     {
         super(context, attrs);
     }
 
-    public void pauseGame()
-    {
-        this.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
-        renderer.pauseGame();
-    }
+    /*---------------------------------------Override Methods-------------------------------------*/
 
     @Override
     public void onPause()
     {
         super.onPause();
         this.pauseGame();
-    }
-
-    public void resumeGame()
-    {
-        this.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
-        renderer.resumeGame();
     }
 
     @Override
@@ -47,11 +39,34 @@ public class GamePlaySurfaceView extends GLSurfaceView
         this.renderer = (GamePlayRenderer) renderer;
     }
 
-    public GamePlayRenderer getRenderer()
+    /*---------------------------------------Public Methods---------------------------------------*/
+
+    public void pauseGame()
     {
+        this.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
+        renderer.pauseGame();
+    }
+
+    public void resumeGame() {
+        this.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
+        renderer.resumeGame();
+    }
+
+    /*-------------------------------------Protected Methods--------------------------------------*/
+
+    /*--------------------------------------Private Methods---------------------------------------*/
+
+    /*--------------------------------------Getters and Setters-----------------------------------*/
+
+    public GamePlayRenderer getRenderer() {
         return renderer;
     }
 
-    private GamePlayRenderer renderer;
+    /*----------------------------------------Public Fields---------------------------------------*/
 
+    /*--------------------------------------Protected Fields--------------------------------------*/
+
+    /*---------------------------------------Private Fields---------------------------------------*/
+
+    private GamePlayRenderer renderer;
 }

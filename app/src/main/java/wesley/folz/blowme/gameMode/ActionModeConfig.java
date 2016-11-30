@@ -13,9 +13,7 @@ public class ActionModeConfig extends ModeConfig
     {
         super();
         timeLeft = 10;
-        positionsInitialized = false;
     }
-
 
     @Override
     protected void initializationRoutine()
@@ -52,28 +50,6 @@ public class ActionModeConfig extends ModeConfig
 
             }
         }, 0, 1000);
-/*
-        timer = new CountDownTimer(timeInterval * 1000, 1000)
-        {
-            public void onTick(long millisUntilFinished)
-            {
-                timeLeft = millisUntilFinished / 1000;
-                //game is complete
-                if (isObjectiveComplete())
-                {
-                    timer.cancel(); //stop timer
-                }
-            }
-
-            public void onFinish()
-            {
-                //finish activity
-                objectiveFailed = !isObjectiveComplete();
-                //timerView.setText("done!");
-            }
-        }.start();
-
-        */
     }
 
     @Override
@@ -95,6 +71,15 @@ public class ActionModeConfig extends ModeConfig
             timer.cancel();
         }
     }
+
+    @Override
+    public void stopGame() {
+        super.stopGame();
+        if (timer != null) {
+            timer.cancel();
+        }
+    }
+
 
     public long getTimeLeft()
     {

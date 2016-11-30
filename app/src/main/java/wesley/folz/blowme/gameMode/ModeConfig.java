@@ -656,6 +656,10 @@ public abstract class ModeConfig
         }
     }
 
+    public void stopGame() {
+        Log.e("pause", "stop mode");
+    }
+
     public GraphicsUtilities getGraphicsData()
     {
         return graphicsData;

@@ -29,6 +29,11 @@ import wesley.folz.blowme.gamemode.ModeConfig;
 
 public class GamePlayActivity extends Activity
 {
+
+    /*-----------------------------------------Constructors---------------------------------------*/
+
+    /*---------------------------------------Override Methods-------------------------------------*/
+
     @Override
     protected void onCreate( Bundle savedInstanceState )
     {
@@ -100,42 +105,41 @@ public class GamePlayActivity extends Activity
         }
     }
 
-    private void initializeGameMode()
+    @Override
+    protected void onPause()
     {
-        gameMode = new ActionModeConfig();
-        gameMode.initializeFromExistingMode(menuMode, surfaceView);
-        surfaceView.getRenderer().setModeConfig(gameMode);
-
-        cubes = (TextView) findViewById(R.id.cubeTextView);
-        rings = (TextView) findViewById(R.id.ringTextView);
-        timerView = (TextView) this.findViewById(R.id.timerTextView);
-
-        //TODO: Possibly have fan constantly move in an a ellipse, user taps to change direction?
-        //or user taps and holds and fan moves towards their finger?
-        surfaceView.setOnTouchListener( new View.OnTouchListener()
-        {
-            @Override
-            public boolean onTouch( View v, MotionEvent event )
-            {
-                final int action = MotionEventCompat.getActionMasked( event );
-                //multiply by 2 because OpenGL coordinates go [-1,1] whereas screeen coordinates only go [0,1]
-                float x = 2 * event.getX() / WIDTH;
-                float y = 2 * event.getY() / HEIGHT;
-
-                gameMode.handleTouchDrag(action, x, y);
-
-                return true;
-            }
-        } );
-
-        startTiming();
+        super.onPause();
+        surfaceView.onPause();
+        if (timerHandler != null) {
+            timerHandler.removeCallbacks(timerRunnable);
+        }
     }
 
-    private void initializeMenuMode()
-    {
-        surfaceView.getRenderer().setModeConfig(menuMode);
-        surfaceView.setOnTouchListener(null);
+    @Override
+    protected void onResume() {
+        super.onResume();
+        surfaceView.onResume();
+        //startTiming();
     }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus)
+    {
+        super.onWindowFocusChanged(hasFocus);
+        if (hasFocus) {
+            //make window fullscreen
+            getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                    | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                    | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                    | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                    | View.SYSTEM_UI_FLAG_FULLSCREEN
+                    | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+        }
+    }
+
+    /*---------------------------------------Public Methods---------------------------------------*/
+
+    /*-------------------------------------Protected Methods--------------------------------------*/
 
     protected void onPlayButtonClicked(View playButton)
     {
@@ -143,6 +147,11 @@ public class GamePlayActivity extends Activity
         initializeGameMode();
     }
 
+    /**
+     * Resumes game play from a paused state, dismisses pauseWindow
+     *
+     * @param resumeButton - Resume button in pauseWindow that activated this method
+     */
     protected void onResumeButtonClicked(View resumeButton)
     {
         pauseWindow.dismiss();
@@ -150,6 +159,10 @@ public class GamePlayActivity extends Activity
         startTiming();
     }
 
+    /**
+     * Pauses game and surface view, launches the pause popup window
+     * @param pauseButton - Pause button in game play view that activated this method
+     */
     protected void onPauseButtonClicked(View pauseButton)
     {
         Log.e("blowme", "pause");
@@ -162,6 +175,10 @@ public class GamePlayActivity extends Activity
         }
     }
 
+    /**
+     * Exits game play and transitions back to menu, dismisses any popup windows
+     * @param exitButton - Exit button in pauseWindow that activated this method
+     */
     protected void onExitGamePlayButtonClicked(View exitButton)
     {
         if (pauseWindow != null)
@@ -172,51 +189,79 @@ public class GamePlayActivity extends Activity
         {
             resultsWindow.dismiss();
         }
+        timerHandler.removeCallbacks(timerRunnable);
+        gameMode.stopGame();
         surfaceView.resumeGame();
         TransitionManager.go(mainMenuScene, transitionAnimation);
         initializeMenuMode();
-        //this.finish();
     }
 
+    /**
+     * Reinitializes game parameters, dismisses results window and resumes rendering
+     * @param replayButton - Button in results window that activated this method
+     */
     protected void onReplayGameButtonClicked(View replayButton)
     {
         resultsWindow.dismiss();
         this.initializeGameMode();
         surfaceView.resumeGame();
-        //this.recreate();
     }
 
-    @Override
-    protected void onPause()
-    {
-        super.onPause();
-        surfaceView.onPause();
-        timerHandler.removeCallbacks(timerRunnable);
-    }
+    /*--------------------------------------Private Methods---------------------------------------*/
 
-    @Override
-    protected void onResume()
-    {
-        super.onResume();
-        surfaceView.onResume();
-        //startTiming();
-    }
-
-    @Override
-    public void onWindowFocusChanged( boolean hasFocus )
-    {
-        super.onWindowFocusChanged( hasFocus );
-        if( hasFocus )
-        {
-            //make window fullscreen
-            getWindow().getDecorView().setSystemUiVisibility( View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                    | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                    | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                    | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                    | View.SYSTEM_UI_FLAG_FULLSCREEN
-                    | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY );
+    private void displayGameResults(boolean objectiveComplete) {
+        Log.e("diplaygame", "objective complete " + objectiveComplete);
+        View resultsView = getLayoutInflater().inflate(R.layout.results_window_layout, null);
+        resultsWindow = new PopupWindow(resultsView, ViewPager.LayoutParams.WRAP_CONTENT,
+                ViewPager.LayoutParams.WRAP_CONTENT);
+        TextView resultsText = (TextView) resultsWindow.getContentView().findViewById(
+                R.id.resultsTextView);
+        if (objectiveComplete) {
+            resultsText.setText("Success!!");
+        } else {
+            resultsText.setText("Failure!!");
         }
+        surfaceView.pauseGame();
+        resultsWindow.showAtLocation(resultsView, Gravity.CENTER, 10, 10);
     }
+
+    private void initializeGameMode() {
+        gameMode = new ActionModeConfig();
+        gameMode.initializeFromExistingMode(menuMode, surfaceView);
+        surfaceView.getRenderer().setModeConfig(gameMode);
+
+        cubes = (TextView) findViewById(R.id.cubeTextView);
+        rings = (TextView) findViewById(R.id.ringTextView);
+        timerView = (TextView) this.findViewById(R.id.timerTextView);
+
+        //TODO: Possibly have fan constantly move in an a ellipse, user taps to change direction?
+        //or user taps and holds and fan moves towards their finger?
+        surfaceView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                final int action = MotionEventCompat.getActionMasked(event);
+                //multiply by 2 because OpenGL coordinates go [-1,1] whereas screeen coordinates
+                // only go [0,1]
+                float x = 2 * event.getX() / WIDTH;
+                float y = 2 * event.getY() / HEIGHT;
+
+                gameMode.handleTouchDrag(action, x, y);
+
+                return true;
+            }
+        });
+
+        startTiming();
+    }
+
+    /**
+     * Sets the mode of the renderer to a menuMode and disables the touch listener
+     */
+    private void initializeMenuMode() {
+        surfaceView.getRenderer().setModeConfig(menuMode);
+        surfaceView.setOnTouchListener(null);
+    }
+
 
     public void startTiming()
     {
@@ -245,23 +290,18 @@ public class GamePlayActivity extends Activity
         timerHandler.postDelayed(timerRunnable, 0);
     }
 
-    private void displayGameResults(boolean objectiveComplete)
-    {
-        Log.e("diplaygame", "objective complete " + objectiveComplete);
-        View resultsView = getLayoutInflater().inflate(R.layout.results_window_layout, null);
-        resultsWindow = new PopupWindow(resultsView, ViewPager.LayoutParams.WRAP_CONTENT, ViewPager.LayoutParams.WRAP_CONTENT);
-        TextView resultsText = (TextView) resultsWindow.getContentView().findViewById(R.id.resultsTextView);
-        if (objectiveComplete)
-        {
-            resultsText.setText("Success!!");
-        }
-        else
-        {
-            resultsText.setText("Failure!!");
-        }
-        surfaceView.pauseGame();
-        resultsWindow.showAtLocation(resultsView, Gravity.CENTER, 10, 10);
-    }
+    /*--------------------------------------Getters and Setters-----------------------------------*/
+
+
+    /*----------------------------------------Public Fields---------------------------------------*/
+
+    public static final float X_EDGE_POSITION = 0.35f;
+
+    public static final float Y_EDGE_POSITION = 0.7f;
+
+    /*--------------------------------------Protected Fields--------------------------------------*/
+
+    /*---------------------------------------Private Fields---------------------------------------*/
 
     /**
      * View where OpenGL objects are drawn
@@ -271,10 +311,6 @@ public class GamePlayActivity extends Activity
     private PopupWindow pauseWindow;
 
     private PopupWindow resultsWindow;
-
-    public static final float X_EDGE_POSITION = 0.35f;
-
-    public static final float Y_EDGE_POSITION = 0.7f;
 
     private int WIDTH;
 
@@ -305,5 +341,4 @@ public class GamePlayActivity extends Activity
     private Handler timerHandler;
 
     private Runnable timerRunnable;
-
 }
