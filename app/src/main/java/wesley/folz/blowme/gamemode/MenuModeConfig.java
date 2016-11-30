@@ -4,6 +4,7 @@ import android.util.Log;
 
 import wesley.folz.blowme.graphics.models.FallingObject;
 
+
 /**
  * Created by Wesley on 11/20/2016.
  */
@@ -11,15 +12,18 @@ import wesley.folz.blowme.graphics.models.FallingObject;
 public class MenuModeConfig extends ModeConfig
 {
 
-    public void updatePositionsAndDrawModels()
+    public MenuModeConfig()
+    {
+        super();
+        positionsInitialized = true;
+    }
+
+    @Override
+    protected void updateModelPositions()
     {
         background.updatePosition(0, 0);
-        background.draw();
-
-        fan.draw();
 
         dispenser.updatePosition(0, 0);
-        dispenser.draw();
 
         int modelCount = 0;
         for (FallingObject falObj : fallingObjects)
@@ -45,11 +49,24 @@ public class MenuModeConfig extends ModeConfig
             }
 
             falObj.updatePosition(0, 0);
-            falObj.draw();
             modelCount++;
         }
 
         //line.updatePosition(0, 0);
+        //line.draw();
+    }
+
+    protected void drawModels()
+    {
+        background.draw();
+        fan.draw();
+
+        dispenser.draw();
+
+        for (FallingObject falObj : fallingObjects)
+        {
+            falObj.draw();
+        }
         //line.draw();
     }
 }

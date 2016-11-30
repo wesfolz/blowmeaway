@@ -6,7 +6,7 @@ import android.content.Context;
 import android.content.pm.ConfigurationInfo;
 import android.graphics.Point;
 import android.os.Bundle;
-import android.os.CountDownTimer;
+import android.os.Handler;
 import android.support.v4.view.MotionEventCompat;
 import android.support.v4.view.ViewPager;
 import android.transition.Scene;
@@ -98,28 +98,14 @@ public class GamePlayActivity extends Activity
             // renderer if you wanted to support both ES 1 and ES 2.
             return;
         }
-
     }
 
-    protected void onPauseButtonClicked(View pauseButton)
-    {
-        Log.e("blowme", "pause");
-        if (!surfaceView.getRenderer().isPaused())
-        {
-            timer.cancel();
-            View pauseView = getLayoutInflater().inflate(R.layout.pause_window_layout, null);
-            pauseWindow = new PopupWindow(pauseView, ViewPager.LayoutParams.WRAP_CONTENT, ViewPager.LayoutParams.WRAP_CONTENT);
-            surfaceView.pauseGame();
-            pauseWindow.showAtLocation(pauseView, Gravity.CENTER, 10, 10);
-        }
-    }
-
-    private void initializeGame()
+    private void initializeGameMode()
     {
         gameMode = new ActionModeConfig();
-
-        gameMode.setGraphicsData(menuMode, surfaceView);
+        gameMode.initializeFromExistingMode(menuMode, surfaceView);
         surfaceView.getRenderer().setModeConfig(gameMode);
+
         cubes = (TextView) findViewById(R.id.cubeTextView);
         rings = (TextView) findViewById(R.id.ringTextView);
         timerView = (TextView) this.findViewById(R.id.timerTextView);
@@ -142,22 +128,38 @@ public class GamePlayActivity extends Activity
             }
         } );
 
-        startTiming(10);
+        startTiming();
+    }
+
+    private void initializeMenuMode()
+    {
+        surfaceView.getRenderer().setModeConfig(menuMode);
+        surfaceView.setOnTouchListener(null);
     }
 
     protected void onPlayButtonClicked(View playButton)
     {
-        Log.e("surface view", "renderer " + surfaceView.getRenderer());
         TransitionManager.go(gamePlayScene, transitionAnimation);
-        Log.e("surface view", "renderer " + surfaceView.getRenderer());
-        initializeGame();
+        initializeGameMode();
     }
 
     protected void onResumeButtonClicked(View resumeButton)
     {
         pauseWindow.dismiss();
         surfaceView.resumeGame();
-        startTiming(timeLeft);
+        startTiming();
+    }
+
+    protected void onPauseButtonClicked(View pauseButton)
+    {
+        Log.e("blowme", "pause");
+        if (!surfaceView.getRenderer().isPaused())
+        {
+            View pauseView = getLayoutInflater().inflate(R.layout.pause_window_layout, null);
+            pauseWindow = new PopupWindow(pauseView, ViewPager.LayoutParams.WRAP_CONTENT, ViewPager.LayoutParams.WRAP_CONTENT);
+            surfaceView.pauseGame();
+            pauseWindow.showAtLocation(pauseView, Gravity.CENTER, 10, 10);
+        }
     }
 
     protected void onExitGamePlayButtonClicked(View exitButton)
@@ -172,13 +174,14 @@ public class GamePlayActivity extends Activity
         }
         surfaceView.resumeGame();
         TransitionManager.go(mainMenuScene, transitionAnimation);
+        initializeMenuMode();
         //this.finish();
     }
 
     protected void onReplayGameButtonClicked(View replayButton)
     {
         resultsWindow.dismiss();
-        this.initializeGame();
+        this.initializeGameMode();
         surfaceView.resumeGame();
         //this.recreate();
     }
@@ -188,6 +191,7 @@ public class GamePlayActivity extends Activity
     {
         super.onPause();
         surfaceView.onPause();
+        timerHandler.removeCallbacks(timerRunnable);
     }
 
     @Override
@@ -195,6 +199,7 @@ public class GamePlayActivity extends Activity
     {
         super.onResume();
         surfaceView.onResume();
+        //startTiming();
     }
 
     @Override
@@ -213,35 +218,36 @@ public class GamePlayActivity extends Activity
         }
     }
 
-    public void startTiming(long timeInterval)
+    public void startTiming()
     {
-        timer = new CountDownTimer(timeInterval * 1000, 1000)
+        timerHandler = new Handler();
+        timerRunnable = new Runnable()
         {
-            public void onTick(long millisUntilFinished)
+            @Override
+            public void run()
             {
-                timeLeft = millisUntilFinished / 1000;
-                timerView.setText(Long.toString(timeLeft));
-                cubes.setText(Integer.toString(menuMode.getNumCubesRemaining()));
-                rings.setText(Integer.toString(menuMode.getNumRingsRemaining()));
-                //game is complete
-                if (menuMode.isObjectiveComplete())
+                Log.e("timing", "timer handler");
+                timerView.setText(Long.toString(gameMode.getTimeLeft()));
+                cubes.setText(Integer.toString(gameMode.getNumCubesRemaining()));
+                rings.setText(Integer.toString(gameMode.getNumRingsRemaining()));
+
+                if (gameMode.isObjectiveComplete() || gameMode.isObjectiveFailed())
                 {
-                    timer.cancel(); //stop timer
-                    displayGameResults(true); //display results
+                    displayGameResults(gameMode.isObjectiveComplete());
+                    timerHandler.removeCallbacks(timerRunnable);
+                }
+                else
+                {
+                    timerHandler.postDelayed(this, 500);
                 }
             }
-
-            public void onFinish()
-            {
-                //finish activity
-                displayGameResults(menuMode.isObjectiveComplete());
-                //timerView.setText("done!");
-            }
-        }.start();
+        };
+        timerHandler.postDelayed(timerRunnable, 0);
     }
 
     private void displayGameResults(boolean objectiveComplete)
     {
+        Log.e("diplaygame", "objective complete " + objectiveComplete);
         View resultsView = getLayoutInflater().inflate(R.layout.results_window_layout, null);
         resultsWindow = new PopupWindow(resultsView, ViewPager.LayoutParams.WRAP_CONTENT, ViewPager.LayoutParams.WRAP_CONTENT);
         TextView resultsText = (TextView) resultsWindow.getContentView().findViewById(R.id.resultsTextView);
@@ -256,7 +262,6 @@ public class GamePlayActivity extends Activity
         surfaceView.pauseGame();
         resultsWindow.showAtLocation(resultsView, Gravity.CENTER, 10, 10);
     }
-
 
     /**
      * View where OpenGL objects are drawn
@@ -277,13 +282,11 @@ public class GamePlayActivity extends Activity
 
     private boolean touchActionStarted = true;
 
-    private CountDownTimer timer;
-
     private long timeLeft = 0;
 
     private ModeConfig menuMode;
 
-    private ModeConfig gameMode;
+    private ActionModeConfig gameMode;
 
     private TextView timerView;
 
@@ -294,7 +297,13 @@ public class GamePlayActivity extends Activity
     private ViewGroup sceneRoot;
 
     private Scene mainMenuScene;
+
     private Scene gamePlayScene;
+
     private Transition transitionAnimation;
+
+    private Handler timerHandler;
+
+    private Runnable timerRunnable;
 
 }

@@ -28,6 +28,8 @@ public class Vortex extends Model
         initialYPos = yPos;
         yPos = -0.65f;
 
+        scaleCount = 1.0f;
+
         for (int i = 0; i < 3; i++)
         {
             orbitingObjects[i] = new OrbitingObject(type, xPos, -1.0f, (float) Math.PI + i * (float) Math.PI / 2);
@@ -100,13 +102,21 @@ public class Vortex extends Model
     }
 
     @Override
-    public void updatePosition(float x, float y)
+    public boolean initializationRoutine()
     {
         if (scaleCount < 100)
         {
             scaleCount++;
             deltaY = scaleCount / 500f;
         }
+        updatePosition(0, 0);
+
+        return scaleCount >= 100;
+    }
+
+    @Override
+    public void updatePosition(float x, float y)
+    {
         for (OrbitingObject orbitingObject : orbitingObjects)
         {
             orbitingObject.updatePosition(0, deltaY);

@@ -60,6 +60,13 @@ public class Background extends Model
     }
 
     @Override
+    public boolean initializationRoutine()
+    {
+        updatePosition(0, 0);
+        return true;
+    }
+
+    @Override
     public void updatePosition(float x, float y)
     {
         long time = System.nanoTime();

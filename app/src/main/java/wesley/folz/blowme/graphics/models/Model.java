@@ -216,7 +216,6 @@ public abstract class Model
         this.lightPosInEyeSpace = lightPosInEyeSpace;
     }
 
-
     public void setVertexOrder(short[] order)
     {
         vertexOrder = order;
@@ -226,7 +225,6 @@ public abstract class Model
     {
         this.interleavedData = data;
     }
-
 
     public float getxPos()
     {
@@ -241,6 +239,11 @@ public abstract class Model
     public abstract float[] createTransformationMatrix();
 
     public abstract void updatePosition(float x, float y);
+
+    public boolean initializationRoutine()
+    {
+        return true;
+    }
 
     public String fragmentShaderCode;
     public String vertexShaderCode;

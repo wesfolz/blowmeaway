@@ -133,6 +133,8 @@ public abstract class ModeConfig
         background = new Background();
         models.add(background);
 
+        positionsInitialized = false;
+
         //line =  new Line();
         //models.add(line);
         Log.e("pause", "constructor mode");
@@ -207,22 +209,89 @@ public abstract class ModeConfig
         Log.e("pause", "surface changed mode");
     }
 
+    public void initializeFromExistingMode(ModeConfig mode, GamePlaySurfaceView surfaceView)
+    {
+        this.graphicsData = mode.graphicsData;
+        this.projectionMatrix = mode.projectionMatrix;
+        this.viewMatrix = mode.viewMatrix;
+        this.lightPosInEyeSpace = mode.lightPosInEyeSpace;
+        this.background = mode.background;
+        this.fan = mode.fan;
+        this.dispenser = mode.dispenser;
+        int modelCount = 0;
+        for (Model m : models)
+        {
+            if (m.getClass() == fan.getClass())
+            {
+                models.set(modelCount, fan);
+            }
+            else
+            {
+                if (m.getClass() == background.getClass())
+                {
+                    models.set(modelCount, background);
+                }
+                else
+                {
+                    if (m.getClass() == dispenser.getClass())
+                    {
+                        models.set(modelCount, dispenser);
+                    }
+                }
+            }
+            m.initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
+            modelCount++;
+        }
+
+        surfaceView.queueEvent(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                for (Model m : models)
+                {
+                    m.enableGraphics(graphicsData);
+                }
+            }
+        });
+    }
+
+    protected void initializationRoutine()
+    {
+        boolean initialized = true;
+        for (Model m : models)
+        {
+            initialized &= m.initializationRoutine();
+        }
+        positionsInitialized = initialized;
+    }
+
     public void updatePositionsAndDrawModels()
     {
+        if (!positionsInitialized)
+        {
+            initializationRoutine();
+        }
+        else
+        {
+            updateModelPositions();
+        }
+
+        drawModels();
+    }
+
+    protected void updateModelPositions()
+    {
         background.updatePosition(0, 0);
-        background.draw();
 
         //fan.updatePosition(0, 0);
-        fan.draw();
         //fan.getWind().updatePosition(0, 0);
 
         dispenser.updatePosition(0, 0);
-        dispenser.draw();
 
         for (Vortex v : vortexes)
         {
             v.updatePosition(0, 0);
-            v.draw();
         }
 
         int modelCount = 0;
@@ -241,7 +310,6 @@ public abstract class ModeConfig
             else
             {
                 o.updatePosition(0, 0);
-                o.draw();
             }
             modelCount++;
         }
@@ -271,7 +339,6 @@ public abstract class ModeConfig
             else
             {
                 h.updatePosition(0, 0);
-                h.draw();
             }
             modelCount++;
         }
@@ -405,12 +472,36 @@ public abstract class ModeConfig
                 }
                 objectiveComplete = (numCubesRemaining == 0) & (numRingsRemaining == 0);
             }
-
-            falObj.draw();
-
             modelCount++;
         }
+        //line.updatePosition(0, 0);
+    }
 
+    protected void drawModels()
+    {
+        background.draw();
+        fan.draw();
+
+        dispenser.draw();
+
+        for (RicochetObstacle o : obstacles)
+        {
+            o.draw();
+        }
+        for (DestructiveObstacle h : hazards)
+        {
+            h.draw();
+        }
+
+        for (Vortex v : vortexes)
+        {
+            v.draw();
+        }
+
+        for (FallingObject falObj : fallingObjects)
+        {
+            falObj.draw();
+        }
         for (Explosion e : explosions)
         {
             if (e.isExploding())
@@ -425,7 +516,6 @@ public abstract class ModeConfig
             dc.updatePosition(0, 0);
             dc.draw();
         }
-        //line.updatePosition(0, 0);
         //line.draw();
     }
 
@@ -571,39 +661,14 @@ public abstract class ModeConfig
         return graphicsData;
     }
 
-    public void setGraphicsData(ModeConfig mode, GamePlaySurfaceView surfaceView)
-    {
-        this.graphicsData = mode.graphicsData;
-        this.projectionMatrix = mode.projectionMatrix;
-        this.viewMatrix = mode.viewMatrix;
-        this.lightPosInEyeSpace = mode.lightPosInEyeSpace;
-        this.background = mode.background;
-        this.fan = mode.fan;
-        this.dispenser = mode.dispenser;
-        for (Model m : models)
-        {
-            m.initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
-        }
-
-        surfaceView.queueEvent(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                Log.e("clone", "view matrix " + viewMatrix + "projection matrix " + projectionMatrix + "light position " + lightPosInEyeSpace);
-
-                for (Model m : models)
-                {
-                    m.enableGraphics(graphicsData);
-                }
-            }
-        });
-
-    }
-
     public boolean isObjectiveComplete()
     {
         return objectiveComplete;
+    }
+
+    public boolean isObjectiveFailed()
+    {
+        return objectiveFailed;
     }
 
     public int getNumCubesRemaining()
@@ -660,4 +725,7 @@ public abstract class ModeConfig
 
     private boolean touchActionStarted;
 
+    protected boolean positionsInitialized;
+
+    protected boolean objectiveFailed = false;
 }
