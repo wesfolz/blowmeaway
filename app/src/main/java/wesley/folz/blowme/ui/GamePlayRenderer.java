@@ -14,8 +14,7 @@ import wesley.folz.blowme.gamemode.ModeConfig;
  */
 public class GamePlayRenderer implements GLSurfaceView.Renderer
 {
-     /*-----------------------------------------Constructors
-     ---------------------------------------*/
+     /*----------------------------------------Constructors---------------------------------------*/
 
     public GamePlayRenderer(ModeConfig config)
     {
@@ -61,7 +60,7 @@ public class GamePlayRenderer implements GLSurfaceView.Renderer
         //GLES20.glEnable(GLES20.GL_BLEND);
         //GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
         modeConfig.enableModelGraphics();
-        Log.e("pause", "surface created");
+        Log.e("appflow", "surface created");
     }
 
     /**
@@ -91,6 +90,7 @@ public class GamePlayRenderer implements GLSurfaceView.Renderer
         GLES20.glViewport(0, 0, width, height);
 
         modeConfig.surfaceGraphicsChanged(width, height);
+        Log.e("appflow", "surface changed");
     }
 
     /**

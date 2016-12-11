@@ -6,27 +6,9 @@
                 android:paddingLeft="@dimen/activity_horizontal_margin"
                 android:paddingRight="@dimen/activity_horizontal_margin"
                 android:paddingTop="@dimen/activity_vertical_margin"
-                tools:context=".MainMenuActivity">
-
+                tools:context=".ui.GamePlayActivity">
     <Button
-        android:id="@+id/playButton"
-        style="@style/Widget.AppCompat.Button.Colored"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="161dp"
-        android:backgroundTint="@android:color/holo_red_light"
-        android:fontFamily="sans-serif"
-        android:text="Play"
-        android:textColor="@android:color/white"
-        android:textSize="18sp"
-        tools:alpha="1"
-        android:onClick="onPlayButtonClicked"/>
-
-
-    <Button
-        android:id="@+id/modeButton"
+        android:id="@+id/puzzleButton"
         style="@style/Widget.AppCompat.Button.Colored"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -34,24 +16,10 @@
         android:layout_centerVertical="true"
         android:backgroundTint="@android:color/holo_orange_light"
         android:fontFamily="sans-serif"
-        android:text="Mode"
+        android:text="Puzzle"
         android:textSize="18sp"
-        android:alpha="1"/>
-
-    <Button
-        android:id="@+id/shopButton"
-        style="@style/Widget.AppCompat.Button.Colored"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/modeButton"
-        android:layout_alignStart="@+id/modeButton"
-        android:layout_below="@+id/modeButton"
-        android:layout_marginTop="31dp"
-        android:backgroundTint="@android:color/holo_green_light"
-        android:fontFamily="sans-serif"
-        android:text="Shop"
-        android:textSize="18sp"
-        android:alpha="1"/>
+        android:alpha="1"
+        android:onClick="onPuzzleButtonClicked"/>
 
     <TextView
         android:id="@+id/titleView"
@@ -66,4 +34,34 @@
         android:textSize="45sp"
         android:textStyle="normal|bold"
         android:alpha="0.5"/>
+
+    <Button
+        android:id="@+id/endlessButton"
+        style="@style/Widget.AppCompat.Button.Colored"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:backgroundTint="@android:color/holo_green_light"
+        android:fontFamily="sans-serif"
+        android:text="Endless"
+        android:textSize="18sp"
+        android:alpha="1"
+        android:onClick="onEndlessButtonClicked"
+        android:layout_below="@+id/puzzleButton"
+        android:layout_centerHorizontal="true"/>
+
+    <Button
+        android:id="@+id/actionButton"
+        style="@style/Widget.AppCompat.Button.Colored"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:backgroundTint="@android:color/holo_red_light"
+        android:fontFamily="sans-serif"
+        android:text="Action"
+        android:textColor="@android:color/white"
+        android:textSize="18sp"
+        tools:alpha="1"
+        android:onClick="onActionButtonClicked"
+        android:layout_above="@+id/puzzleButton"
+        android:layout_alignStart="@+id/puzzleButton"/>
+
 </RelativeLayout>

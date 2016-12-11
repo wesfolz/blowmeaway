@@ -3,6 +3,7 @@ package wesley.folz.blowme.ui;
 import android.content.Context;
 import android.opengl.GLSurfaceView;
 import android.util.AttributeSet;
+import android.util.Log;
 
 /**
  * Created by Wesley on 9/10/2016.
@@ -22,6 +23,7 @@ public class GamePlaySurfaceView extends GLSurfaceView
     public void onPause()
     {
         super.onPause();
+        Log.e("appflow", "onPause");
         this.pauseGame();
     }
 
@@ -29,6 +31,7 @@ public class GamePlaySurfaceView extends GLSurfaceView
     public void onResume()
     {
         super.onResume();
+        Log.e("appflow", "onResume");
         this.resumeGame();
     }
 
@@ -43,11 +46,13 @@ public class GamePlaySurfaceView extends GLSurfaceView
 
     public void pauseGame()
     {
+        Log.e("appflow", "pause game");
         this.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
         renderer.pauseGame();
     }
 
     public void resumeGame() {
+        Log.e("appflow", "resume game");
         this.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
         renderer.resumeGame();
     }

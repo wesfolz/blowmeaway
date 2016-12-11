@@ -1,7 +1,9 @@
 package wesley.folz.blowme.graphics.models;
 
 import android.opengl.Matrix;
+import android.util.Log;
 
+import wesley.folz.blowme.graphics.Border;
 import wesley.folz.blowme.ui.GamePlayActivity;
 import wesley.folz.blowme.util.GraphicsUtilities;
 
@@ -69,10 +71,26 @@ public class Dispenser extends Model
         return deltaX;
     }
 
+
+    public void setTargetX(float targetX) {
+        this.targetX = targetX;
+    }
+
     @Override
     public boolean initializationRoutine()
     {
-        updatePosition(0, 0);
+        if (targetX >= Border.XRIGHT) {
+            updatePosition(0, 0);
+            return true;
+        }
+        // deltaX = (targetX - xPos)/100.0f;
+        Log.e("json", "deltaX " + deltaX + " target x " + targetX + " xPos " + xPos);
+        initializeCount++;
+        if (initializeCount >= 100) {
+            deltaX = 0;
+            xPos = targetX;
+            return true;
+        }
         return true;
     }
 
@@ -97,4 +115,8 @@ public class Dispenser extends Model
     private int motionMultiplier;
 
     private float[] initialRotation;
+
+    private float targetX = Border.XRIGHT;
+
+    private int initializeCount = 0;
 }

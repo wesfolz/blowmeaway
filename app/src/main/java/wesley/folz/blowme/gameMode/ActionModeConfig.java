@@ -11,8 +11,27 @@ public class ActionModeConfig extends ModeConfig
 {
     public ActionModeConfig()
     {
-        super();
-        timeLeft = 10;
+        this("Action1");
+    }
+
+    public ActionModeConfig(String level) {
+        this.level = level;
+        loadLevel();
+        initializeGameObjects();
+    }
+
+    private void loadLevel() {
+        numRicochetObstacles = LevelData.getNumRicochetObstacles().get(level);
+        numDestructiveObstacles = LevelData.getNumDestructiveObstacles().get(level);
+        numFallingObjects = LevelData.getNumFallingObjects().get(level);
+        numRings = LevelData.getNumRings().get(level);
+        numCubes = LevelData.getNumCubes().get(level);
+        numVortexes = LevelData.getNumVortexes().get(level);
+        numRingVortexes = LevelData.getNumRingVortexes().get(level);
+        numCubeVortexes = LevelData.getNumCubeVortexes().get(level);
+        numCubesRemaining = LevelData.getNumCubesRemaining().get(level);
+        numRingsRemaining = LevelData.getNumRingsRemaining().get(level);
+        timeLeft = LevelData.getTimeLimit().get(level);
     }
 
     @Override
@@ -21,7 +40,7 @@ public class ActionModeConfig extends ModeConfig
         super.initializationRoutine();
         if (positionsInitialized)
         {
-            timeLeft = 10;
+            timeLeft = LevelData.getTimeLimit().get(level);
             startTiming();
         }
     }
@@ -80,14 +99,6 @@ public class ActionModeConfig extends ModeConfig
         }
     }
 
-
-    public long getTimeLeft()
-    {
-        return timeLeft;
-    }
-
     private Timer timer;
-
-    private long timeLeft;
 
 }

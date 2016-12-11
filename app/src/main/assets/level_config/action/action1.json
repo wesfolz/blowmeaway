@@ -1,0 +1,47 @@
+{
+  "Models": [
+    {
+      "model": "Dispenser",
+      "index": 0,
+      "xPos": 0
+    },
+    {
+      "model": "Vortex",
+      "index": 0,
+      "xPos": 0,
+      "type": "cube"
+    },
+    {
+      "model": "Background"
+    },
+    {
+      "model": "FallingObject",
+      "index": 0,
+      "type": "cube"
+    },
+    {
+      "model": "RicochetObstacle",
+      "index": 0,
+      "xPos": 1,
+      "yPos": 1
+    },
+    {
+      "model": "RicochetObstacle",
+      "index": 1,
+      "xPos": 2,
+      "yPos": 2
+    },
+    {
+      "model": "DestructiveObstacle",
+      "index": 0,
+      "xPos": 1,
+      "yPos": 3
+    },
+    {
+      "model": "DestructiveObstacle",
+      "index": 1,
+      "xPos": 3,
+      "yPos": 5
+    }
+  ]
+}

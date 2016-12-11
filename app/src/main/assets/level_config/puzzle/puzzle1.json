@@ -1,0 +1,55 @@
+{
+  "Models": [
+    {
+      "model": "Fan",
+      "index": 0
+    },
+    {
+      "model": "Fan",
+      "index": 1
+    },
+    {
+      "model": "Dispenser",
+      "index": 0,
+      "xPos": 0
+    },
+    {
+      "model": "Vortex",
+      "index": 0,
+      "xPos": 0,
+      "type": "cube"
+    },
+    {
+      "model": "Background"
+    },
+    {
+      "model": "FallingObject",
+      "index": 0,
+      "type": "cube"
+    },
+    {
+      "model": "RicochetObstacle",
+      "index": 0,
+      "xPos": 4,
+      "yPos": 0
+    },
+    {
+      "model": "RicochetObstacle",
+      "index": 1,
+      "xPos": 0,
+      "yPos": 7
+    },
+    {
+      "model": "DestructiveObstacle",
+      "index": 0,
+      "xPos": 1,
+      "yPos": 3
+    },
+    {
+      "model": "DestructiveObstacle",
+      "index": 1,
+      "xPos": -1,
+      "yPos": 5
+    }
+  ]
+}

@@ -29,8 +29,8 @@ public class DestructiveObstacle extends Model
         initialXPos = xPos;
         initialYPos = yPos;
 
-        getBounds().setBounds(xPos - scaleFactor, yPos - scaleFactor, xPos + scaleFactor, yPos + scaleFactor);
-
+        getBounds().setBounds(xPos - xRadius, yPos - 4 * scaleFactor, xPos + xRadius,
+                yPos + 4 * scaleFactor);
     }
 
     @Override

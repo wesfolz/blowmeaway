@@ -16,6 +16,7 @@ public class MenuModeConfig extends ModeConfig
     {
         super();
         positionsInitialized = true;
+        initializeGameObjects();
     }
 
     @Override

@@ -2,14 +2,17 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:orientation="vertical"
               android:layout_width="match_parent"
-              android:layout_height="match_parent">
+              android:layout_height="match_parent"
+              android:background="@color/glass"
+              android:backgroundTint="#5500ddff"
+              android:backgroundTintMode="add">
 
     <ImageButton
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/resumeButton"
         android:layout_gravity="center_horizontal"
-        android:src="@android:drawable/ic_media_play"
+        android:src="@drawable/ic_play_arrow"
         android:clickable="false"
         android:onClick="onResumeButtonClicked"
         android:background="@null"
@@ -29,7 +32,7 @@
         android:layout_height="wrap_content"
         android:id="@+id/exitGamePlayButton"
         android:layout_gravity="center_horizontal"
-        android:src="@android:drawable/ic_menu_close_clear_cancel"
+        android:src="@drawable/ic_close"
         android:clickable="false"
         android:onClick="onExitGamePlayButtonClicked"
         android:background="@null"

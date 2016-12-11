@@ -32,7 +32,9 @@ public abstract class ModeConfig
 {
     public ModeConfig()
     {
-        //read config file to determine game play parameters
+    }
+
+    public void initializeGameObjects() {
         numRicochetObstacles = 2;
         numDestructiveObstacles = 2;
         numFallingObjects = 2;
@@ -43,7 +45,6 @@ public abstract class ModeConfig
         numCubeVortexes = 1;
         numCubesRemaining = 1;
         numRingsRemaining = 1;
-
         models = new ArrayList<>();
         obstacles = new ArrayList<>();
         fallingObjects = new ArrayList<>();
@@ -140,6 +141,7 @@ public abstract class ModeConfig
         Log.e("pause", "constructor mode");
     }
 
+
     public void enableModelGraphics()
     {
         graphicsData = new GraphicsUtilities();
@@ -216,44 +218,51 @@ public abstract class ModeConfig
         this.viewMatrix = mode.viewMatrix;
         this.lightPosInEyeSpace = mode.lightPosInEyeSpace;
         this.background = mode.background;
+        if (this.fan != null) {
+            Log.e("existingmode", "this fan " + this.fan.getyPos() + " x " + this.fan.getxPos()
+                    + " mode fan " + mode.fan.getyPos() + " x " + mode.fan.getxPos());
+        }
         this.fan = mode.fan;
         this.dispenser = mode.dispenser;
-        int modelCount = 0;
-        for (Model m : models)
-        {
-            if (m.getClass() == fan.getClass())
-            {
-                models.set(modelCount, fan);
-            }
-            else
-            {
-                if (m.getClass() == background.getClass())
-                {
-                    models.set(modelCount, background);
-                }
-                else
-                {
-                    if (m.getClass() == dispenser.getClass())
-                    {
-                        models.set(modelCount, dispenser);
+
+        if (surfaceView == null) {
+            models.add(background);
+            models.add(fan);
+            models.add(dispenser);
+        } else {
+            int modelCount = 0;
+            for (Model m : models) {
+                if (m.getClass() == fan.getClass()) {
+                    models.set(modelCount, fan);
+                } else {
+                    if (m.getClass() == background.getClass()) {
+                        models.set(modelCount, background);
+                    } else {
+
+                        if (m.getClass() == dispenser.getClass()) {
+                            models.set(modelCount, dispenser);
+                        }
                     }
                 }
+                m.initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
+                modelCount++;
             }
-            m.initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
-            modelCount++;
+
+            surfaceView.queueEvent(new Runnable() {
+                @Override
+                public void run() {
+                    for (Model m : models) {
+                        m.enableGraphics(graphicsData);
+                    }
+                }
+            });
+
+            if (this.fan != null) {
+                Log.e("existingmode", "this fan " + this.fan.getyPos() + " x " + this.fan.getxPos()
+                        + " mode fan " + mode.fan.getyPos() + " x " + mode.fan.getxPos());
+            }
         }
 
-        surfaceView.queueEvent(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                for (Model m : models)
-                {
-                    m.enableGraphics(graphicsData);
-                }
-            }
-        });
     }
 
     protected void initializationRoutine()
@@ -264,6 +273,7 @@ public abstract class ModeConfig
             initialized &= m.initializationRoutine();
         }
         positionsInitialized = initialized;
+        fanReadyToMove = positionsInitialized;
     }
 
     public void updatePositionsAndDrawModels()
@@ -358,7 +368,6 @@ public abstract class ModeConfig
             {
                 if (Physics.isCollision(h.getBounds(), falObj.getBounds()))
                 {
-                    Log.e("falobj", "destruction");
                     objectExplosion.reinitialize(falObj.getxPos(), falObj.getyPos());
                     falObj.setOffscreen(true);
                     //rotate through all explosions
@@ -378,7 +387,6 @@ public abstract class ModeConfig
 
             if (falObj.isOffscreen())
             {
-                Log.e("falobj", "offscreen");
                 try
                 {
                     models.remove(falObj);
@@ -406,7 +414,7 @@ public abstract class ModeConfig
                     vortex.setCollecting(true);
                     //falObj.travelOnVector(vortex.getxPos() - falObj.getxPos(), vortex.getyPos() - falObj.getyPos());
                     falObj.setCollectingVortexIndex(vortexCount);
-                    if (vortex.getType() == falObj.getType())
+                    if (vortex.getType().equals(falObj.getType()))
                     {
                         falObj.spiralIntoVortex(vortex.getxPos());
                     }
@@ -563,8 +571,6 @@ public abstract class ModeConfig
         xLocations.remove(xIndex);
         yLocations.remove(yIndex);
 
-        Log.e("locations", "locations " + locations[1] + " yCell " + yCell);
-
         return locations;
     }
 
@@ -589,50 +595,55 @@ public abstract class ModeConfig
 
     public void handleTouchDrag(int action, float x, float y)
     {
-        switch (action)
-        {
-            case MotionEvent.ACTION_POINTER_UP:
-                touchActionStarted = true;
-                //gameMode.handleFanMovementDown(x, y);
-                break;
-            case MotionEvent.ACTION_POINTER_DOWN:
-                //gameMode.handleFanMovementDown(x, y);
-                touchActionStarted = true;
-                break;
+        if (fanReadyToMove) {
+            switch (action) {
+                case MotionEvent.ACTION_POINTER_UP:
+                    touchActionStarted = true;
+                    //gameMode.handleFanMovementDown(x, y);
+                    break;
+                case MotionEvent.ACTION_POINTER_DOWN:
+                    //gameMode.handleFanMovementDown(x, y);
+                    touchActionStarted = true;
+                    break;
 
-            case MotionEvent.ACTION_UP:
-                touchActionStarted = true;
-                //gameMode.handleFanMovementDown(x, y);
-                break;
+                case MotionEvent.ACTION_UP:
+                    touchActionStarted = true;
+                    //gameMode.handleFanMovementDown(x, y);
+                    break;
 
-            case MotionEvent.ACTION_DOWN:
-                //gameMode.handleFanMovementDown(x, y);
-                touchActionStarted = true;
-                break;
+                case MotionEvent.ACTION_DOWN:
+                    //gameMode.handleFanMovementDown(x, y);
+                    touchActionStarted = true;
+                    break;
 
-            case MotionEvent.ACTION_MOVE:
-                if (touchActionStarted)
-                {
-                    this.handleFanMovementDown(x, y);
-                    touchActionStarted = false;
-                }
-                this.handleFanMovementMove(x, y);
+                case MotionEvent.ACTION_MOVE:
+                    if (touchActionStarted) {
+                        this.handleFanMovementDown(x, y);
+                        touchActionStarted = false;
+                    }
+                    this.handleFanMovementMove(x, y);
 
-                //Log.e( "blowme", "Move: X " + (event.getRawX() / WIDTH) + " Y " +
-                // (event.getRawY() / HEIGHT) );
-                break;
+                    //Log.e( "blowme", "Move: X " + (event.getRawX() / WIDTH) + " Y " +
+                    // (event.getRawY() / HEIGHT) );
+                    break;
+            }
         }
     }
 
     public void handleFanMovementDown(float x, float y)
     {
-        fan.setInitialX(x);
-        fan.setInitialY(y);
+        if (fanReadyToMove) {
+            fan.setInitialX(x);
+            fan.setInitialY(y);
+            initialPositionSet = true;
+        }
     }
 
     public void handleFanMovementMove(float x, float y)
     {
-        fan.updatePosition(x, y);
+        if (fanReadyToMove && initialPositionSet) {
+            fan.updatePosition(x, y);
+        }
 
         // obstacles.get(0).updatePosition(x, y);
         // fallingObjects.get(0).updatePosition(x, y);
@@ -660,6 +671,13 @@ public abstract class ModeConfig
         Log.e("pause", "stop mode");
     }
 
+    public long getTimeLeft() {
+        return timeLeft;
+    }
+
+
+    protected long timeLeft = 10;
+
     public GraphicsUtilities getGraphicsData()
     {
         return graphicsData;
@@ -685,6 +703,11 @@ public abstract class ModeConfig
         return numRingsRemaining;
     }
 
+
+    public String getLevel() {
+        return level;
+    }
+
     protected ArrayList<Model> models;
     protected ArrayList<RicochetObstacle> obstacles;
     protected ArrayList<DestructiveObstacle> hazards;
@@ -706,30 +729,36 @@ public abstract class ModeConfig
 
     protected GraphicsUtilities graphicsData;
 
-    private int explosionIndex = 0;
+    protected int explosionIndex = 0;
 
     private ArrayList<Integer> xLocations = new ArrayList<>();
     private ArrayList<Integer> yLocations = new ArrayList<>();
 
     //initial game parameters:
-    private int numRicochetObstacles;
-    private int numDestructiveObstacles;
-    private int numFallingObjects;
-    private int numRings;
-    private int numCubes;
-    private int numVortexes;
-    private int numRingVortexes;
-    private int numCubeVortexes;
+    protected int numRicochetObstacles;
+    protected int numDestructiveObstacles;
+    protected int numFallingObjects;
+    protected int numRings;
+    protected int numCubes;
+    protected int numVortexes;
+    protected int numRingVortexes;
+    protected int numCubeVortexes;
 
     //dynamic game parameters
-    private int numCubesRemaining;
-    private int numRingsRemaining;
+    protected int numCubesRemaining;
+    protected int numRingsRemaining;
 
-    private boolean objectiveComplete = false;
+    protected boolean objectiveComplete = false;
 
     private boolean touchActionStarted;
 
     protected boolean positionsInitialized;
 
     protected boolean objectiveFailed = false;
+
+    protected boolean fanReadyToMove = false;
+
+    protected boolean initialPositionSet = false;
+
+    protected String level;
 }

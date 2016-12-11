@@ -19,13 +19,18 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.AdapterView;
+import android.widget.GridView;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 
 import wesley.folz.blowme.R;
 import wesley.folz.blowme.gamemode.ActionModeConfig;
+import wesley.folz.blowme.gamemode.EndlessModeConfig;
 import wesley.folz.blowme.gamemode.MenuModeConfig;
 import wesley.folz.blowme.gamemode.ModeConfig;
+import wesley.folz.blowme.gamemode.PuzzleModeConfig;
+import wesley.folz.blowme.util.ImageAdapter;
 
 public class GamePlayActivity extends Activity
 {
@@ -59,12 +64,15 @@ public class GamePlayActivity extends Activity
             }
         } );
 
-// Create the scene root for the scenes in this app
+        // Create the scene root for the scenes in this app
         sceneRoot = (ViewGroup) findViewById(R.id.scene_root);
 
-// Create the scenes
+        // Create the scenes
         mainMenuScene = Scene.getSceneForLayout(sceneRoot, R.layout.activity_main_menu, this);
         gamePlayScene = Scene.getSceneForLayout(sceneRoot, R.layout.activity_game_play, this);
+        levelSelectScene = Scene.getSceneForLayout(sceneRoot, R.layout.level_select_layout, this);
+        puzzleGamePlayScene = Scene.getSceneForLayout(sceneRoot, R.layout.puzzle_game_play_layout,
+                this);
 
         transitionAnimation =
                 TransitionInflater.from(this).
@@ -109,17 +117,29 @@ public class GamePlayActivity extends Activity
     protected void onPause()
     {
         super.onPause();
+        Log.e("appflow", "onPause");
         surfaceView.onPause();
-        if (timerHandler != null) {
-            timerHandler.removeCallbacks(timerRunnable);
+        if (actionModeHandler != null) {
+            actionModeHandler.removeCallbacks(actionModeRunnable);
+        }
+
+        if (puzzleModeHandler != null) {
+            puzzleModeHandler.removeCallbacks(actionModeRunnable);
+        }
+
+        if (pauseWindow != null) {
+            pauseWindow.dismiss();
+        }
+        if (resultsWindow != null) {
+            resultsWindow.dismiss();
         }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        Log.e("appflow", "onResume");
         surfaceView.onResume();
-        //startTiming();
     }
 
     @Override
@@ -137,14 +157,54 @@ public class GamePlayActivity extends Activity
         }
     }
 
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        //TODO: go back to last scene, or exit if in main scene
+    }
+
     /*---------------------------------------Public Methods---------------------------------------*/
 
     /*-------------------------------------Protected Methods--------------------------------------*/
 
-    protected void onPlayButtonClicked(View playButton)
+    protected void onActionButtonClicked(View actionButton)
     {
-        TransitionManager.go(gamePlayScene, transitionAnimation);
-        initializeGameMode();
+        TransitionManager.go(levelSelectScene, transitionAnimation);
+        TextView modeTitle = (TextView) findViewById(R.id.modeBannerText);
+        modeTitle.setText("Action Mode");
+        GridView gridview = (GridView) findViewById(R.id.level_grid);
+        gridview.setAdapter(new ImageAdapter(this));
+
+        gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            public void onItemClick(AdapterView<?> parent, View v,
+                    int position, long id) {
+                TransitionManager.go(gamePlayScene, transitionAnimation);
+                initializeActionMode("Action" + (position + 1));
+            }
+        });
+    }
+
+    protected void onEndlessButtonClicked(View endlessButton) {
+        TransitionManager.go(levelSelectScene, transitionAnimation);
+        //TransitionManager.go(gamePlayScene, transitionAnimation);
+        //initializeEndlessMode();
+    }
+
+    protected void onPuzzleButtonClicked(View endlessButton) {
+        TransitionManager.go(levelSelectScene, transitionAnimation);
+        TextView modeTitle = (TextView) findViewById(R.id.modeBannerText);
+        modeTitle.setText("Puzzle Mode");
+        GridView gridview = (GridView) findViewById(R.id.level_grid);
+        gridview.setAdapter(new ImageAdapter(this));
+
+        gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            public void onItemClick(AdapterView<?> parent, View v,
+                    int position, long id) {
+                TransitionManager.go(puzzleGamePlayScene, transitionAnimation);
+                initializePuzzleMode("puzzle" + (position + 1));
+            }
+        });
+        //initializePuzzleMode();
     }
 
     /**
@@ -156,7 +216,6 @@ public class GamePlayActivity extends Activity
     {
         pauseWindow.dismiss();
         surfaceView.resumeGame();
-        startTiming();
     }
 
     /**
@@ -189,8 +248,17 @@ public class GamePlayActivity extends Activity
         {
             resultsWindow.dismiss();
         }
-        timerHandler.removeCallbacks(timerRunnable);
-        gameMode.stopGame();
+        if (actionModeHandler != null && currentGameMode == "Action") {
+            actionModeHandler.removeCallbacks(actionModeRunnable);
+        }
+
+        if (puzzleModeHandler != null && currentGameMode == "Puzzle") {
+            puzzleModeHandler.removeCallbacks(puzzleModeRunnable);
+        }
+
+        if (gameMode != null) {
+            gameMode.stopGame();
+        }
         surfaceView.resumeGame();
         TransitionManager.go(mainMenuScene, transitionAnimation);
         initializeMenuMode();
@@ -203,14 +271,30 @@ public class GamePlayActivity extends Activity
     protected void onReplayGameButtonClicked(View replayButton)
     {
         resultsWindow.dismiss();
-        this.initializeGameMode();
+        switch (currentGameMode) {
+            case "Action":
+                this.initializeActionMode(gameMode.getLevel());
+                break;
+            case "endless":
+                this.initializeEndlessMode();
+                break;
+            case "puzzle":
+                this.initializePuzzleMode(gameMode.getLevel());
+                break;
+        }
         surfaceView.resumeGame();
+    }
+
+    protected void onStartPuzzleButtonClicked(View startPuzzleButton) {
+        PuzzleModeConfig puzzle = (PuzzleModeConfig) gameMode;
+        puzzle.setPuzzleStarted(true);
+        findViewById(R.id.startPuzzleButton).setVisibility(View.INVISIBLE);
+        surfaceView.setOnTouchListener(null);
     }
 
     /*--------------------------------------Private Methods---------------------------------------*/
 
     private void displayGameResults(boolean objectiveComplete) {
-        Log.e("diplaygame", "objective complete " + objectiveComplete);
         View resultsView = getLayoutInflater().inflate(R.layout.results_window_layout, null);
         resultsWindow = new PopupWindow(resultsView, ViewPager.LayoutParams.WRAP_CONTENT,
                 ViewPager.LayoutParams.WRAP_CONTENT);
@@ -226,13 +310,8 @@ public class GamePlayActivity extends Activity
     }
 
     private void initializeGameMode() {
-        gameMode = new ActionModeConfig();
-        gameMode.initializeFromExistingMode(menuMode, surfaceView);
+        //gameMode.initializeFromExistingMode(menuMode, surfaceView);
         surfaceView.getRenderer().setModeConfig(gameMode);
-
-        cubes = (TextView) findViewById(R.id.cubeTextView);
-        rings = (TextView) findViewById(R.id.ringTextView);
-        timerView = (TextView) this.findViewById(R.id.timerTextView);
 
         //TODO: Possibly have fan constantly move in an a ellipse, user taps to change direction?
         //or user taps and holds and fan moves towards their finger?
@@ -250,23 +329,74 @@ public class GamePlayActivity extends Activity
                 return true;
             }
         });
+    }
 
-        startTiming();
+    private void initializeActionMode(String level) {
+        currentGameMode = "action";
+        gameMode = new ActionModeConfig(level);
+
+        cubes = (TextView) findViewById(R.id.cubeTextView);
+        rings = (TextView) findViewById(R.id.ringTextView);
+        timerView = (TextView) this.findViewById(R.id.imageVIew2);
+
+        initializeGameMode();
+
+        startActionModeHandler();
+    }
+
+    private void initializeEndlessMode() {
+        currentGameMode = "endless";
+        gameMode = new EndlessModeConfig();
+
+        initializeGameMode();
+    }
+
+    private void initializePuzzleMode(String level) {
+        currentGameMode = "puzzle";
+        gameMode = new PuzzleModeConfig(level, menuMode, surfaceView);
+        cubes = (TextView) findViewById(R.id.cubeTextView);
+        rings = (TextView) findViewById(R.id.ringTextView);
+        timerView = (TextView) this.findViewById(R.id.timerTextVIew);
+        findViewById(R.id.startPuzzleButton).setVisibility(View.VISIBLE);
+        initializeGameMode();
+        startPuzzleModeHandler();
     }
 
     /**
      * Sets the mode of the renderer to a menuMode and disables the touch listener
      */
     private void initializeMenuMode() {
+        //if(gameMode != null)
+        //    menuMode.initializeFromExistingMode(gameMode, surfaceView);
         surfaceView.getRenderer().setModeConfig(menuMode);
         surfaceView.setOnTouchListener(null);
     }
 
+    public void startActionModeHandler() {
+        actionModeHandler = new Handler();
+        actionModeRunnable = new Runnable() {
+            @Override
+            public void run() {
+                Log.e("timing", "timer handler");
+                timerView.setText(Long.toString(gameMode.getTimeLeft()));
+                cubes.setText(Integer.toString(gameMode.getNumCubesRemaining()));
+                rings.setText(Integer.toString(gameMode.getNumRingsRemaining()));
 
-    public void startTiming()
+                if (gameMode.isObjectiveComplete() || gameMode.isObjectiveFailed()) {
+                    displayGameResults(gameMode.isObjectiveComplete());
+                    actionModeHandler.removeCallbacks(actionModeRunnable);
+                } else {
+                    actionModeHandler.postDelayed(this, 500);
+                }
+            }
+        };
+        actionModeHandler.postDelayed(actionModeRunnable, 0);
+    }
+
+    public void startPuzzleModeHandler()
     {
-        timerHandler = new Handler();
-        timerRunnable = new Runnable()
+        puzzleModeHandler = new Handler();
+        puzzleModeRunnable = new Runnable()
         {
             @Override
             public void run()
@@ -278,16 +408,16 @@ public class GamePlayActivity extends Activity
 
                 if (gameMode.isObjectiveComplete() || gameMode.isObjectiveFailed())
                 {
+                    puzzleModeHandler.removeCallbacks(puzzleModeRunnable);
                     displayGameResults(gameMode.isObjectiveComplete());
-                    timerHandler.removeCallbacks(timerRunnable);
                 }
                 else
                 {
-                    timerHandler.postDelayed(this, 500);
+                    puzzleModeHandler.postDelayed(this, 500);
                 }
             }
         };
-        timerHandler.postDelayed(timerRunnable, 0);
+        puzzleModeHandler.postDelayed(puzzleModeRunnable, 0);
     }
 
     /*--------------------------------------Getters and Setters-----------------------------------*/
@@ -318,11 +448,9 @@ public class GamePlayActivity extends Activity
 
     private boolean touchActionStarted = true;
 
-    private long timeLeft = 0;
-
     private ModeConfig menuMode;
 
-    private ActionModeConfig gameMode;
+    private ModeConfig gameMode;
 
     private TextView timerView;
 
@@ -336,9 +464,19 @@ public class GamePlayActivity extends Activity
 
     private Scene gamePlayScene;
 
+    private Scene levelSelectScene;
+
+    private Scene puzzleGamePlayScene;
+
     private Transition transitionAnimation;
 
-    private Handler timerHandler;
+    private Handler actionModeHandler;
 
-    private Runnable timerRunnable;
+    private Runnable actionModeRunnable;
+
+    private Handler puzzleModeHandler;
+
+    private Runnable puzzleModeRunnable;
+
+    private String currentGameMode;
 }

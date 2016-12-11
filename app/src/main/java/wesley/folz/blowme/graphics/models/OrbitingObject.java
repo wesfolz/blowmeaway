@@ -1,7 +1,6 @@
 package wesley.folz.blowme.graphics.models;
 
 import android.opengl.Matrix;
-import android.util.Log;
 
 import wesley.folz.blowme.util.GraphicsUtilities;
 
@@ -54,9 +53,9 @@ public class OrbitingObject extends Model
         //Matrix.translateM(modelMatrix, 0, deltaX, 0, 0);
 
         //copy modelMatrix to separate matrix for return, (returning modelMatrix doesn't work)
+        //Matrix.translateM(modelMatrix, 0, deltaX, deltaY, deltaZ);
         Matrix.multiplyMM(mvp, 0, modelMatrix, 0, mvp, 0);
         Matrix.translateM(mvp, 0, deltaX, deltaY, deltaZ);
-
 
         //Matrix.rotateM(mvp, 0, angle, 0, -1, 0);
 
@@ -86,7 +85,6 @@ public class OrbitingObject extends Model
         float newX = 0.1f * (float) Math.cos(parametricAngle + initialAngle);
         float newZ = 0.35f * (float) Math.sin(parametricAngle + initialAngle);
 
-        Log.e("orbit", "newZ " + newZ);
         parametricAngle += angle;
 
         deltaX = newX;// - xPos;
@@ -95,7 +93,8 @@ public class OrbitingObject extends Model
         xPos = newX;
         zPos = newZ;
 
-        deltaY = y;
+        deltaY = y;// - yPos;
+        yPos = y;
     }
 
     private long previousTime;

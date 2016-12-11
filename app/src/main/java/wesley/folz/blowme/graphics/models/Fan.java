@@ -49,6 +49,11 @@ public class Fan extends Model
     }
 
     @Override
+    public boolean initializationRoutine() {
+        return super.initializationRoutine();
+    }
+
+    @Override
     public void draw()
     {
         super.draw();
@@ -104,7 +109,6 @@ public class Fan extends Model
         Matrix.rotateM(bladeRotation, 0, -65, 0, 1, 0);
         //rotate 90 degrees about x-axis
         Matrix.rotateM(bladeRotation, 0, 90, 1, 0, 0);
-
 
         //since fan is initially rotated 90 about x, translation occurs on Z instead of y
         //and rotation occurs about y instead of z

@@ -27,6 +27,9 @@ public class RicochetObstacle extends Model
 
         initialXPos = xPos;
         initialYPos = yPos;
+
+        getBounds().setBounds(xPos - scaleFactor, yPos - scaleFactor, xPos + scaleFactor,
+                yPos + scaleFactor);
     }
 
     @Override

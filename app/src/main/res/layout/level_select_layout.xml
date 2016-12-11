@@ -4,29 +4,17 @@
               android:layout_width="match_parent"
               android:layout_height="match_parent"
               android:transitionGroup="false"
-              android:background="@color/glass">
+              android:weightSum="1">
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/resultsTextView"
+        android:id="@+id/modeBannerText"
         android:layout_gravity="center_horizontal"
         android:clickable="false"
-        android:text="Game Complete!"
+        android:text="Action Mode"
         android:layout_margin="10dp"
-        android:fontFamily="sans-serif"
-        android:textColor="@android:color/white"
-        android:textSize="24sp"/>
-
-    <ImageButton
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/replayButton"
-        android:layout_gravity="center_horizontal"
-        android:src="@drawable/ic_replay"
-        android:onClick="onReplayGameButtonClicked"
-        android:background="@null"
-        android:layout_margin="10dp"/>
+        android:textSize="36sp"/>
 
     <ImageButton
         android:layout_width="wrap_content"
@@ -37,7 +25,19 @@
         android:clickable="false"
         android:onClick="onExitGamePlayButtonClicked"
         android:background="@null"
-        android:layout_margin="10dp"
+        android:layout_margin="10dp"/>
+
+    <GridView
+        android:id="@+id/level_grid"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:columnWidth="100dp"
+        android:numColumns="auto_fit"
+        android:verticalSpacing="10dp"
+        android:horizontalSpacing="10dp"
+        android:stretchMode="columnWidth"
+        android:gravity="center"
+        android:scrollbars="vertical"
         />
 
 </LinearLayout>

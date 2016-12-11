@@ -2,7 +2,6 @@ package wesley.folz.blowme.graphics.models;
 
 import android.opengl.Matrix;
 import android.os.SystemClock;
-import android.util.Log;
 
 import java.util.ArrayList;
 
@@ -87,7 +86,6 @@ public class FallingObject extends Model
         //Matrix.multiplyMM( result, 0, mvpMatrix, 0, transformation, 0 );
         if (deltaT > 50 && collected)
         {
-            Log.e("vortex", String.valueOf(stretchX) + " " + String.valueOf(stretchY));
             //Matrix.translateM(modelMatrix, 0, deltaX, 0, deltaZ);
             Matrix.scaleM(modelMatrix, 0, stretchX, stretchY, 1);
             prevRenderTime = time;
@@ -320,13 +318,9 @@ public class FallingObject extends Model
     {
         for (RicochetObstacle o : obstacles)
         {
-            //Log.e("obstacle", "ybottom " + o.getBounds().getyBottom() + " ytop " + o.getBounds().getyTop());
             collision = Physics.calculateCollision(o.getBounds(), getBounds());
             if (collision != Physics.COLLISION.NONE)
-            {
-                Log.e("titans", "Collision: " + collision);
                 break;
-            }
         }
     }
 
@@ -337,6 +331,10 @@ public class FallingObject extends Model
     @Override
     public void updatePosition(float x, float y)
     {
+        if (firstUpdate) {
+            previousTime = System.nanoTime();
+            firstUpdate = false;
+        }
         long time = System.nanoTime();
         float deltaTime = (time - previousTime) / 1000000000.0f;
         previousTime = time;//System.nanoTime();
@@ -347,6 +345,7 @@ public class FallingObject extends Model
 
         xVelocity += force[0] * fallingTime;
         yVelocity += force[1] * fallingTime;
+
 
         //reflection of falling object off of side border
         //if object collides of off right border, xVelocity must be negative
@@ -378,10 +377,6 @@ public class FallingObject extends Model
             }
         }
 
-        Log.e("falobj", "force y " + force[1] + " collision " + collision + " delta time "
-                + deltaTime + " yvelocity " + yVelocity + " y " + y);
-
-
         deltaX = fallingTime * xVelocity;
 
         deltaY = fallingTime * yVelocity;
@@ -390,10 +385,6 @@ public class FallingObject extends Model
         yPos += deltaY;
 
         getBounds().setBounds(xPos - scaleFactor, yPos - scaleFactor, xPos + scaleFactor, yPos + scaleFactor);
-//        getBounds().setBounds(xPos - scaleFactor, yPos + scaleFactor, xPos + scaleFactor, yPos - scaleFactor );
-
-        //Log.e("blowme", "xpos " + xPos + " ypos " + yPos);
-        //Log.e("blowme", "ycorners0 " + getBounds().getYCorners()[0] + " ycorners1 " + getBounds().getYCorners()[1]);
     }
 
     public String getType()
@@ -490,4 +481,6 @@ public class FallingObject extends Model
     private String type;
 
     private float spiralY = 0;
+
+    private boolean firstUpdate = true;
 }

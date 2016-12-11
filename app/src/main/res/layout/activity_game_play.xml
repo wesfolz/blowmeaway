@@ -14,7 +14,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/pauseButton"
-        android:src="@android:drawable/ic_media_pause"
+        android:src="@drawable/ic_pause"
         android:onClick="onPauseButtonClicked"
         android:background="@null"
         android:layout_marginTop="9dp"
@@ -29,10 +29,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/cubeTextView"
-        android:layout_alignBaseline="@+id/timerTextView"
-        android:layout_alignBottom="@+id/timerTextView"
-        android:layout_toLeftOf="@+id/timerTextView"
-        android:layout_toStartOf="@+id/timerTextView"
+        android:layout_alignBaseline="@+id/imageVIew2"
+        android:layout_alignBottom="@+id/imageVIew2"
+        android:layout_toLeftOf="@+id/imageVIew2"
+        android:layout_toStartOf="@+id/imageVIew2"
         android:layout_marginRight="19dp"
         android:layout_marginEnd="19dp"/>
 
@@ -72,13 +72,11 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/timerTextView"
+        android:id="@+id/imageVIew2"
         android:text="60"
         android:layout_marginTop="7dp"
-        android:layout_alignTop="@+id/pauseButton"
-        android:layout_toLeftOf="@+id/pauseButton"
-        android:layout_toStartOf="@+id/pauseButton"
         android:layout_marginRight="23dp"
-        android:layout_marginEnd="23dp"/>
+        android:layout_alignTop="@+id/pauseButton"
+        android:layout_toStartOf="@+id/pauseButton"/>
 
 </RelativeLayout>

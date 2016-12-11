@@ -1,0 +1,83 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingLeft="0dp"
+                android:paddingRight="0dp"
+                android:paddingTop="0dp"
+                android:paddingBottom="0dp"
+                android:id="@+id/gamePlayViewGroup"
+                tools:context="wesley.folz.blowme.ui.GamePlayActivity">
+
+
+    <ImageButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_play_arrow"
+        android:id="@+id/startPuzzleButton"
+        android:background="@null"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:onClick="onStartPuzzleButtonClicked"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/cubeTextView"
+        android:layout_marginTop="9dp"
+        android:layout_marginRight="10dp"
+        android:text="10"
+        android:layout_alignParentTop="true"
+        android:layout_toEndOf="@+id/imageVIew2"
+        />
+
+    <TextView
+        android:text="10"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/ringTextView"
+        android:layout_marginRight="20dp"
+        android:layout_alignBottom="@+id/imageVIew2"
+        android:layout_toEndOf="@+id/imageView"/>
+
+    <ImageButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_pause"
+        android:id="@+id/pauseButton"
+        android:background="@null"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginRight="10dp"
+        android:layout_marginEnd="10dp"
+        android:onClick="onPauseButtonClicked"/>
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@android:drawable/radiobutton_on_background"
+        android:id="@+id/imageView"
+        android:layout_marginRight="5dp"
+        android:layout_alignBottom="@+id/ringTextView"
+        android:layout_toEndOf="@+id/startPuzzleButton"/>
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/imageVIew2"
+        android:src="@android:drawable/checkbox_off_background"
+        android:layout_marginRight="5dp"
+        android:layout_alignBottom="@+id/cubeTextView"
+        android:layout_toEndOf="@+id/imageView"
+        android:layout_marginStart="24dp"/>
+
+    <TextView
+        android:text="10"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/timerTextVIew"
+        android:layout_alignBaseline="@+id/cubeTextView"
+        android:layout_alignBottom="@+id/cubeTextView"
+        android:layout_toEndOf="@+id/cubeTextView"/>
+
+</RelativeLayout>
