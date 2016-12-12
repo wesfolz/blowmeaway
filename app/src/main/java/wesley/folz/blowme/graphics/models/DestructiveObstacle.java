@@ -37,7 +37,9 @@ public class DestructiveObstacle extends Model
     public void resumeGame()
     {
         super.resumeGame();
-        previousTime = System.currentTimeMillis();
+        if (previousTime != 0) {
+            previousTime = System.currentTimeMillis();
+        }
     }
 
     @Override
@@ -88,12 +90,23 @@ public class DestructiveObstacle extends Model
         getBounds().setBounds(xPos - xRadius, yPos - 4 * scaleFactor, xPos + xRadius, yPos + 4 * scaleFactor);
     }
 
+    public int getTime() {
+        return time;
+    }
+
+    public void setTime(int time) {
+        this.time = time;
+    }
+
+
     public boolean isOffscreen()
     {
         return this.getBounds().getyBottom() > Border.YTOP;
     }
 
     private float deltaY;
+
+    private int time = 0;
 
     private float deltaX;
 

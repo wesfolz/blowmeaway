@@ -2,7 +2,6 @@ package wesley.folz.blowme.graphics.models;
 
 import android.opengl.Matrix;
 import android.os.SystemClock;
-import android.util.Log;
 
 import wesley.folz.blowme.graphics.effects.Wind;
 import wesley.folz.blowme.ui.GamePlayActivity;
@@ -84,8 +83,9 @@ public class Fan extends Model
         float[] bladeRotation = new float[16];
 
         // Create a rotation transformation for the triangle
-        long time = SystemClock.uptimeMillis();// % 4000L;
-        float angle = 0.40f * ((int) time);
+        long time = SystemClock.uptimeMillis() % 4000L; //modulo makes rotation look smooth
+        float angle = 0.6f * (float) time;
+        prevRotationTime = angle;
 
         //if (deltaX != 0 || deltaY != 0)
         // {
@@ -103,12 +103,19 @@ public class Fan extends Model
         deltaX = 0;
         deltaY = 0;
 
+        //Matrix.rotateM(modelMatrix, 0, deltaAngle, 0, -1, 0);
+
         Matrix.multiplyMM(bladeRotation, 0, modelMatrix, 0, calculateInwardParametricRotation(), 0);
 
         //rotate -65 degrees about y-axis
         Matrix.rotateM(bladeRotation, 0, -65, 0, 1, 0);
         //rotate 90 degrees about x-axis
         Matrix.rotateM(bladeRotation, 0, 90, 1, 0, 0);
+
+        //rotate -65 degrees about y-axis
+        //Matrix.rotateM(bladeRotation, 0, -65, 0, 1, 0);
+        //rotate 90 degrees about x-axis
+        //Matrix.rotateM(bladeRotation, 0, 90, 1, 0, 0);
 
         //since fan is initially rotated 90 about x, translation occurs on Z instead of y
         //and rotation occurs about y instead of z
@@ -117,12 +124,6 @@ public class Fan extends Model
         // Combine the rotation matrix with the projection and camera view
         // Note that the mMVPMatrix factor *must be first* in order
         // for the matrix multiplication product to be correct.
-
-
-        if (clockwise != ((((prevX - 1.0f) * (initialY - 1.0f)) - ((prevY - 1.0f) * (initialX - 1.0f))) > 0))
-        {
-            Log.e("parametric", "not equal");
-        }
 
         return bladeRotation;
     }
@@ -193,7 +194,6 @@ public class Fan extends Model
         //directions[updateCount % 10] = (((initialX - 1.0f) * (y - 1.0f)) - ((initialY - 1.0f) * (x - 1.0f))) > 0;
 
         clockwise = (((initialX - 1.0f) * (y - 1.0f)) - ((initialY - 1.0f) * (x - 1.0f))) > 0;
-
 /*
         if (Math.abs(deltaY) > Math.abs(deltaX))
         {
@@ -275,4 +275,6 @@ public class Fan extends Model
     private boolean directions[] = new boolean[10];
 
     public boolean stop = true;
+
+    private float prevRotationTime;
 }

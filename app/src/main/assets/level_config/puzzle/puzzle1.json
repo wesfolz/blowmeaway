@@ -30,14 +30,14 @@
     {
       "model": "RicochetObstacle",
       "index": 0,
-      "xPos": 4,
-      "yPos": 0
+      "xPos": 1,
+      "yPos": 1
     },
     {
       "model": "RicochetObstacle",
       "index": 1,
-      "xPos": 0,
-      "yPos": 7
+      "xPos": 2,
+      "yPos": 3
     },
     {
       "model": "DestructiveObstacle",

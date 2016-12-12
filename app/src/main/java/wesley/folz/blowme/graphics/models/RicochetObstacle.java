@@ -47,7 +47,9 @@ public class RicochetObstacle extends Model
     public void resumeGame()
     {
         super.resumeGame();
-        previousTime = System.currentTimeMillis();
+        if (previousTime != 0) {
+            previousTime = System.currentTimeMillis();
+        }
     }
 
 
@@ -97,6 +99,14 @@ public class RicochetObstacle extends Model
         getBounds().setBounds(xPos - scaleFactor, yPos - scaleFactor, xPos + scaleFactor, yPos + scaleFactor);
     }
 
+    public int getTime() {
+        return time;
+    }
+
+    public void setTime(int time) {
+        this.time = time;
+    }
+
     public boolean isOffscreen()
     {
         return this.getBounds().getyBottom() > Border.YTOP;
@@ -109,5 +119,7 @@ public class RicochetObstacle extends Model
     private long previousTime = 0;
 
     private float risingSpeed = 0.1f;
+
+    private int time = 0;
 
 }

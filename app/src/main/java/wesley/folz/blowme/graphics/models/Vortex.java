@@ -3,6 +3,7 @@ package wesley.folz.blowme.graphics.models;
 import android.opengl.Matrix;
 import android.os.SystemClock;
 
+import wesley.folz.blowme.graphics.effects.DustCloud;
 import wesley.folz.blowme.util.Bounds;
 import wesley.folz.blowme.util.GraphicsUtilities;
 
@@ -30,6 +31,8 @@ public class Vortex extends Model
 
         scaleCount = 1.0f;
 
+        dustCloud = new DustCloud(xPos, 1.0f);
+
         for (int i = 0; i < 3; i++)
         {
             orbitingObjects[i] = new OrbitingObject(type, xPos, -1.0f, (float) Math.PI + i * (float) Math.PI / 2);
@@ -43,6 +46,8 @@ public class Vortex extends Model
         orderVBO = graphicsData.orderVBOMap.get("vortex");
         numVertices = graphicsData.numVerticesMap.get("vortex");
         programHandle = graphicsData.shaderProgramIdMap.get("lighting");
+
+        dustCloud.enableGraphics(graphicsData);
         for (OrbitingObject orbitingObject : orbitingObjects)
         {
             orbitingObject.enableGraphics(graphicsData);
@@ -53,6 +58,7 @@ public class Vortex extends Model
     public void draw()
     {
         super.draw();
+        dustCloud.draw();
         for (OrbitingObject orbitingObject : orbitingObjects)
         {
             orbitingObject.draw();
@@ -93,6 +99,7 @@ public class Vortex extends Model
             Matrix.scaleM(modelMatrix, 0, 1.0f, 0.01f, 1.0f);
         }
 
+        dustCloud.initializeMatrices(viewMatrix, projectionMatrix, lightPositionInEyeSpace);
         for (OrbitingObject orbitingObject : orbitingObjects)
         {
             orbitingObject.initializeMatrices(viewMatrix, projectionMatrix, lightPositionInEyeSpace);
@@ -117,6 +124,7 @@ public class Vortex extends Model
     @Override
     public void updatePosition(float x, float y)
     {
+        dustCloud.updatePosition(0, 0);
         for (OrbitingObject orbitingObject : orbitingObjects)
         {
             orbitingObject.updatePosition(0, deltaY);
@@ -138,6 +146,8 @@ public class Vortex extends Model
     {
         this.collecting = collecting;
     }
+
+    private DustCloud dustCloud;
 
     private float deltaY = 0;
 

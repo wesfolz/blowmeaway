@@ -3,6 +3,7 @@ package wesley.folz.blowme.gamemode;
 import android.util.Log;
 
 import wesley.folz.blowme.graphics.models.FallingObject;
+import wesley.folz.blowme.util.Physics;
 
 
 /**
@@ -29,6 +30,8 @@ public class MenuModeConfig extends ModeConfig
         int modelCount = 0;
         for (FallingObject falObj : fallingObjects)
         {
+            float xForce = 0;
+            float yForce = 0;
             if (falObj.isOffscreen())
             {
                 Log.e("falobj", "offscreen");
@@ -49,7 +52,18 @@ public class MenuModeConfig extends ModeConfig
                 }
             }
 
-            falObj.updatePosition(0, 0);
+            //calculate wind influence
+            if (Physics.isCollision(fan.getWind().getBounds(), falObj.getBounds())) {
+                Physics.calculateWindForce(fan.getWind(), falObj);
+                //Log.e("wind", "xforce " + fan.getWind().getxForce() + " yforce " + fan.getWind
+                // ().getyForce());
+                //Log.e("mode", "wind collision");
+                //falObj.updatePosition(fan.getWind().getxForce(), fan.getWind().getyForce());
+                xForce = fan.getWind().getxForce();
+                yForce = fan.getWind().getyForce();
+            }
+
+            falObj.updatePosition(xForce, yForce);
             modelCount++;
         }
 

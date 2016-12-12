@@ -1,6 +1,16 @@
 {
   "Models": [
     {
+      "model": "LevelParams",
+      "time": 25,
+      "numCubes": 2,
+      "numRings": 2
+    },
+    {
+      "model": "Fan",
+      "index": 0
+    },
+    {
       "model": "Dispenser",
       "index": 0,
       "xPos": 0
@@ -8,8 +18,14 @@
     {
       "model": "Vortex",
       "index": 0,
-      "xPos": 0,
+      "xPos": -0.25,
       "type": "cube"
+    },
+    {
+      "model": "Vortex",
+      "index": 1,
+      "xPos": 0.25,
+      "type": "ring"
     },
     {
       "model": "Background"
@@ -20,28 +36,37 @@
       "type": "cube"
     },
     {
-      "model": "RicochetObstacle",
-      "index": 0,
-      "xPos": 1,
-      "yPos": 1
-    },
-    {
-      "model": "RicochetObstacle",
+      "model": "FallingObject",
       "index": 1,
-      "xPos": 2,
-      "yPos": 2
+      "type": "ring"
     },
     {
-      "model": "DestructiveObstacle",
+      "model": "RicochetObstacle",
       "index": 0,
       "xPos": 1,
-      "yPos": 3
+      "yPos": 7,
+      "time": 0
     },
     {
-      "model": "DestructiveObstacle",
+      "model": "RicochetObstacle",
       "index": 1,
       "xPos": 3,
-      "yPos": 5
+      "yPos": 7,
+      "time": 7
+    },
+    {
+      "model": "DestructiveObstacle",
+      "index": 0,
+      "xPos": 1,
+      "yPos": 7,
+      "time": 4
+    },
+    {
+      "model": "DestructiveObstacle",
+      "index": 1,
+      "xPos": -1,
+      "yPos": 7,
+      "time": 10
     }
   ]
 }

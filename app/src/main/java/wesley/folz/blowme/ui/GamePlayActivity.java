@@ -179,7 +179,7 @@ public class GamePlayActivity extends Activity
             public void onItemClick(AdapterView<?> parent, View v,
                     int position, long id) {
                 TransitionManager.go(gamePlayScene, transitionAnimation);
-                initializeActionMode("Action" + (position + 1));
+                initializeActionMode("action" + (position + 1));
             }
         });
     }
@@ -248,11 +248,11 @@ public class GamePlayActivity extends Activity
         {
             resultsWindow.dismiss();
         }
-        if (actionModeHandler != null && currentGameMode == "Action") {
+        if (actionModeHandler != null && currentGameMode == "action") {
             actionModeHandler.removeCallbacks(actionModeRunnable);
         }
 
-        if (puzzleModeHandler != null && currentGameMode == "Puzzle") {
+        if (puzzleModeHandler != null && currentGameMode == "puzzle") {
             puzzleModeHandler.removeCallbacks(puzzleModeRunnable);
         }
 
@@ -272,7 +272,7 @@ public class GamePlayActivity extends Activity
     {
         resultsWindow.dismiss();
         switch (currentGameMode) {
-            case "Action":
+            case "action":
                 this.initializeActionMode(gameMode.getLevel());
                 break;
             case "endless":
@@ -333,7 +333,7 @@ public class GamePlayActivity extends Activity
 
     private void initializeActionMode(String level) {
         currentGameMode = "action";
-        gameMode = new ActionModeConfig(level);
+        gameMode = new ActionModeConfig(level, menuMode, surfaceView);
 
         cubes = (TextView) findViewById(R.id.cubeTextView);
         rings = (TextView) findViewById(R.id.ringTextView);
@@ -378,7 +378,7 @@ public class GamePlayActivity extends Activity
             @Override
             public void run() {
                 Log.e("timing", "timer handler");
-                timerView.setText(Long.toString(gameMode.getTimeLeft()));
+                timerView.setText(Long.toString(gameMode.getTimeRemaining()));
                 cubes.setText(Integer.toString(gameMode.getNumCubesRemaining()));
                 rings.setText(Integer.toString(gameMode.getNumRingsRemaining()));
 
@@ -402,7 +402,7 @@ public class GamePlayActivity extends Activity
             public void run()
             {
                 Log.e("timing", "timer handler");
-                timerView.setText(Long.toString(gameMode.getTimeLeft()));
+                timerView.setText(Long.toString(gameMode.getTimeRemaining()));
                 cubes.setText(Integer.toString(gameMode.getNumCubesRemaining()));
                 rings.setText(Integer.toString(gameMode.getNumRingsRemaining()));
 

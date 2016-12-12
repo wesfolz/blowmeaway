@@ -11,7 +11,6 @@ import wesley.folz.blowme.R;
 import wesley.folz.blowme.graphics.Background;
 import wesley.folz.blowme.graphics.Border;
 import wesley.folz.blowme.graphics.Line;
-import wesley.folz.blowme.graphics.effects.DustCloud;
 import wesley.folz.blowme.graphics.effects.Explosion;
 import wesley.folz.blowme.graphics.models.DestructiveObstacle;
 import wesley.folz.blowme.graphics.models.Dispenser;
@@ -50,7 +49,6 @@ public abstract class ModeConfig
         fallingObjects = new ArrayList<>();
         explosions = new ArrayList<>();
         vortexes = new ArrayList<>();
-        dustClouds = new ArrayList<>();
         hazards = new ArrayList<>();
 
         fan = new Fan();
@@ -119,13 +117,6 @@ public abstract class ModeConfig
             Vortex v = new Vortex(vortexTypes.get(i), (float) (i + 1) * (2.0f / (numVortexes + 1.0f)) - 1);
             models.add(v);
             vortexes.add(v);
-        }
-
-        for (int i = 0; i < numVortexes; i++)
-        {
-            DustCloud dustCloud = new DustCloud((float) (i + 1) * (2.0f / (numVortexes + 1.0f)) - 1, 1f);
-            models.add(dustCloud);
-            dustClouds.add(dustCloud);
         }
 
         dispenser = new Dispenser();
@@ -501,15 +492,16 @@ public abstract class ModeConfig
             h.draw();
         }
 
+        for (FallingObject falObj : fallingObjects)
+        {
+            falObj.draw();
+        }
+
         for (Vortex v : vortexes)
         {
             v.draw();
         }
 
-        for (FallingObject falObj : fallingObjects)
-        {
-            falObj.draw();
-        }
         for (Explosion e : explosions)
         {
             if (e.isExploding())
@@ -517,12 +509,6 @@ public abstract class ModeConfig
                 e.updatePosition(0, 0);
                 e.draw();
             }
-        }
-
-        for (DustCloud dc : dustClouds)
-        {
-            dc.updatePosition(0, 0);
-            dc.draw();
         }
         //line.draw();
     }
@@ -671,12 +657,12 @@ public abstract class ModeConfig
         Log.e("pause", "stop mode");
     }
 
-    public long getTimeLeft() {
-        return timeLeft;
+    public long getTimeRemaining() {
+        return timeRemaining;
     }
 
 
-    protected long timeLeft = 10;
+    protected long timeRemaining = 10;
 
     public GraphicsUtilities getGraphicsData()
     {
@@ -714,7 +700,6 @@ public abstract class ModeConfig
     protected ArrayList<FallingObject> fallingObjects;
     protected ArrayList<Explosion> explosions;
     protected ArrayList<Vortex> vortexes;
-    protected ArrayList<DustCloud> dustClouds;
 
     protected Fan fan;
     protected Background background;
