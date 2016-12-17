@@ -270,8 +270,6 @@ public abstract class Model
 
     protected float[] viewMatrix = new float[16];
 
-    protected FloatBuffer vertexBuffer;
-
     protected FloatBuffer dataBuffer;
 
     protected static final int COORDS_PER_VERTEX = 3;

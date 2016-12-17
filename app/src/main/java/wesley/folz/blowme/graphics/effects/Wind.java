@@ -60,7 +60,6 @@ public class Wind extends ParticleSystem
         {
             Random rand = new Random();
             //direction vectors
-            float[] direction = new float[3];
             interleavedData[numAttributes * i] = 1.0f - 1.3f * rand.nextFloat();//direction[0]; //x direction
             interleavedData[numAttributes * i + 1] = 0.1f - 0.2f * rand.nextFloat();//direction[1]; //y direction
             interleavedData[numAttributes * i + 2] = 0;// 1 - 2 * rand.nextFloat();//direction[2]; //y direction

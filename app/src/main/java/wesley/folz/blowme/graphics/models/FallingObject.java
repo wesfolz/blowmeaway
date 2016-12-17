@@ -111,11 +111,7 @@ public class FallingObject extends Model
     public boolean isOffscreen()
     {
 //        return false;
-        if (collectedCount >= 10)
-        {
-            return true;
-        }
-        return this.getBounds().getyTop() < Border.YBOTTOM || offscreen;
+        return collectedCount >= 10 || this.getBounds().getyTop() < Border.YBOTTOM || offscreen;
     }
 
     @Override

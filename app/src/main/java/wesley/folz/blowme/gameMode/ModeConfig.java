@@ -29,19 +29,19 @@ import wesley.folz.blowme.util.Physics;
 
 public abstract class ModeConfig
 {
-    public ModeConfig()
+    protected ModeConfig()
     {
     }
 
-    public void initializeGameObjects() {
-        numRicochetObstacles = 2;
-        numDestructiveObstacles = 2;
-        numFallingObjects = 2;
-        numRings = 1;
-        numCubes = 1;
-        numVortexes = 2;
-        numRingVortexes = 1;
-        numCubeVortexes = 1;
+    protected void initializeGameObjects() {
+        int numRicochetObstacles = 2;
+        int numDestructiveObstacles = 2;
+        int numFallingObjects = 2;
+        int numRings = 1;
+        int numCubes = 1;
+        int numVortexes = 2;
+        int numRingVortexes = 1;
+        int numCubeVortexes = 1;
         numCubesRemaining = 1;
         numRingsRemaining = 1;
         models = new ArrayList<>();
@@ -202,7 +202,7 @@ public abstract class ModeConfig
         Log.e("pause", "surface changed mode");
     }
 
-    public void initializeFromExistingMode(ModeConfig mode, GamePlaySurfaceView surfaceView)
+    protected void initializeFromExistingMode(ModeConfig mode, GamePlaySurfaceView surfaceView)
     {
         this.graphicsData = mode.graphicsData;
         this.projectionMatrix = mode.projectionMatrix;
@@ -442,7 +442,7 @@ public abstract class ModeConfig
                 //falObj.updatePosition(fan.getWind().getxForce(), fan.getWind().getyForce());
                 xForce = fan.getWind().getxForce();
                 yForce = fan.getWind().getyForce();
-                objectEffected = true;
+                //objectEffected = true;
             }
 
             if (!falObj.isSpiraling())
@@ -513,7 +513,7 @@ public abstract class ModeConfig
         //line.draw();
     }
 
-    protected float[] generateRandomLocation()
+    private float[] generateRandomLocation()
     {
         Random rand = new Random();
         //screen dimensions: -0.5 <= x <= 0.5, -1 <= y <= 1
@@ -625,7 +625,7 @@ public abstract class ModeConfig
         }
     }
 
-    public void handleFanMovementMove(float x, float y)
+    private void handleFanMovementMove(float x, float y)
     {
         if (fanReadyToMove && initialPositionSet) {
             fan.updatePosition(x, y);
@@ -662,7 +662,7 @@ public abstract class ModeConfig
     }
 
 
-    protected long timeRemaining = 10;
+    long timeRemaining = 10;
 
     public GraphicsUtilities getGraphicsData()
     {
@@ -695,15 +695,15 @@ public abstract class ModeConfig
     }
 
     protected ArrayList<Model> models;
-    protected ArrayList<RicochetObstacle> obstacles;
-    protected ArrayList<DestructiveObstacle> hazards;
-    protected ArrayList<FallingObject> fallingObjects;
-    protected ArrayList<Explosion> explosions;
-    protected ArrayList<Vortex> vortexes;
+    ArrayList<RicochetObstacle> obstacles;
+    ArrayList<DestructiveObstacle> hazards;
+    ArrayList<FallingObject> fallingObjects;
+    ArrayList<Explosion> explosions;
+    ArrayList<Vortex> vortexes;
 
     protected Fan fan;
     protected Background background;
-    protected Dispenser dispenser;
+    Dispenser dispenser;
     protected Line line;
 
     protected float[] viewMatrix = new float[16];
@@ -714,36 +714,28 @@ public abstract class ModeConfig
 
     protected GraphicsUtilities graphicsData;
 
-    protected int explosionIndex = 0;
+    int explosionIndex = 0;
 
     private ArrayList<Integer> xLocations = new ArrayList<>();
     private ArrayList<Integer> yLocations = new ArrayList<>();
 
     //initial game parameters:
-    protected int numRicochetObstacles;
-    protected int numDestructiveObstacles;
-    protected int numFallingObjects;
-    protected int numRings;
-    protected int numCubes;
-    protected int numVortexes;
-    protected int numRingVortexes;
-    protected int numCubeVortexes;
 
     //dynamic game parameters
-    protected int numCubesRemaining;
-    protected int numRingsRemaining;
+    int numCubesRemaining;
+    int numRingsRemaining;
 
-    protected boolean objectiveComplete = false;
+    boolean objectiveComplete = false;
 
     private boolean touchActionStarted;
 
-    protected boolean positionsInitialized;
+    boolean positionsInitialized;
 
-    protected boolean objectiveFailed = false;
+    boolean objectiveFailed = false;
 
-    protected boolean fanReadyToMove = false;
+    boolean fanReadyToMove = false;
 
-    protected boolean initialPositionSet = false;
+    boolean initialPositionSet = false;
 
     protected String level;
 }

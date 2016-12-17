@@ -28,12 +28,6 @@ public abstract class Physics
         wind.setyForce((-1) * wind.getyPos() * (totalForce));
     }
 
-    public static boolean isBorderCollision( Bounds object )
-    {
-        return (object.getxRight() >= Border.XRIGHT ||
-                object.getxLeft() <= Border.XLEFT);
-    }
-
     public static boolean isTopBorderCollision(Bounds object)
     {
         return (object.getyTop() >= Border.YTOP);

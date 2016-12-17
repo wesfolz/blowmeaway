@@ -291,7 +291,7 @@ public class ActionModeConfig extends ModeConfig
                 //falObj.updatePosition(fan.getWind().getxForce(), fan.getWind().getyForce());
                 xForce = fan.getWind().getxForce();
                 yForce = fan.getWind().getyForce();
-                objectEffected = true;
+                //objectEffected = true;
             }
 
             if (!falObj.isSpiraling()) {
@@ -320,7 +320,7 @@ public class ActionModeConfig extends ModeConfig
         //line.updatePosition(0, 0);
     }
 
-    public void startTiming()
+    private void startTiming()
     {
         timer = new Timer();
         timer.scheduleAtFixedRate(new TimerTask()

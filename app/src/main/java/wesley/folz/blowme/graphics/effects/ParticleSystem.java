@@ -6,7 +6,6 @@ import android.util.Log;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.ArrayList;
 
 import wesley.folz.blowme.R;
 import wesley.folz.blowme.graphics.models.Model;
@@ -24,8 +23,6 @@ public abstract class ParticleSystem extends Model
     public ParticleSystem()
     {
         super();
-        particles = new ArrayList<>();
-
         initialTime = System.nanoTime() / 1000000000.0f;
     }
 
@@ -207,8 +204,6 @@ public abstract class ParticleSystem extends Model
         //time = 0;
         time += 0.01f;
     }
-
-    ArrayList<Particle> particles;
 
     private float initialTime;
 

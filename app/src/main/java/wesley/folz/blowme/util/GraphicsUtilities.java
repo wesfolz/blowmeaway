@@ -145,10 +145,8 @@ public class GraphicsUtilities
         {
             e.printStackTrace();
         }
-        finally
-        {
-            return shaderCode;
-        }
+
+        return shaderCode;
     }
 
     public static void readShader(Model model)
@@ -160,8 +158,8 @@ public class GraphicsUtilities
         BufferedReader fragmentReader = new BufferedReader( new InputStreamReader( fragmentStream ) );
 
         String line;
-        model.vertexShaderCode = new String("");
-        model.fragmentShaderCode = new String("");
+        model.vertexShaderCode = "";
+        model.fragmentShaderCode = "";
         try
         {
             while( (line = vertexReader.readLine()) != null )
@@ -187,7 +185,7 @@ public class GraphicsUtilities
         InputStream stream = MainApplication.getAppContext().getResources().openRawResource(model
                 .OBJ_FILE_RESOURCE);
         BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
-        String line = null;
+        String line;
         try
         {
             while ((line = reader.readLine()) != null)
@@ -201,7 +199,7 @@ public class GraphicsUtilities
             }
         } catch (IOException e)
         {
-
+            e.printStackTrace();
         }
     }
 
@@ -214,13 +212,12 @@ public class GraphicsUtilities
         ArrayList<Float> vertices = new ArrayList<>();
         ArrayList<Float> normals = new ArrayList<>();
         ArrayList<Short> faceList = new ArrayList<>();
-        ArrayList<Short> faceNormals = new ArrayList<>();
 
         HashMap<Short, Float[]> normalVertexMap = new HashMap<>();
 
         short offset = 1;
 
-        String line = null;
+        String line;
         try
         {
             while ((line = reader.readLine()) != null)
@@ -283,7 +280,6 @@ public class GraphicsUtilities
                                     normalVertexMap.put(faceList.get(faceList.size() - 1),
                                             new Float[]{normals.get(normalIndex), normals.get(normalIndex + 1), normals.get(normalIndex + 2)});
                                 }
-                                faceNormals.add((short) (Short.parseShort(s) - offset));
                             }
                             count++;
                         }
@@ -329,13 +325,12 @@ public class GraphicsUtilities
         ArrayList<Float> vertices = new ArrayList<>();
         ArrayList<Float> normals = new ArrayList<>();
         ArrayList<Short> faceList = new ArrayList<>();
-        ArrayList<Short> faceNormals = new ArrayList<>();
 
         HashMap<Short, Float[]> normalVertexMap = new HashMap<>();
 
         short offset = 1;
 
-        String line = null;
+        String line;
         try
         {
             while( (line = reader.readLine()) != null )
@@ -393,7 +388,6 @@ public class GraphicsUtilities
                                 normalVertexMap.put(faceList.get(faceList.size() - 1),
                                         new Float[]{normals.get(normalIndex), normals.get(normalIndex+1), normals.get(normalIndex+2)});
                             }
-                            faceNormals.add( (short) (Short.parseShort( s ) - offset) );
                         }
                         count++;
                     }
@@ -575,7 +569,8 @@ public class GraphicsUtilities
      * @param attributes           Attributes that need to be bound to the program.
      * @return An OpenGL handle to the program.
      */
-    public int createAndLinkProgram(final int vertexShaderHandle, final int fragmentShaderHandle, final String[] attributes)
+    private int createAndLinkProgram(final int vertexShaderHandle, final int fragmentShaderHandle,
+            final String[] attributes)
     {
         int programHandle = GLES20.glCreateProgram();
 
@@ -629,7 +624,7 @@ public class GraphicsUtilities
      * @param shaderCode
      * @return
      */
-    public int loadShader(int type, String shaderCode)
+    private int loadShader(int type, String shaderCode)
     {
         // create a vertex vertexshader type (GLES20.GL_VERTEX_SHADER)
         // or a fragment vertexshader type (GLES20.GL_FRAGMENT_SHADER)

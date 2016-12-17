@@ -69,19 +69,6 @@ public class RicochetObstacle extends Model
     }
 
     @Override
-    public void initializeMatrices(float[] viewMatrix, float[] projectionMatrix, float[] lightPositionInEyeSpace)
-    {
-        super.initializeMatrices(viewMatrix, projectionMatrix, lightPositionInEyeSpace);
-        if (!this.resuming)
-        {
-            //rotate 130 degrees about x-axis
-            //Matrix.rotateM(modelMatrix, 0, 20, 1, 0, 0);
-        }
-
-        //Log.e( "blowme", "xpos: " + xPos + " ypos " + yPos );
-    }
-
-    @Override
     public void updatePosition(float x, float y)
     {
         if (previousTime == 0)

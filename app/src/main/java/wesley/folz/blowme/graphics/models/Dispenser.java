@@ -17,7 +17,6 @@ public class Dispenser extends Model
         super();
         xPos = 0;//+.01f;
         yPos = 0.935f;//GamePlayActivity.Y_EDGE_POSITION;
-        initialRotation = new float[16];
         motionMultiplier = 1;
 
         scaleFactor = 0.2f;
@@ -113,8 +112,6 @@ public class Dispenser extends Model
     private float deltaX;
 
     private int motionMultiplier;
-
-    private float[] initialRotation;
 
     private float targetX = Border.XRIGHT;
 

@@ -65,7 +65,6 @@ public class PuzzleModeConfig extends ModeConfig
                 JSONObject jso = jsonArray.getJSONObject(i);
                 switch (jso.getString("model")) {
                     case "RicochetObstacle":
-                        numRicochetObstacles++;
                         float pos[] = generateObstacleLocation(jso.getInt("xPos"),
                                 jso.getInt("yPos"));
                         RicochetObstacle obstacle = new RicochetObstacle(pos[0], pos[1]);
@@ -74,7 +73,6 @@ public class PuzzleModeConfig extends ModeConfig
                         break;
 
                     case "DestructiveObstacle":
-                        numRicochetObstacles++;
                         float desPos[] = generateObstacleLocation(0, jso.getInt("yPos"));
                         desPos[0] = (float) jso.getInt("xPos") * 0.56f;
                         DestructiveObstacle destructiveObstacle = new DestructiveObstacle(desPos[0],
@@ -84,7 +82,6 @@ public class PuzzleModeConfig extends ModeConfig
                         break;
 
                     case "Vortex":
-                        numVortexes++;
                         Vortex v = new Vortex(jso.getString("type"), jso.getInt("xPos"));
                         vortexes.add(v);
                         models.add(v);
@@ -303,7 +300,7 @@ public class PuzzleModeConfig extends ModeConfig
         //line.draw();
     }
 
-    public void startTiming() {
+    private void startTiming() {
         timer = new Timer();
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override

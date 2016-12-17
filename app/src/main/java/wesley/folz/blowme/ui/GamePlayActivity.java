@@ -24,6 +24,8 @@ import android.widget.GridView;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 
+import java.util.Locale;
+
 import wesley.folz.blowme.R;
 import wesley.folz.blowme.gamemode.ActionModeConfig;
 import wesley.folz.blowme.gamemode.EndlessModeConfig;
@@ -171,7 +173,7 @@ public class GamePlayActivity extends Activity
     {
         TransitionManager.go(levelSelectScene, transitionAnimation);
         TextView modeTitle = (TextView) findViewById(R.id.modeBannerText);
-        modeTitle.setText("Action Mode");
+        modeTitle.setText(getResources().getString(R.string.action_mode));
         GridView gridview = (GridView) findViewById(R.id.level_grid);
         gridview.setAdapter(new ImageAdapter(this));
 
@@ -193,7 +195,7 @@ public class GamePlayActivity extends Activity
     protected void onPuzzleButtonClicked(View endlessButton) {
         TransitionManager.go(levelSelectScene, transitionAnimation);
         TextView modeTitle = (TextView) findViewById(R.id.modeBannerText);
-        modeTitle.setText("Puzzle Mode");
+        modeTitle.setText(getResources().getString(R.string.puzzle_mode));
         GridView gridview = (GridView) findViewById(R.id.level_grid);
         gridview.setAdapter(new ImageAdapter(this));
 
@@ -248,11 +250,11 @@ public class GamePlayActivity extends Activity
         {
             resultsWindow.dismiss();
         }
-        if (actionModeHandler != null && currentGameMode == "action") {
+        if (actionModeHandler != null && currentGameMode.equals("action")) {
             actionModeHandler.removeCallbacks(actionModeRunnable);
         }
 
-        if (puzzleModeHandler != null && currentGameMode == "puzzle") {
+        if (puzzleModeHandler != null && currentGameMode.equals("puzzle")) {
             puzzleModeHandler.removeCallbacks(puzzleModeRunnable);
         }
 
@@ -378,9 +380,12 @@ public class GamePlayActivity extends Activity
             @Override
             public void run() {
                 Log.e("timing", "timer handler");
-                timerView.setText(Long.toString(gameMode.getTimeRemaining()));
-                cubes.setText(Integer.toString(gameMode.getNumCubesRemaining()));
-                rings.setText(Integer.toString(gameMode.getNumRingsRemaining()));
+                timerView.setText(
+                        String.format(Locale.getDefault(), "%d", gameMode.getTimeRemaining()));
+                cubes.setText(
+                        String.format(Locale.getDefault(), "%d", gameMode.getNumCubesRemaining()));
+                rings.setText(
+                        String.format(Locale.getDefault(), "%d", gameMode.getNumRingsRemaining()));
 
                 if (gameMode.isObjectiveComplete() || gameMode.isObjectiveFailed()) {
                     displayGameResults(gameMode.isObjectiveComplete());
@@ -402,9 +407,12 @@ public class GamePlayActivity extends Activity
             public void run()
             {
                 Log.e("timing", "timer handler");
-                timerView.setText(Long.toString(gameMode.getTimeRemaining()));
-                cubes.setText(Integer.toString(gameMode.getNumCubesRemaining()));
-                rings.setText(Integer.toString(gameMode.getNumRingsRemaining()));
+                timerView.setText(
+                        String.format(Locale.getDefault(), "%d", gameMode.getTimeRemaining()));
+                cubes.setText(
+                        String.format(Locale.getDefault(), "%d", gameMode.getNumCubesRemaining()));
+                rings.setText(
+                        String.format(Locale.getDefault(), "%d", gameMode.getNumRingsRemaining()));
 
                 if (gameMode.isObjectiveComplete() || gameMode.isObjectiveFailed())
                 {

@@ -24,7 +24,7 @@ public class GameModeUtilities {
     public static String readAsset(String assetName) {
         StringBuilder buf = new StringBuilder();
         InputStream json;
-        String str = "";
+        String str;
 
         try {
             json = MainApplication.getAppContext().getAssets().open(assetName);
