@@ -1,41 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:orientation="vertical"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:background="@color/glass"
-              android:backgroundTint="#5500ddff"
-              android:backgroundTintMode="add">
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                                             xmlns:app="http://schemas.android.com/apk/res-auto"
+                                             xmlns:tools="http://schemas.android.com/tools"
+                                             android:orientation="vertical"
+                                             android:layout_width="match_parent"
+                                             android:layout_height="match_parent"
+                                             android:background="@color/glass">
 
     <ImageButton
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/resumeButton"
-        android:layout_gravity="center_horizontal"
         android:src="@drawable/ic_play_arrow"
         android:clickable="false"
         android:onClick="onResumeButtonClicked"
         android:background="@null"
-        android:layout_margin="10dp"/>
+        tools:layout_constraintTop_creator="1"
+        tools:layout_constraintRight_creator="1"
+        app:layout_constraintRight_toRightOf="parent"
+        android:layout_marginTop="10dp"
+        tools:layout_constraintLeft_creator="1"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
 
     <ImageButton
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/helpButton"
-        android:layout_gravity="center_horizontal"
         android:src="@android:drawable/ic_menu_help"
         android:background="@null"
-        android:layout_margin="10dp"/>
+        tools:layout_constraintTop_creator="1"
+        android:layout_marginTop="20dp"
+        app:layout_constraintTop_toBottomOf="@+id/resumeButton"
+        app:layout_constraintLeft_toLeftOf="@+id/resumeButton"
+        app:layout_constraintRight_toRightOf="@+id/resumeButton"/>
 
     <ImageButton
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/exitGamePlayButton"
-        android:layout_gravity="center_horizontal"
         android:src="@drawable/ic_close"
         android:clickable="false"
         android:onClick="onExitGamePlayButtonClicked"
         android:background="@null"
-        android:layout_margin="10dp"/>
+        tools:layout_constraintTop_creator="1"
+        android:layout_marginTop="20dp"
+        app:layout_constraintTop_toBottomOf="@+id/helpButton"
+        app:layout_constraintLeft_toLeftOf="@+id/helpButton"
+        app:layout_constraintRight_toRightOf="@+id/helpButton"/>
 
-</LinearLayout>
+</android.support.constraint.ConstraintLayout>

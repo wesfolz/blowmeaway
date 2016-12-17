@@ -1,43 +1,61 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:orientation="vertical"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:transitionGroup="false"
-              android:background="@color/glass">
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                                             xmlns:app="http://schemas.android.com/apk/res-auto"
+                                             xmlns:tools="http://schemas.android.com/tools"
+                                             android:orientation="vertical"
+                                             android:layout_width="match_parent"
+                                             android:layout_height="match_parent"
+                                             android:transitionGroup="false"
+                                             android:background="@color/glass"
+                                             android:id="@+id/linearLayout">
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/resultsTextView"
-        android:layout_gravity="center_horizontal"
         android:clickable="false"
         android:text="Game Complete!"
-        android:layout_margin="10dp"
         android:fontFamily="sans-serif"
         android:textColor="@android:color/white"
-        android:textSize="24sp"/>
+        android:textSize="24sp"
+        tools:layout_constraintTop_creator="1"
+        tools:layout_constraintRight_creator="1"
+        app:layout_constraintRight_toRightOf="parent"
+        android:layout_marginTop="10dp"
+        tools:layout_constraintLeft_creator="1"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
 
     <ImageButton
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/replayButton"
-        android:layout_gravity="center_horizontal"
         android:src="@drawable/ic_replay"
         android:onClick="onReplayGameButtonClicked"
         android:background="@null"
-        android:layout_margin="10dp"/>
+        tools:layout_constraintTop_creator="1"
+        tools:layout_constraintRight_creator="1"
+        app:layout_constraintRight_toRightOf="parent"
+        android:layout_marginTop="20dp"
+        app:layout_constraintTop_toBottomOf="@+id/resultsTextView"
+        tools:layout_constraintLeft_creator="1"
+        app:layout_constraintLeft_toLeftOf="parent"/>
 
     <ImageButton
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/homeButton"
-        android:layout_gravity="center_horizontal"
         android:src="@drawable/ic_home"
         android:clickable="false"
         android:onClick="onExitGamePlayButtonClicked"
         android:background="@null"
-        android:layout_margin="10dp"
-        />
+        tools:layout_constraintTop_creator="1"
+        tools:layout_constraintRight_creator="1"
+        app:layout_constraintRight_toRightOf="@+id/replayButton"
+        android:layout_marginTop="20dp"
+        app:layout_constraintTop_toBottomOf="@+id/replayButton"
+        tools:layout_constraintLeft_creator="1"
+        app:layout_constraintLeft_toLeftOf="@+id/replayButton"
+        app:layout_constraintHorizontal_bias="0.0"/>
 
-</LinearLayout>
+</android.support.constraint.ConstraintLayout>
