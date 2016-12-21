@@ -2,7 +2,13 @@ package wesley.folz.blowme.gamemode;
 
 import android.util.Log;
 
+import java.util.ArrayList;
+
+import wesley.folz.blowme.graphics.Background;
+import wesley.folz.blowme.graphics.effects.Explosion;
+import wesley.folz.blowme.graphics.models.Dispenser;
 import wesley.folz.blowme.graphics.models.FallingObject;
+import wesley.folz.blowme.graphics.models.Fan;
 import wesley.folz.blowme.util.Physics;
 
 
@@ -19,6 +25,60 @@ public class MenuModeConfig extends ModeConfig
         positionsInitialized = true;
         initializeGameObjects();
     }
+
+    @Override
+    protected void initializeGameObjects() {
+        int numRicochetObstacles = 2;
+        int numDestructiveObstacles = 2;
+        int numFallingObjects = 2;
+        int numRings = 1;
+        int numCubes = 1;
+        int numVortexes = 2;
+        int numRingVortexes = 1;
+        int numCubeVortexes = 1;
+        numCubesRemaining = 1;
+        numRingsRemaining = 1;
+        models = new ArrayList<>();
+        obstacles = new ArrayList<>();
+        fallingObjects = new ArrayList<>();
+        explosions = new ArrayList<>();
+        vortexes = new ArrayList<>();
+        hazards = new ArrayList<>();
+
+        fan = new Fan();
+        models.add(fan);
+
+        for (int i = 0; i < numRings; i++) {
+            FallingObject fo = new FallingObject("ring");
+            models.add(fo);
+            fallingObjects.add(fo);
+        }
+
+        for (int i = 0; i < numCubes; i++) {
+            FallingObject fo = new FallingObject("cube");
+            models.add(fo);
+            fallingObjects.add(fo);
+        }
+
+        for (int i = 0; i < numFallingObjects; i++) {
+            Explosion explosion = new Explosion();
+            models.add(explosion);
+            explosions.add(explosion);
+        }
+
+        dispenser = new Dispenser();
+        models.add(dispenser);
+
+        background = new Background();
+        models.add(background);
+
+        positionsInitialized = false;
+
+        //line =  new Line();
+        //models.add(line);
+        Log.e("pause", "constructor mode");
+    }
+
 
     @Override
     protected void updateModelPositions()
@@ -71,6 +131,7 @@ public class MenuModeConfig extends ModeConfig
         //line.draw();
     }
 
+    @Override
     protected void drawModels()
     {
         background.draw();

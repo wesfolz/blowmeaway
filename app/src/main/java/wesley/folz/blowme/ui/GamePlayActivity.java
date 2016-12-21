@@ -75,6 +75,8 @@ public class GamePlayActivity extends Activity
         levelSelectScene = Scene.getSceneForLayout(sceneRoot, R.layout.level_select_layout, this);
         puzzleGamePlayScene = Scene.getSceneForLayout(sceneRoot, R.layout.puzzle_game_play_layout,
                 this);
+        endlessGamePlayScene = Scene.getSceneForLayout(sceneRoot, R.layout.endless_game_play_layout,
+                this);
 
         transitionAnimation =
                 TransitionInflater.from(this).
@@ -121,14 +123,10 @@ public class GamePlayActivity extends Activity
         super.onPause();
         Log.e("appflow", "onPause");
         surfaceView.onPause();
-        if (actionModeHandler != null) {
-            actionModeHandler.removeCallbacks(actionModeRunnable);
-        }
 
-        if (puzzleModeHandler != null) {
-            puzzleModeHandler.removeCallbacks(actionModeRunnable);
+        if (gameHandler != null) {
+            gameHandler.removeCallbacks(gameRunnable);
         }
-
         if (pauseWindow != null) {
             pauseWindow.dismiss();
         }
@@ -187,9 +185,9 @@ public class GamePlayActivity extends Activity
     }
 
     protected void onEndlessButtonClicked(View endlessButton) {
-        TransitionManager.go(levelSelectScene, transitionAnimation);
+        TransitionManager.go(endlessGamePlayScene, transitionAnimation);
         //TransitionManager.go(gamePlayScene, transitionAnimation);
-        //initializeEndlessMode();
+        initializeEndlessMode();
     }
 
     protected void onPuzzleButtonClicked(View endlessButton) {
@@ -250,12 +248,8 @@ public class GamePlayActivity extends Activity
         {
             resultsWindow.dismiss();
         }
-        if (actionModeHandler != null && currentGameMode.equals("action")) {
-            actionModeHandler.removeCallbacks(actionModeRunnable);
-        }
-
-        if (puzzleModeHandler != null && currentGameMode.equals("puzzle")) {
-            puzzleModeHandler.removeCallbacks(puzzleModeRunnable);
+        if (gameHandler != null) {
+            gameHandler.removeCallbacks(gameRunnable);
         }
 
         if (gameMode != null) {
@@ -339,7 +333,7 @@ public class GamePlayActivity extends Activity
 
         cubes = (TextView) findViewById(R.id.cubeTextView);
         rings = (TextView) findViewById(R.id.ringTextView);
-        timerView = (TextView) this.findViewById(R.id.imageVIew2);
+        timerView = (TextView) this.findViewById(R.id.timerTextView);
 
         initializeGameMode();
 
@@ -348,9 +342,13 @@ public class GamePlayActivity extends Activity
 
     private void initializeEndlessMode() {
         currentGameMode = "endless";
-        gameMode = new EndlessModeConfig();
+        gameMode = new EndlessModeConfig(menuMode, surfaceView);
+
+        numLivesView = (TextView) findViewById(R.id.numLivesTextView);
+        scoreTextView = (TextView) findViewById(R.id.timerTextView);
 
         initializeGameMode();
+        startEndlessModeHandler();
     }
 
     private void initializePuzzleMode(String level) {
@@ -375,11 +373,10 @@ public class GamePlayActivity extends Activity
     }
 
     public void startActionModeHandler() {
-        actionModeHandler = new Handler();
-        actionModeRunnable = new Runnable() {
+        gameHandler = new Handler();
+        gameRunnable = new Runnable() {
             @Override
             public void run() {
-                Log.e("timing", "timer handler");
                 timerView.setText(
                         String.format(Locale.getDefault(), "%d", gameMode.getTimeRemaining()));
                 cubes.setText(
@@ -389,24 +386,44 @@ public class GamePlayActivity extends Activity
 
                 if (gameMode.isObjectiveComplete() || gameMode.isObjectiveFailed()) {
                     displayGameResults(gameMode.isObjectiveComplete());
-                    actionModeHandler.removeCallbacks(actionModeRunnable);
+                    gameHandler.removeCallbacks(gameRunnable);
                 } else {
-                    actionModeHandler.postDelayed(this, 500);
+                    gameHandler.postDelayed(this, 500);
                 }
             }
         };
-        actionModeHandler.postDelayed(actionModeRunnable, 0);
+        gameHandler.postDelayed(gameRunnable, 0);
+    }
+
+    public void startEndlessModeHandler() {
+        gameHandler = new Handler();
+        gameRunnable = new Runnable() {
+            @Override
+            public void run() {
+                EndlessModeConfig endlessMode = (EndlessModeConfig) gameMode;
+                scoreTextView.setText(
+                        String.format(Locale.getDefault(), "%d", endlessMode.getScore()));
+                numLivesView.setText(
+                        String.format(Locale.getDefault(), "%d", endlessMode.getNumLives()));
+                if (gameMode.isObjectiveFailed()) {
+                    displayGameResults(false);
+                    gameHandler.removeCallbacks(gameRunnable);
+                } else {
+                    gameHandler.postDelayed(this, 500);
+                }
+            }
+        };
+        gameHandler.postDelayed(gameRunnable, 0);
     }
 
     public void startPuzzleModeHandler()
     {
-        puzzleModeHandler = new Handler();
-        puzzleModeRunnable = new Runnable()
+        gameHandler = new Handler();
+        gameRunnable = new Runnable()
         {
             @Override
             public void run()
             {
-                Log.e("timing", "timer handler");
                 timerView.setText(
                         String.format(Locale.getDefault(), "%d", gameMode.getTimeRemaining()));
                 cubes.setText(
@@ -416,16 +433,16 @@ public class GamePlayActivity extends Activity
 
                 if (gameMode.isObjectiveComplete() || gameMode.isObjectiveFailed())
                 {
-                    puzzleModeHandler.removeCallbacks(puzzleModeRunnable);
+                    gameHandler.removeCallbacks(gameRunnable);
                     displayGameResults(gameMode.isObjectiveComplete());
                 }
                 else
                 {
-                    puzzleModeHandler.postDelayed(this, 500);
+                    gameHandler.postDelayed(this, 500);
                 }
             }
         };
-        puzzleModeHandler.postDelayed(puzzleModeRunnable, 0);
+        gameHandler.postDelayed(gameRunnable, 0);
     }
 
     /*--------------------------------------Getters and Setters-----------------------------------*/
@@ -466,6 +483,10 @@ public class GamePlayActivity extends Activity
 
     private TextView rings;
 
+    private TextView numLivesView;
+
+    private TextView scoreTextView;
+
     private ViewGroup sceneRoot;
 
     private Scene mainMenuScene;
@@ -476,15 +497,13 @@ public class GamePlayActivity extends Activity
 
     private Scene puzzleGamePlayScene;
 
+    private Scene endlessGamePlayScene;
+
     private Transition transitionAnimation;
 
-    private Handler actionModeHandler;
+    private Runnable gameRunnable;
 
-    private Runnable actionModeRunnable;
-
-    private Handler puzzleModeHandler;
-
-    private Runnable puzzleModeRunnable;
+    private Handler gameHandler;
 
     private String currentGameMode;
 }
