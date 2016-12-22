@@ -5,13 +5,10 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.Random;
 
-import wesley.folz.blowme.graphics.Background;
 import wesley.folz.blowme.graphics.Border;
 import wesley.folz.blowme.graphics.effects.Explosion;
 import wesley.folz.blowme.graphics.models.DestructiveObstacle;
-import wesley.folz.blowme.graphics.models.Dispenser;
 import wesley.folz.blowme.graphics.models.FallingObject;
-import wesley.folz.blowme.graphics.models.Fan;
 import wesley.folz.blowme.graphics.models.Model;
 import wesley.folz.blowme.graphics.models.RicochetObstacle;
 import wesley.folz.blowme.graphics.models.Vortex;
@@ -70,7 +67,7 @@ public class EndlessModeConfig extends ModeConfig
         vortexes = new ArrayList<>();
         hazards = new ArrayList<>();
 
-        fan = new Fan();
+        //fan = new Fan();
         models.add(fan);
 
         for (int i = 0; i < numRings; i++) {
@@ -128,10 +125,10 @@ public class EndlessModeConfig extends ModeConfig
             vortexes.add(v);
         }
 
-        dispenser = new Dispenser();
+        //dispenser = new Dispenser();
         models.add(dispenser);
 
-        background = new Background();
+        //background = new Background();
         models.add(background);
 
         positionsInitialized = false;
