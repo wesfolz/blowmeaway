@@ -25,6 +25,8 @@ public class Fan extends Model
 
         scaleFactor = 0.03f;
 
+        //    scaleFactor = 0.1f;
+
         initialXPos = xPos;
         initialYPos = yPos;
     }
@@ -36,7 +38,7 @@ public class Fan extends Model
         orderVBO = graphicsData.orderVBOMap.get("fan");
         numVertices = graphicsData.numVerticesMap.get("fan");
         programHandle = graphicsData.shaderProgramIdMap.get("texture");
-        textureDataHandle = graphicsData.textureIdMap.get("wood");
+        textureDataHandle = graphicsData.textureIdMap.get("fan_test");
         //      getWind().enableGraphics(graphicsData);
     }
 

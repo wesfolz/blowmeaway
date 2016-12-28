@@ -28,14 +28,11 @@ public class MenuModeConfig extends ModeConfig
 
     @Override
     protected void initializeGameObjects() {
-        int numRicochetObstacles = 2;
-        int numDestructiveObstacles = 2;
+
         int numFallingObjects = 2;
         int numRings = 1;
         int numCubes = 1;
-        int numVortexes = 2;
-        int numRingVortexes = 1;
-        int numCubeVortexes = 1;
+
         numCubesRemaining = 1;
         numRingsRemaining = 1;
         models = new ArrayList<>();
@@ -137,7 +134,7 @@ public class MenuModeConfig extends ModeConfig
         background.draw();
         fan.draw();
 
-        dispenser.draw();
+        //  dispenser.draw();
 
         for (FallingObject falObj : fallingObjects)
         {

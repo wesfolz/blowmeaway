@@ -24,6 +24,8 @@ public class Vortex extends Model
         yPos = -1.0f;//0.935f;//GamePlayActivity.Y_EDGE_POSITION;
 
         scaleFactor = 0.04f;
+        //     scaleFactor = 0.1f;
+
 
         initialXPos = xPos;
         initialYPos = yPos;
@@ -45,13 +47,15 @@ public class Vortex extends Model
         dataVBO = graphicsData.modelVBOMap.get("vortex");
         orderVBO = graphicsData.orderVBOMap.get("vortex");
         numVertices = graphicsData.numVerticesMap.get("vortex");
-        programHandle = graphicsData.shaderProgramIdMap.get("lighting");
+        programHandle = graphicsData.shaderProgramIdMap.get("texture");
+        textureDataHandle = graphicsData.textureIdMap.get("vortex_tex");
 
         dustCloud.enableGraphics(graphicsData);
         for (OrbitingObject orbitingObject : orbitingObjects)
         {
             orbitingObject.enableGraphics(graphicsData);
         }
+
     }
 
     @Override
@@ -63,6 +67,7 @@ public class Vortex extends Model
         {
             orbitingObject.draw();
         }
+
     }
 
     @Override

@@ -133,6 +133,14 @@ public class EndlessModeConfig extends ModeConfig
 
         positionsInitialized = false;
 
+        //keeps object matrices from reinitializing
+        this.fan.pauseGame();
+        this.fan.resumeGame();
+        this.dispenser.pauseGame();
+        this.dispenser.resumeGame();
+        this.background.pauseGame();
+        this.background.resumeGame();
+
         //line =  new Line();
         //models.add(line);
         Log.e("pause", "constructor mode");

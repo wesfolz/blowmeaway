@@ -46,9 +46,9 @@ public class DestructiveObstacle extends Model
     public void enableGraphics(GraphicsUtilities graphicsData)
     {
         //get dataVBO, orderVBO, program, texture handles
-        dataVBO = graphicsData.modelVBOMap.get("short_spikes");
-        orderVBO = graphicsData.orderVBOMap.get("short_spikes");
-        numVertices = graphicsData.numVerticesMap.get("short_spikes");
+        dataVBO = graphicsData.modelVBOMap.get("cube");
+        orderVBO = graphicsData.orderVBOMap.get("cube");
+        numVertices = graphicsData.numVerticesMap.get("cube");
         programHandle = graphicsData.shaderProgramIdMap.get("lighting");
     }
 

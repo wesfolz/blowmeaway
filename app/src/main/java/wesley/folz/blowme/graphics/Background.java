@@ -16,21 +16,17 @@ public class Background extends Model
         super();
         interleavedData = new float[]{
                 -1.0f, 1.0f, -1.0f,    // top left
-                0.0f, 0.0f, 1.0f,      //normal
-                0.53f, 0.81f, 0.98f, 0.8f, //color
                 0.0f, 0.0f,            //texture
-                -1.0f, -3.0f, -1.0f,  // bottom left
-                0.0f, 0.0f, 1.0f,       //normal
-                0.53f, 0.81f, 0.98f, 0.8f, //color
-                0.0f, 1.0f,           //texture
-                1.0f, -3.0f, -1.0f,    // bottom right
-                0.0f, 0.0f, 1.0f,       //normal
-                0.53f, 0.81f, 0.98f, 0.8f, //color
-                1.0f, 1.0f,                //texture
-                1.0f, 1.0f, -1.0f,      // top right
                 0.0f, 0.0f, 1.0f,      //normal
-                0.53f, 0.81f, 0.98f, 0.8f,//color
-                1.0f, 0.0f              //texture
+                -1.0f, -3.0f, -1.0f,  // bottom left
+                0.0f, 1.0f,           //texture
+                0.0f, 0.0f, 1.0f,       //normal
+                1.0f, -3.0f, -1.0f,    // bottom right
+                1.0f, 1.0f,                //texture
+                0.0f, 0.0f, 1.0f,       //normal
+                1.0f, 1.0f, -1.0f,      // top right
+                1.0f, 0.0f,              //texture
+                0.0f, 0.0f, 1.0f      //normal
         };
 
         vertexOrder = new short[]{0, 1, 2, 2, 3, 0};

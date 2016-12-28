@@ -40,7 +40,7 @@ public class OrbitingObject extends Model
         orderVBO = graphicsData.orderVBOMap.get(type);
         numVertices = graphicsData.numVerticesMap.get(type);
         programHandle = graphicsData.shaderProgramIdMap.get("texture");
-        textureDataHandle = graphicsData.textureIdMap.get("wood");
+        textureDataHandle = graphicsData.textureIdMap.get("cube_wood");
     }
 
     @Override

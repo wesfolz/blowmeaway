@@ -49,6 +49,7 @@ public class FallingObject extends Model
         previousTime = System.nanoTime();
 
         scaleFactor = 0.03f;
+        //scaleFactor = 0.3f;
 
         initialXPos = xPos;
         initialYPos = yPos;
@@ -63,7 +64,7 @@ public class FallingObject extends Model
         orderVBO = graphicsData.orderVBOMap.get(type);
         numVertices = graphicsData.numVerticesMap.get(type);
         programHandle = graphicsData.shaderProgramIdMap.get("texture");
-        textureDataHandle = graphicsData.textureIdMap.get("wood");
+        textureDataHandle = graphicsData.textureIdMap.get("cube_wood");
     }
 
     @Override

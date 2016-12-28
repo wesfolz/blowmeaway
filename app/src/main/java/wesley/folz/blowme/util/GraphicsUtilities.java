@@ -211,11 +211,16 @@ public class GraphicsUtilities
 
         ArrayList<Float> vertices = new ArrayList<>();
         ArrayList<Float> normals = new ArrayList<>();
-        ArrayList<Short> faceList = new ArrayList<>();
+        ArrayList<Float> textureCoords = new ArrayList<>();
+        ArrayList<Float> faces = new ArrayList<>();
 
-        HashMap<Short, Float[]> normalVertexMap = new HashMap<>();
+        ArrayList<Short> vtnOrder = new ArrayList<>();
+
+        HashMap<String, Short> vertexTextureNormalMap = new HashMap<>();
 
         short offset = 1;
+
+        short vtnIndex = 0;
 
         String line;
         try
@@ -236,52 +241,83 @@ public class GraphicsUtilities
                         coordinate[count] = Float.parseFloat(tokenizer.nextToken());
                         count++;
                     }
+                    //read vertex normals
                     if (line.startsWith("vn "))
                     {
                         normals.add(coordinate[0]);
                         normals.add(coordinate[1]);
                         normals.add(coordinate[2]);
                     }
-                    else
+                    //read uv texture coordinates
+                    else if (line.startsWith("vt "))
                     {
-                        if (line.startsWith("v "))
-                        {
-                            vertices.add(coordinate[0]);
-                            vertices.add(coordinate[1]);
-                            vertices.add(coordinate[2]);
-                        }
+                        textureCoords.add(coordinate[0]);
+                        //*(-1) to account for inverted coordinate systems
+                        textureCoords.add(coordinate[1] * (-1));
                     }
-
+                    //read vertices
+                    else if (line.startsWith("v ")) {
+                        vertices.add(coordinate[0]);
+                        vertices.add(coordinate[1]);
+                        vertices.add(coordinate[2]);
+                    }
                 }
                 else
                 {
+                    //read faces
                     if (line.startsWith("f "))
                     {
-                        StringTokenizer tokenizer = new StringTokenizer(line, "// ");
-                        int count = 0;
-                        String s;
-                        while (tokenizer.hasMoreTokens())
+                        StringTokenizer vtnTripleTokenizer = new StringTokenizer(line, " ");
+                        //StringTokenizer tokenizer = new StringTokenizer(line, "/ ");
+                        String s, vtn;
+                        while (vtnTripleTokenizer.hasMoreTokens())
                         {
-                            s = tokenizer.nextToken();
-                            if (count == 0)
+                            vtn = vtnTripleTokenizer.nextToken();
+                            if (vtn.equals("f")) //igonre 'f' token
                             {
-                                s = tokenizer.nextToken();
+                                vtn = vtnTripleTokenizer.nextToken();
                             }
-                            if (count % 2 == 0)
-                            {
-                                faceList.add((short) (Short.parseShort(s) - offset));
-                            }
-                            else
-                            {
-                                //create map with key being last vertex index and value being normal vector
-                                if (!normalVertexMap.containsKey(faceList.get(faceList.size() - 1)))
-                                {
-                                    int normalIndex = 3 * (Integer.parseInt(s) - offset);
-                                    normalVertexMap.put(faceList.get(faceList.size() - 1),
-                                            new Float[]{normals.get(normalIndex), normals.get(normalIndex + 1), normals.get(normalIndex + 2)});
+
+                            //check if the vertex,texture,normal triple is already in HashMap
+                            //if not add it and increment index
+                            if (!vertexTextureNormalMap.containsKey(vtn)) {
+                                //add new index to HashMap
+                                vertexTextureNormalMap.put(vtn, vtnIndex);
+                                vtnIndex++;
+
+                                //read each vertex, texture, normal
+                                StringTokenizer tokenizer = new StringTokenizer(vtn, "/ ");
+                                int count = 0;
+                                while (tokenizer.hasMoreTokens()) {
+                                    s = tokenizer.nextToken();
+                                    switch (count % 3) {
+                                        case 0: //read vertex
+                                            for (int i = 0; i < 3; i++) {
+                                                faces.add(vertices.get(3 * (Integer.parseInt(s)
+                                                        - offset) + i));
+                                            }
+                                            break;
+
+                                        case 1: //read texture
+                                            for (int i = 0; i < 2; i++) {
+                                                faces.add(textureCoords.get(2 * (Integer.parseInt(s)
+                                                        - offset) + i));
+                                            }
+                                            break;
+
+                                        case 2: //read normal
+                                            for (int i = 0; i < 3; i++) {
+                                                faces.add(normals.get(3 * (Integer.parseInt(s)
+                                                        - offset) + i));
+                                            }
+                                            break;
+
+                                    }
+                                    count++;
                                 }
                             }
-                            count++;
+                            //add vtn index to order array
+                            vtnOrder.add(vertexTextureNormalMap.get(vtn));
                         }
                     }
                 }
@@ -295,15 +331,18 @@ public class GraphicsUtilities
         {
             try
             {
-                numVertices = faceList.size();
+                numVertices = vtnOrder.size();
                 vertexOrder = new short[numVertices];
-                for (int i = 0; i < faceList.size(); i++)
+                for (int i = 0; i < vtnOrder.size(); i++)
                 {
-                    vertexOrder[i] = faceList.get(i);
+                    vertexOrder[i] = vtnOrder.get(i);
                 }
 
-
-                modelData = interleaveData(normalVertexMap, vertices);
+                modelData = new float[faces.size()];
+                for (int i = 0; i < faces.size(); i++) {
+                    modelData[i] = faces.get(i);
+                }
+                //modelData = interleaveData(normalVertexMap, textureCoordinateMap, vertices);
 
                 stream.close();
             }
@@ -314,112 +353,113 @@ public class GraphicsUtilities
         }
     }
 
-
-    public static void readOBJFile( Model model )
-    {
-        //opening input stream to obj file
-        InputStream stream = MainApplication.getAppContext().getResources().openRawResource( model
-                .OBJ_FILE_RESOURCE);
-        BufferedReader reader = new BufferedReader( new InputStreamReader( stream ) );
-
-        ArrayList<Float> vertices = new ArrayList<>();
-        ArrayList<Float> normals = new ArrayList<>();
-        ArrayList<Short> faceList = new ArrayList<>();
-
-        HashMap<Short, Float[]> normalVertexMap = new HashMap<>();
-
-        short offset = 1;
-
-        String line;
-        try
+    /*
+        public static void readOBJFile( Model model )
         {
-            while( (line = reader.readLine()) != null )
-            {
-                if( line.startsWith( "v") )
-                {
-                    StringTokenizer tokenizer = new StringTokenizer( line, " " );
-                    float[] coordinate = new float[3];
-                    int count = 0;
-                    while( tokenizer.hasMoreTokens() )
-                    {
-                        if( count == 0 )
-                        {
-                            tokenizer.nextToken();
-                        }
-                        coordinate[count] = Float.parseFloat( tokenizer.nextToken() );
-                        count++;
-                    }
-                    if( line.startsWith( "vn " ) )
-                    {
-                        normals.add( coordinate[0] );
-                        normals.add( coordinate[1] );
-                        normals.add( coordinate[2] );
-                    }
-                    else if( line.startsWith( "v " ) )
-                    {
-                        vertices.add( coordinate[0] );
-                        vertices.add( coordinate[1] );
-                        vertices.add( coordinate[2] );
-                    }
+            //opening input stream to obj file
+            InputStream stream = MainApplication.getAppContext().getResources().openRawResource( model
+                    .OBJ_FILE_RESOURCE);
+            BufferedReader reader = new BufferedReader( new InputStreamReader( stream ) );
 
-                }
-                else if( line.startsWith( "f " ) )
-                {
-                    StringTokenizer tokenizer = new StringTokenizer( line, "// " );
-                    int count = 0;
-                    String s;
-                    while( tokenizer.hasMoreTokens() )
-                    {
-                        s = tokenizer.nextToken();
-                        if( count == 0 )
-                        {
-                            s = tokenizer.nextToken();
-                        }
-                        if( count % 2 == 0 )
-                        {
-                            faceList.add( (short) (Short.parseShort( s ) - offset) );
-                        }
-                        else
-                        {
-                            //create map with key being last vertex index and value being normal vector
-                            if(!normalVertexMap.containsKey(faceList.get(faceList.size() - 1)))
-                            {
-                                int normalIndex = 3*(Integer.parseInt(s) - offset);
-                                normalVertexMap.put(faceList.get(faceList.size() - 1),
-                                        new Float[]{normals.get(normalIndex), normals.get(normalIndex+1), normals.get(normalIndex+2)});
-                            }
-                        }
-                        count++;
-                    }
-                }
-            }
-        }
-        catch( IOException e )
-        {
-            e.printStackTrace();
-        }
-        finally
-        {
+            ArrayList<Float> vertices = new ArrayList<>();
+            ArrayList<Float> normals = new ArrayList<>();
+            ArrayList<Short> faceList = new ArrayList<>();
+
+            HashMap<Short, Float[]> normalVertexMap = new HashMap<>();
+
+
+            short offset = 1;
+
+            String line;
             try
             {
-                short[] vertexOrder = new short[faceList.size()];
-                for( int i = 0; i < faceList.size(); i++ )
+                while( (line = reader.readLine()) != null )
                 {
-                    vertexOrder[i] = faceList.get( i );
+                    if( line.startsWith( "v") )
+                    {
+                        StringTokenizer tokenizer = new StringTokenizer( line, " " );
+                        float[] coordinate = new float[3];
+                        int count = 0;
+                        while( tokenizer.hasMoreTokens() )
+                        {
+                            if( count == 0 )
+                            {
+                                tokenizer.nextToken();
+                            }
+                            coordinate[count] = Float.parseFloat( tokenizer.nextToken() );
+                            count++;
+                        }
+                        if( line.startsWith( "vn " ) )
+                        {
+                            normals.add( coordinate[0] );
+                            normals.add( coordinate[1] );
+                            normals.add( coordinate[2] );
+                        }
+                        else if( line.startsWith( "v " ) )
+                        {
+                            vertices.add( coordinate[0] );
+                            vertices.add( coordinate[1] );
+                            vertices.add( coordinate[2] );
+                        }
+
+                    }
+                    else if( line.startsWith( "f " ) )
+                    {
+                        StringTokenizer tokenizer = new StringTokenizer( line, "/ " );
+                        int count = 0;
+                        String s;
+                        while( tokenizer.hasMoreTokens() )
+                        {
+                            s = tokenizer.nextToken();
+                            if( count == 0 )
+                            {
+                                s = tokenizer.nextToken();
+                            }
+                            if( count % 2 == 0 )
+                            {
+                                faceList.add( (short) (Short.parseShort( s ) - offset) );
+                            }
+                            else
+                            {
+                                //create map with key being last vertex index and value being normal vector
+                                if(!normalVertexMap.containsKey(faceList.get(faceList.size() - 1)))
+                                {
+                                    int normalIndex = 3*(Integer.parseInt(s) - offset);
+                                    normalVertexMap.put(faceList.get(faceList.size() - 1),
+                                            new Float[]{normals.get(normalIndex), normals.get(normalIndex+1), normals.get(normalIndex+2)});
+                                }
+                            }
+                            count++;
+                        }
+                    }
                 }
-
-                model.setVertexOrder( vertexOrder );
-                model.setInterleavedData(interleaveData(normalVertexMap, vertices));
-
-                stream.close();
             }
             catch( IOException e )
             {
                 e.printStackTrace();
             }
-        }
-    }
+            finally
+            {
+                try
+                {
+                    short[] vertexOrder = new short[faceList.size()];
+                    for( int i = 0; i < faceList.size(); i++ )
+                    {
+                        vertexOrder[i] = faceList.get( i );
+                    }
 
+                    model.setVertexOrder( vertexOrder );
+                    //model.setInterleavedData(interleaveData(normalVertexMap, vertices));
+
+                    stream.close();
+                }
+                catch( IOException e )
+                {
+                    e.printStackTrace();
+                }
+            }
+        }
+    */
     private int loadTextureFile(final Context context, final int resourceId)
     {
         final int[] textureHandle = new int[1];
@@ -492,7 +532,8 @@ public class GraphicsUtilities
         return textureHandle[0];
     }
 
-    private static float[] interleaveData(HashMap<Short, Float[]> normalVertexMap, ArrayList<Float> vertices)
+    private static float[] interleaveData(HashMap<Short, Float[]> normalVertexMap,
+            HashMap<Short, Float[]> textureCoordsMap, ArrayList<Float> vertices)
     {
         ArrayList<Float> interleavedArrayList = new ArrayList<>();
         float[] interleavedData = new float[2 * vertices.size() + 4 * vertices.size() / 3 + 2 * vertices.size() / 3];
@@ -500,6 +541,7 @@ public class GraphicsUtilities
         for(short key=0; key < normalVertexMap.size(); key++)
         {
             Float[] normalVector = normalVertexMap.get(key);
+            Float[] textureCoord = textureCoordsMap.get(key);
             //    Log.e("keys", String.valueOf(key));
             //vertices
             for(int i=0; i<3; i++)
@@ -520,6 +562,10 @@ public class GraphicsUtilities
             }
             //texture coordinates
 
+            for (int i = 0; i < 2; i++) {
+                interleavedArrayList.add(textureCoord[i]);
+            }
+            /*
             float xn = Math.abs(normalVector[0]);
             float yn = Math.abs(normalVector[1]);
             float zn = Math.abs(normalVector[2]);
@@ -548,6 +594,7 @@ public class GraphicsUtilities
                     interleavedArrayList.add(vertices.get(3 * key + 1));
                 }
             }
+            */
         }
         //copy arraylist to float array
         for (int i=0; i<interleavedData.length; i++)

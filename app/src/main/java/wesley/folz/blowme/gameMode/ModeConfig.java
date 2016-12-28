@@ -35,19 +35,23 @@ public abstract class ModeConfig
         graphicsData = new GraphicsUtilities();
 
         //initialize data
-        graphicsData.storeModelData("fan", R.raw.fan);
-        graphicsData.storeModelData("vortex", R.raw.vortex_open_top);
-        graphicsData.storeModelData("cube", R.raw.cube);
-        graphicsData.storeModelData("dispenser", R.raw.triangle_collector);
-        graphicsData.storeModelData("short_spikes", R.raw.short_spikes);
-        graphicsData.storeModelData("ring", R.raw.ring);
+        graphicsData.storeModelData("dispenser", R.raw.uv_dispenser);
+        //graphicsData.storeModelData("short_spikes", R.raw.uv_spikes);
+        graphicsData.storeModelData("ring", R.raw.uv_ring);
 
+        graphicsData.storeModelData("cube", R.raw.uv_cube);
+        //graphicsData.storeModelData("fan", R.raw.uv_fan);
+        graphicsData.storeModelData("fan", R.raw.fan_orig);
+        graphicsData.storeModelData("vortex", R.raw.uv_vortex);
 
-        graphicsData.storeTexture("wood", R.raw.wood_texture);
-        graphicsData.storeTexture("brick", R.raw.brick_texture);
         graphicsData.storeTexture("yellow_circle", R.raw.yellow_circle);
         graphicsData.storeTexture("sky", R.raw.sky_texture);
         graphicsData.storeTexture("grid", R.raw.grid);
+        graphicsData.storeTexture("cube_wood", R.raw.cube_wood_tex);
+        graphicsData.storeTexture("brick", R.raw.cube_brick_tex);
+
+        graphicsData.storeTexture("fan_test", R.raw.fan_orig_tex);
+        graphicsData.storeTexture("vortex_tex", R.raw.vortex_tex);
 
         graphicsData.storeTexture("grey_circle", R.raw.grey_circle);
 
@@ -60,9 +64,19 @@ public abstract class ModeConfig
         graphicsData.storeShader("texture", R.raw.texture_vertex_shader, R.raw.texture_fragment_shader, modelAttributes);
         graphicsData.storeShader("lighting", R.raw.lighting_vertex_shader, R.raw.lighting_fragment_shader, modelAttributes);
 
+        for (FallingObject fo : fallingObjects) {
+            fo.enableGraphics(graphicsData);
+        }
+
+        for (Vortex v : vortexes) {
+            v.enableGraphics(graphicsData);
+        }
+
+        background.enableGraphics(graphicsData);
+        fan.enableGraphics(graphicsData);
         for (Model m : models)
         {
-            m.enableGraphics(graphicsData);
+            //          m.enableGraphics(graphicsData);
         }
         Log.e("pause", "enable graphics mode");
     }
@@ -152,7 +166,6 @@ public abstract class ModeConfig
                         + " mode fan " + mode.fan.getyPos() + " x " + mode.fan.getxPos());
             }
         }
-
     }
 
     protected void initializationRoutine()

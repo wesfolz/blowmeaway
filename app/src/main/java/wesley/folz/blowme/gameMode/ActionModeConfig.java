@@ -140,6 +140,7 @@ public class ActionModeConfig extends ModeConfig
 
         positionsInitialized = false;
 
+        //keeps object matrices from reinitializing
         this.fan.pauseGame();
         this.fan.resumeGame();
         this.dispenser.pauseGame();

@@ -32,7 +32,8 @@ public abstract class Model
         GLES20.glUseProgram(programHandle);
 
         //3 coords per vertex, 3 coords per normal, 4 coords per color, 2 coords per texture, 4 bytes per float
-        final int stride = (COORDS_PER_VERTEX + COORDS_PER_NORMAL + COORDS_PER_COLOR + COORDS_PER_TEX) * BYTES_PER_FLOAT;
+        final int stride =
+                (COORDS_PER_VERTEX + COORDS_PER_NORMAL + COORDS_PER_TEX) * BYTES_PER_FLOAT;
 
         //vertices
         int vertexPositionHandle = GLES20.glGetAttribLocation(programHandle, "position");
@@ -44,14 +45,15 @@ public abstract class Model
         int normalVectorHandle = GLES20.glGetAttribLocation(programHandle, "normalVector");
         GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, dataVBO);
         GLES20.glEnableVertexAttribArray(normalVectorHandle);
-        GLES20.glVertexAttribPointer(normalVectorHandle, COORDS_PER_NORMAL, GLES20.GL_FLOAT, false, stride, COORDS_PER_VERTEX * BYTES_PER_FLOAT);
+        GLES20.glVertexAttribPointer(normalVectorHandle, COORDS_PER_NORMAL, GLES20.GL_FLOAT, false,
+                stride, (COORDS_PER_VERTEX + COORDS_PER_TEX) * BYTES_PER_FLOAT);
 
         //colors
-        int colorHandle = GLES20.glGetAttribLocation(programHandle, "color");
+  /*      int colorHandle = GLES20.glGetAttribLocation(programHandle, "color");
         GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, dataVBO);
         GLES20.glEnableVertexAttribArray(colorHandle);
         GLES20.glVertexAttribPointer(colorHandle, COORDS_PER_COLOR, GLES20.GL_FLOAT, false, stride, (COORDS_PER_VERTEX + COORDS_PER_NORMAL) * BYTES_PER_FLOAT);
-
+*/
         //texture
         int textureUniformHandle = GLES20.glGetUniformLocation(programHandle, "u_Texture");
 
@@ -67,7 +69,8 @@ public abstract class Model
         int textureCoordinateHandle = GLES20.glGetAttribLocation(programHandle, "a_TexCoordinate");
         GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, dataVBO);
         GLES20.glEnableVertexAttribArray(textureCoordinateHandle);
-        GLES20.glVertexAttribPointer(textureCoordinateHandle, COORDS_PER_TEX, GLES20.GL_FLOAT, false, stride, (COORDS_PER_VERTEX + COORDS_PER_NORMAL + COORDS_PER_COLOR) * BYTES_PER_FLOAT);
+        GLES20.glVertexAttribPointer(textureCoordinateHandle, COORDS_PER_TEX, GLES20.GL_FLOAT,
+                false, stride, (COORDS_PER_VERTEX) * BYTES_PER_FLOAT);
 
         // get handle to shape's transformation matrix
         int mvpMatrixHandle = GLES20.glGetUniformLocation(programHandle, "u_MVPMatrix");
