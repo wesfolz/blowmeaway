@@ -1,6 +1,7 @@
 package wesley.folz.blowme.gamemode;
 
 import android.opengl.Matrix;
+import android.support.v4.view.MotionEventCompat;
 import android.util.Log;
 import android.view.MotionEvent;
 
@@ -54,6 +55,7 @@ public abstract class ModeConfig
         graphicsData.storeTexture("vortex_tex", R.raw.vortex_tex);
 
         graphicsData.storeTexture("grey_circle", R.raw.grey_circle);
+        graphicsData.storeTexture("sun", R.raw.sun);
 
         String[] particleAttributes = new String[]{"position", "direction", "normalVector", "speed", "color"};
         String[] modelAttributes = new String[]{"position", "color", "normalVector"};
@@ -251,8 +253,9 @@ public abstract class ModeConfig
         }
     }
 
-    public void handleTouchDrag(int action, float x, float y)
+    public void handleTouchDrag(MotionEvent event, float x, float y)
     {
+        final int action = MotionEventCompat.getActionMasked(event);
         if (fanReadyToMove) {
             switch (action) {
                 case MotionEvent.ACTION_POINTER_UP:
@@ -297,7 +300,7 @@ public abstract class ModeConfig
         }
     }
 
-    private void handleFanMovementMove(float x, float y)
+    protected void handleFanMovementMove(float x, float y)
     {
         if (fanReadyToMove && initialPositionSet) {
             fan.updatePosition(x, y);
@@ -396,7 +399,7 @@ public abstract class ModeConfig
 
     boolean objectiveComplete = false;
 
-    private boolean touchActionStarted;
+    protected boolean touchActionStarted;
 
     boolean positionsInitialized;
 

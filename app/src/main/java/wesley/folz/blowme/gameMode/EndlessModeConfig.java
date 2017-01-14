@@ -1,6 +1,8 @@
 package wesley.folz.blowme.gamemode;
 
+import android.support.v4.view.MotionEventCompat;
 import android.util.Log;
+import android.view.MotionEvent;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -13,13 +15,15 @@ import wesley.folz.blowme.graphics.models.Model;
 import wesley.folz.blowme.graphics.models.RicochetObstacle;
 import wesley.folz.blowme.graphics.models.Vortex;
 import wesley.folz.blowme.ui.GamePlaySurfaceView;
+import wesley.folz.blowme.ui.RotationGestureDetector;
 import wesley.folz.blowme.util.Physics;
 
 /**
  * Created by Wesley on 9/24/2016.
  */
 
-public class EndlessModeConfig extends ModeConfig
+public class EndlessModeConfig extends ModeConfig implements
+        RotationGestureDetector.OnRotationGestureListener
 {
     public EndlessModeConfig(ModeConfig mode, GamePlaySurfaceView surfaceView) {
         models = new ArrayList<>();
@@ -46,6 +50,8 @@ public class EndlessModeConfig extends ModeConfig
                 }
             }
         });
+
+        rotationDetector = new RotationGestureDetector(this);
     }
 
     @Override
@@ -276,7 +282,7 @@ public class EndlessModeConfig extends ModeConfig
             falObj.calculateRicochetCollisions(obstacles);
 
             //calculate wind influence
-            if (Physics.isCollision(fan.getWind().getBounds(), falObj.getBounds())
+            if (Physics.isCollision(falObj.getBounds(), fan.getWind().getBounds())
                     && !objectEffected) {
                 Physics.calculateWindForce(fan.getWind(), falObj);
                 //Log.e("wind", "xforce " + fan.getWind().getxForce() + " yforce " + fan.getWind
@@ -342,6 +348,53 @@ public class EndlessModeConfig extends ModeConfig
         return locations;
     }
 
+    @Override
+    public void handleTouchDrag(MotionEvent event, float x, float y) {
+
+        final int action = MotionEventCompat.getActionMasked(event);
+        rotationDetector.onTouchEvent(event);
+        if (rotationDetector.isRotating()) {
+            Log.e("rotation", "angle " + rotationDetector.getAngle());
+            fan.updateFingerRotation(rotationDetector.getAngle());
+            //      Log.e("rotate", "rotation " + fan.getFingerRotation());
+        } else {
+            if (fanReadyToMove) {
+                switch (action) {
+                    case MotionEvent.ACTION_POINTER_UP:
+                        touchActionStarted = true;
+                        //gameMode.handleFanMovementDown(x, y);
+                        break;
+                    case MotionEvent.ACTION_POINTER_DOWN:
+                        //gameMode.handleFanMovementDown(x, y);
+                        touchActionStarted = true;
+                        break;
+
+                    case MotionEvent.ACTION_UP:
+                        touchActionStarted = true;
+                        //gameMode.handleFanMovementDown(x, y);
+                        break;
+
+                    case MotionEvent.ACTION_DOWN:
+                        //gameMode.handleFanMovementDown(x, y);
+                        touchActionStarted = true;
+                        break;
+
+                    case MotionEvent.ACTION_MOVE:
+                        if (touchActionStarted) {
+                            this.handleFanMovementDown(x, y);
+                            touchActionStarted = false;
+                        }
+                        this.handleFanMovementMove(x, y);
+                        Log.e("rotate", "no rotation");
+
+                        //Log.e( "blowme", "Move: X " + (event.getRawX() / WIDTH) + " Y " +
+                        // (event.getRawY() / HEIGHT) );
+                        break;
+                }
+            }
+        }
+    }
+
     public int getNumLives() {
         return numLives;
     }
@@ -355,4 +408,12 @@ public class EndlessModeConfig extends ModeConfig
 
     private int numLives = 3;
     private int score = 0;
+
+
+    @Override
+    public boolean OnRotation(RotationGestureDetector rotationDetector) {
+        return false;
+    }
+
+    private RotationGestureDetector rotationDetector;
 }

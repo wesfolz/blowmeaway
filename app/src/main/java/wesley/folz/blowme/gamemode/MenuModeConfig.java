@@ -30,7 +30,7 @@ public class MenuModeConfig extends ModeConfig
     protected void initializeGameObjects() {
 
         int numFallingObjects = 2;
-        int numRings = 1;
+        int numRings = 0;
         int numCubes = 1;
 
         numCubesRemaining = 1;
@@ -110,7 +110,7 @@ public class MenuModeConfig extends ModeConfig
             }
 
             //calculate wind influence
-            if (Physics.isCollision(fan.getWind().getBounds(), falObj.getBounds())) {
+            if (Physics.isCollision(falObj.getBounds(), fan.getWind().getBounds())) {
                 Physics.calculateWindForce(fan.getWind(), falObj);
                 //Log.e("wind", "xforce " + fan.getWind().getxForce() + " yforce " + fan.getWind
                 // ().getyForce());

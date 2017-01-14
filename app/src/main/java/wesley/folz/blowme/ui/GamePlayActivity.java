@@ -167,7 +167,7 @@ public class GamePlayActivity extends Activity
 
     /*-------------------------------------Protected Methods--------------------------------------*/
 
-    protected void onActionButtonClicked(View actionButton)
+    public void onActionButtonClicked(View actionButton)
     {
         TransitionManager.go(levelSelectScene, transitionAnimation);
         TextView modeTitle = (TextView) findViewById(R.id.modeBannerText);
@@ -184,13 +184,13 @@ public class GamePlayActivity extends Activity
         });
     }
 
-    protected void onEndlessButtonClicked(View endlessButton) {
+    public void onEndlessButtonClicked(View endlessButton) {
         TransitionManager.go(endlessGamePlayScene, transitionAnimation);
         //TransitionManager.go(gamePlayScene, transitionAnimation);
         initializeEndlessMode();
     }
 
-    protected void onPuzzleButtonClicked(View endlessButton) {
+    public void onPuzzleButtonClicked(View endlessButton) {
         TransitionManager.go(levelSelectScene, transitionAnimation);
         TextView modeTitle = (TextView) findViewById(R.id.modeBannerText);
         modeTitle.setText(getResources().getString(R.string.puzzle_mode));
@@ -212,7 +212,7 @@ public class GamePlayActivity extends Activity
      *
      * @param resumeButton - Resume button in pauseWindow that activated this method
      */
-    protected void onResumeButtonClicked(View resumeButton)
+    public void onResumeButtonClicked(View resumeButton)
     {
         pauseWindow.dismiss();
         surfaceView.resumeGame();
@@ -222,7 +222,7 @@ public class GamePlayActivity extends Activity
      * Pauses game and surface view, launches the pause popup window
      * @param pauseButton - Pause button in game play view that activated this method
      */
-    protected void onPauseButtonClicked(View pauseButton)
+    public void onPauseButtonClicked(View pauseButton)
     {
         Log.e("blowme", "pause");
         if (!surfaceView.getRenderer().isPaused())
@@ -238,7 +238,7 @@ public class GamePlayActivity extends Activity
      * Exits game play and transitions back to menu, dismisses any popup windows
      * @param exitButton - Exit button in pauseWindow that activated this method
      */
-    protected void onExitGamePlayButtonClicked(View exitButton)
+    public void onExitGamePlayButtonClicked(View exitButton)
     {
         if (pauseWindow != null)
         {
@@ -264,7 +264,7 @@ public class GamePlayActivity extends Activity
      * Reinitializes game parameters, dismisses results window and resumes rendering
      * @param replayButton - Button in results window that activated this method
      */
-    protected void onReplayGameButtonClicked(View replayButton)
+    public void onReplayGameButtonClicked(View replayButton)
     {
         resultsWindow.dismiss();
         switch (currentGameMode) {
@@ -281,7 +281,7 @@ public class GamePlayActivity extends Activity
         surfaceView.resumeGame();
     }
 
-    protected void onStartPuzzleButtonClicked(View startPuzzleButton) {
+    public void onStartPuzzleButtonClicked(View startPuzzleButton) {
         PuzzleModeConfig puzzle = (PuzzleModeConfig) gameMode;
         puzzle.setPuzzleStarted(true);
         findViewById(R.id.startPuzzleButton).setVisibility(View.INVISIBLE);
@@ -320,7 +320,7 @@ public class GamePlayActivity extends Activity
                 float x = 2 * event.getX() / WIDTH;
                 float y = 2 * event.getY() / HEIGHT;
 
-                gameMode.handleTouchDrag(action, x, y);
+                gameMode.handleTouchDrag(event, x, y);
 
                 return true;
             }

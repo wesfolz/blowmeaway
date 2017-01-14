@@ -1,5 +1,6 @@
 package wesley.folz.blowme.util;
 
+import android.graphics.PointF;
 import android.opengl.Matrix;
 
 /**
@@ -38,47 +39,27 @@ public class Bounds
         return xLeft;
     }
 
-    /*
-    public float[] getXCorners()
+    public void calculateBounds(float[] transformation)
     {
-        return xCorners;
+        float[] mvp = new float[16];
+
+        Matrix.multiplyMM(mvp, 0, transformation, 0, matrix, 0);
+
+        determineBounds(mvp);
     }
 
-    public float[] getYCorners()
-    {
-        return yCorners;
-    }
-*/
-    public void calculateBounds( float[] rotation )
-    {
-        Matrix.multiplyMM( matrix, 0, rotation, 0, initialMatrix, 0 );
-        //Matrix.translateM( matrix, 0, deltaX, -deltaY, 0 );
-        determineBounds();
-
-        //     Log.e( "blowme1", "ymin " + yMin + " yMax " + yMax );
-
-/*        //on x edge
-        if(Math.abs( xPos ) == GamePlayActivity.X_EDGE_POSITION)
-        {
-            setBounds( new float[]{xPos, yPos - this.getSize()[1]/2, 0.4f, 0.25f} );
-        }
-        //on y edge
-        else
-        {
-            setBounds( new float[]{xPos - this.getSize()[0]/2, yPos, 0.4f, 0.25f} );
-        }
-
-        */
-    }
-
-    private void determineBounds()
+    private void determineBounds(float[] matrix)
     {
         xLeft = matrix[0];
         yBottom = matrix[1];
         xRight = matrix[4];
         yTop = matrix[5];
-    }
 
+        topLeft = new PointF(matrix[8], matrix[9]);
+        topRight = new PointF(matrix[4], matrix[5]);
+        bottomLeft = new PointF(matrix[0], matrix[1]);
+        bottomRight = new PointF(matrix[12], matrix[13]);
+    }
     public void setBounds( float xMin, float yMin, float xMax, float yMax )
     {
         //xCorners = new float[2];
@@ -86,20 +67,30 @@ public class Bounds
         matrix = new float[]{
                 xMin, yMin, 0, 1,
                 xMax, yMax, 0, 1,
-                0, 0, 0, 1,
-                0, 0, 0, 1};
+                xMin, yMax, 0, 1,
+                xMax, yMin, 0, 1};
 
-        initialMatrix = new float[]{
-                xMin, yMin, 0, 1,
-                xMax, yMax, 0, 1,
-                0, 0, 0, 1,
-                0, 0, 0, 1};
-        determineBounds();
+        determineBounds(matrix);
     }
 
-    private float[] matrix;
+    public PointF getTopLeft() {
+        return topLeft;
+    }
 
-    private float[] initialMatrix;
+    public PointF getBottomLeft() {
+        return bottomLeft;
+    }
+
+    public PointF getTopRight() {
+        return topRight;
+    }
+
+    public PointF getBottomRight() {
+        return bottomRight;
+    }
+
+
+    private float[] matrix;
 
     //private float[] xCorners;
 
@@ -112,4 +103,13 @@ public class Bounds
     private float xRight;
 
     private float xLeft;
+
+
+    private PointF topLeft = new PointF();
+
+    private PointF bottomLeft = new PointF();
+
+    private PointF topRight = new PointF();
+
+    private PointF bottomRight = new PointF();
 }

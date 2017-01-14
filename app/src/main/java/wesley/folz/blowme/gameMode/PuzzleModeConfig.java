@@ -1,5 +1,9 @@
 package wesley.folz.blowme.gamemode;
 
+import android.support.v4.view.MotionEventCompat;
+import android.util.Log;
+import android.view.MotionEvent;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -17,6 +21,7 @@ import wesley.folz.blowme.graphics.models.Model;
 import wesley.folz.blowme.graphics.models.RicochetObstacle;
 import wesley.folz.blowme.graphics.models.Vortex;
 import wesley.folz.blowme.ui.GamePlaySurfaceView;
+import wesley.folz.blowme.ui.RotationGestureDetector;
 import wesley.folz.blowme.util.GameModeUtilities;
 import wesley.folz.blowme.util.Physics;
 
@@ -24,7 +29,8 @@ import wesley.folz.blowme.util.Physics;
  * Created by Wesley on 9/24/2016.
  */
 
-public class PuzzleModeConfig extends ModeConfig
+public class PuzzleModeConfig extends ModeConfig implements
+        RotationGestureDetector.OnRotationGestureListener
 {
     public PuzzleModeConfig(String level, ModeConfig mode, GamePlaySurfaceView surfaceView) {
         this.level = level;
@@ -53,6 +59,8 @@ public class PuzzleModeConfig extends ModeConfig
                 }
             }
         });
+
+        rotationDetector = new RotationGestureDetector(this);
     }
 
     @Override
@@ -338,6 +346,53 @@ public class PuzzleModeConfig extends ModeConfig
     }
 
     @Override
+    public void handleTouchDrag(MotionEvent event, float x, float y) {
+
+        final int action = MotionEventCompat.getActionMasked(event);
+        rotationDetector.onTouchEvent(event);
+        if (rotationDetector.isRotating()) {
+            Log.e("rotation", "angle " + rotationDetector.getAngle());
+            fan.updateFingerRotation(rotationDetector.getAngle());
+            //      Log.e("rotate", "rotation " + fan.getFingerRotation());
+        } else {
+            if (fanReadyToMove) {
+                switch (action) {
+                    case MotionEvent.ACTION_POINTER_UP:
+                        touchActionStarted = true;
+                        //gameMode.handleFanMovementDown(x, y);
+                        break;
+                    case MotionEvent.ACTION_POINTER_DOWN:
+                        //gameMode.handleFanMovementDown(x, y);
+                        touchActionStarted = true;
+                        break;
+
+                    case MotionEvent.ACTION_UP:
+                        touchActionStarted = true;
+                        //gameMode.handleFanMovementDown(x, y);
+                        break;
+
+                    case MotionEvent.ACTION_DOWN:
+                        //gameMode.handleFanMovementDown(x, y);
+                        touchActionStarted = true;
+                        break;
+
+                    case MotionEvent.ACTION_MOVE:
+                        if (touchActionStarted) {
+                            this.handleFanMovementDown(x, y);
+                            touchActionStarted = false;
+                        }
+                        this.handleFanMovementMove(x, y);
+                        Log.e("rotate", "no rotation");
+
+                        //Log.e( "blowme", "Move: X " + (event.getRawX() / WIDTH) + " Y " +
+                        // (event.getRawY() / HEIGHT) );
+                        break;
+                }
+            }
+        }
+    }
+
+    @Override
     public void handleFanMovementDown(float x, float y) {
         if (fanReadyToMove) {
             double distance;
@@ -372,4 +427,11 @@ public class PuzzleModeConfig extends ModeConfig
     private boolean puzzleStarted;
 
     private Timer timer;
+
+    @Override
+    public boolean OnRotation(RotationGestureDetector rotationDetector) {
+        return false;
+    }
+
+    private RotationGestureDetector rotationDetector;
 }

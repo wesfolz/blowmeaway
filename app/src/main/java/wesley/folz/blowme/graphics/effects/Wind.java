@@ -6,6 +6,7 @@ import android.opengl.Matrix;
 import java.util.Random;
 
 import wesley.folz.blowme.R;
+import wesley.folz.blowme.graphics.models.WindBounds;
 import wesley.folz.blowme.ui.GamePlayActivity;
 import wesley.folz.blowme.util.Bounds;
 import wesley.folz.blowme.util.GraphicsUtilities;
@@ -35,13 +36,23 @@ public class Wind extends ParticleSystem
 
         vertexOrder = new short[]{0, 1, 2, 0, 2, 3};
 */
+
+        xPos = -GamePlayActivity.X_EDGE_POSITION;//+.01f;
+        yPos = 0;
+
+        initialXPos = xPos;
+        initialYPos = yPos;
+
         this.VERTEX_SHADER = R.raw.wind_vertex_shader;
         this.FRAGMENT_SHADER = R.raw.wind_fragment_shader;
         this.TEXTURE_RESOURCE = R.raw.yellow_circle;
         GraphicsUtilities.readShader(this);
 
-        setSize( new float[]{2.0f, 0.5f} );
-        setBounds( new Bounds( - 1.0f, - 0.25f, 1.0f, 0.25f ) );
+        setSize(new float[]{3.0f, 0.3f});
+        setBounds(new Bounds(-1.15f, -0.15f, 1.85f, 0.15f));
+
+        wBounds = new WindBounds(getBounds());
+
         rotationMatrix = new float[16];
         Matrix.setIdentityM( rotationMatrix, 0 );
         generateParticles();
@@ -75,6 +86,7 @@ public class Wind extends ParticleSystem
     @Override
     public void draw()
     {
+        //wBounds.draw();
         // Add program to OpenGL ES environment
         GLES20.glUseProgram(programHandle);
 
@@ -244,7 +256,9 @@ public class Wind extends ParticleSystem
         //Matrix.setIdentityM(modelMatrix, 0);
         Matrix.setIdentityM(transformation, 0);
 
-        Matrix.translateM(modelMatrix, 0, 0, deltaY / 2, 0);
+//        Matrix.translateM(modelMatrix, 0, 0, deltaY / 2, 0);
+        Matrix.translateM(modelMatrix, 0, deltaX, deltaY, 0);
+
         Matrix.multiplyMM(transformation, 0, modelMatrix, 0, rotationMatrix, 0);
         //Matrix.translateM(transformation, 0, deltaX, deltaY, 0);
 
@@ -252,6 +266,10 @@ public class Wind extends ParticleSystem
         // + transformation[4] + " ymax " + transformation[5]);
 
         //Matrix.multiplyMM(transformation, 0, modelMatrix, 0, transformation, 0);
+
+        getBounds().calculateBounds(transformation);
+        wBounds.bnds = getBounds();
+        wBounds.updatePosition(0, 0);
 
         return transformation;
     }
@@ -267,12 +285,22 @@ public class Wind extends ParticleSystem
 
         deltaX = x;
         deltaY = y;
+
+        xPos += deltaX;
+        yPos += deltaY;
         totalDelta += deltaY;
     }
 
-    public void setRotationMatrix( float[] rotationMatrix )
+    public void setRotationMatrix(float rotation)
     {
-        this.rotationMatrix = rotationMatrix;
+        inwardRotation = rotation;
+        Matrix.setIdentityM(rotationMatrix, 0);
+        Matrix.setRotateM(rotationMatrix, 0, rotation, 0, 0, 1);
+        //getBounds().calculateBounds(rotationMatrix);
+    }
+
+    public float getInwardRotation() {
+        return inwardRotation;
     }
 
     private float deltaX;
@@ -284,8 +312,12 @@ public class Wind extends ParticleSystem
 
     private float yForce;
 
-    private float maxWindForce = 1.8f;
+    private float maxWindForce = 2.0f;
 
     private float[] rotationMatrix;
+
+    private float inwardRotation = 0;
+
+    public WindBounds wBounds;
 
 }

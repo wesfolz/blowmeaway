@@ -137,6 +137,25 @@ public class Vortex extends Model
         getBounds().setBounds(xPos - getSize()[0] / 2.0f, yPos - 0.21f, xPos + getSize()[0] / 2.0f, yPos - 0.1f);
     }
 
+    @Override
+    public void pauseGame() {
+        super.pauseGame();
+        dustCloud.pauseGame();
+        for (OrbitingObject orbitingObject : orbitingObjects) {
+            orbitingObject.pauseGame();
+        }
+    }
+
+
+    @Override
+    public void resumeGame() {
+        super.resumeGame();
+        dustCloud.resumeGame();
+        for (OrbitingObject orbitingObject : orbitingObjects) {
+            orbitingObject.resumeGame();
+        }
+    }
+
     public String getType()
     {
         return type;

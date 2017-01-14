@@ -10,7 +10,6 @@ import wesley.folz.blowme.util.GraphicsUtilities;
  */
 public class Background extends Model
 {
-
     public Background()
     {
         super();

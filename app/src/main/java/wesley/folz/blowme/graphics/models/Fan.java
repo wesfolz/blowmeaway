@@ -39,14 +39,16 @@ public class Fan extends Model
         numVertices = graphicsData.numVerticesMap.get("fan");
         programHandle = graphicsData.shaderProgramIdMap.get("texture");
         textureDataHandle = graphicsData.textureIdMap.get("fan_test");
-        //      getWind().enableGraphics(graphicsData);
+        getWind().enableGraphics(graphicsData);
+        getWind().wBounds.enableGraphics(graphicsData);
     }
 
     @Override
     public void initializeMatrices(float[] viewMatrix, float[] projectionMatrix, float[] lightPosInEyeSpace)
     {
         super.initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
-        //      getWind().initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
+        getWind().initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
+        getWind().wBounds.initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
     }
 
     @Override
@@ -58,9 +60,21 @@ public class Fan extends Model
     public void draw()
     {
         super.draw();
-        //     getWind().draw();
+        getWind().draw();
     }
 
+    @Override
+    public void pauseGame() {
+        super.pauseGame();
+        getWind().pauseGame();
+    }
+
+
+    @Override
+    public void resumeGame() {
+        super.resumeGame();
+        getWind().resumeGame();
+    }
 
     private float[] calculateInwardParametricRotation()
     {
@@ -69,12 +83,13 @@ public class Fan extends Model
         //if parametricAngle = 0 -> inwardRotation = Pi
         //if parametricAngle = 3Pi/4 -> inwardRotation = -Pi/2
 
-        float inwardRotation = 180 * (parametricAngle - (float) Math.PI) / (float) Math.PI;
+        float inwardRotation =
+                180 * (parametricAngle - (float) Math.PI) / (float) Math.PI + fingerRotation;
 
         float[] rotationMatrix = new float[16];
         Matrix.setIdentityM(rotationMatrix, 0);
         Matrix.setRotateM(rotationMatrix, 0, inwardRotation, 0, 0, 1);
-        getWind().setRotationMatrix(rotationMatrix);
+        getWind().setRotationMatrix(inwardRotation);
 
         return rotationMatrix;
     }
@@ -90,9 +105,9 @@ public class Fan extends Model
         prevRotationTime = angle;
 
         //if (deltaX != 0 || deltaY != 0)
-        // {
+        //{
             moveParametric();
-        // }
+        //}
         //don't use deltaX, otherwise it can be updated between the moveParametric
         //call and the translateM call
         Matrix.translateM(modelMatrix, 0, parametricX, parametricY, 0);
@@ -113,6 +128,10 @@ public class Fan extends Model
         Matrix.rotateM(bladeRotation, 0, -65, 0, 1, 0);
         //rotate 90 degrees about x-axis
         Matrix.rotateM(bladeRotation, 0, 90, 1, 0, 0);
+
+        //Log.e("rotation", "fan angle " + fingerRotation);
+
+        //Matrix.rotateM(bladeRotation, 0, fingerRotation, 1, 0, 0);
 
         //rotate -65 degrees about y-axis
         //Matrix.rotateM(bladeRotation, 0, -65, 0, 1, 0);
@@ -169,7 +188,7 @@ public class Fan extends Model
         getBounds().setBounds(xPos - getSize()[0] / 2, yPos - getSize()[1] / 2, xPos + getSize()
                 [0] / 2, yPos + getSize()[1] / 2);
         //getWind().setBounds( new float[]{-0.4f, -0.25f, 0.4f, 0.25f} );
-        getWind().getBounds().calculateBounds(calculateInwardParametricRotation());
+        //getWind().getBounds().calculateBounds(calculateInwardParametricRotation());
         getWind().updatePosition(parametricX, parametricY);
     }
 
@@ -261,6 +280,10 @@ public class Fan extends Model
         this.initialX = initialX;
     }
 
+    public void updateFingerRotation(float fingerRotation) {
+        this.fingerRotation += fingerRotation;
+    }
+
     private float deltaX;
     private float deltaY;
 
@@ -279,4 +302,6 @@ public class Fan extends Model
     public boolean stop = true;
 
     private float prevRotationTime;
+
+    private float fingerRotation = 0;
 }

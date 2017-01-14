@@ -6,7 +6,6 @@
                                              android:id="@+id/gamePlayViewGroup"
                                              tools:context="wesley.folz.blowme.ui.GamePlayActivity">
 
-
     <ImageButton
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
