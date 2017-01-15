@@ -103,7 +103,7 @@ public class GamePlayActivity extends Activity
             surfaceView.setEGLContextClientVersion( 2 );
 
             menuMode = new MenuModeConfig();//new ActionModeConfig();
-
+            menuMode.reinitialize();
             surfaceView.setRenderer(new GamePlayRenderer(menuMode));
 
             // Set the renderer to our demo renderer, defined below.
@@ -330,6 +330,7 @@ public class GamePlayActivity extends Activity
     private void initializeActionMode(String level) {
         currentGameMode = "action";
         gameMode = new ActionModeConfig(level, menuMode, surfaceView);
+        gameMode.reinitialize();
 
         cubes = (TextView) findViewById(R.id.cubeTextView);
         rings = (TextView) findViewById(R.id.ringTextView);
@@ -343,6 +344,7 @@ public class GamePlayActivity extends Activity
     private void initializeEndlessMode() {
         currentGameMode = "endless";
         gameMode = new EndlessModeConfig(menuMode, surfaceView);
+        gameMode.reinitialize();
 
         numLivesView = (TextView) findViewById(R.id.numLivesTextView);
         scoreTextView = (TextView) findViewById(R.id.timerTextView);
@@ -354,6 +356,8 @@ public class GamePlayActivity extends Activity
     private void initializePuzzleMode(String level) {
         currentGameMode = "puzzle";
         gameMode = new PuzzleModeConfig(level, menuMode, surfaceView);
+        gameMode.reinitialize();
+
         cubes = (TextView) findViewById(R.id.cubeTextView);
         rings = (TextView) findViewById(R.id.ringTextView);
         timerView = (TextView) this.findViewById(R.id.timerTextVIew);
@@ -368,6 +372,7 @@ public class GamePlayActivity extends Activity
     private void initializeMenuMode() {
         //if(gameMode != null)
         //    menuMode.initializeFromExistingMode(gameMode, surfaceView);
+        menuMode.reinitialize();
         surfaceView.getRenderer().setModeConfig(menuMode);
         surfaceView.setOnTouchListener(null);
     }
@@ -453,6 +458,8 @@ public class GamePlayActivity extends Activity
     public static final float X_EDGE_POSITION = 0.35f;
 
     public static final float Y_EDGE_POSITION = 0.7f;
+
+    public static final float INITIALIZATION_TIME = 1.0f;
 
     /*--------------------------------------Protected Fields--------------------------------------*/
 

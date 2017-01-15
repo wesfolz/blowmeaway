@@ -211,8 +211,11 @@ public class DustCloud extends ParticleSystem
     {
         if (yUp <= 0.25f)
         {
-            yUp += 0.002f;
-            time += 0.003f;
+            //yUp += 0.002f;
+            yUp += y;
+            //time += 0.003f;
+            time += 3.0f * y / 2.0f;
+
         }
 
     }

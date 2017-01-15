@@ -2,6 +2,7 @@ package wesley.folz.blowme.graphics.models;
 
 import android.opengl.Matrix;
 import android.os.SystemClock;
+import android.util.Log;
 
 import wesley.folz.blowme.graphics.effects.Wind;
 import wesley.folz.blowme.ui.GamePlayActivity;
@@ -13,7 +14,7 @@ import wesley.folz.blowme.util.GraphicsUtilities;
  */
 public class Fan extends Model
 {
-    public Fan()
+    public Fan(float targetX, float targetY, float targetYAngle, float targetZAngle)
     {
         super();
         xPos = -GamePlayActivity.X_EDGE_POSITION;//+.01f;
@@ -24,11 +25,26 @@ public class Fan extends Model
                 [0] / 2, yPos + getSize()[1] / 2));
 
         scaleFactor = 0.03f;
+        yAngle = -65;
 
         //    scaleFactor = 0.1f;
 
         initialXPos = xPos;
         initialYPos = yPos;
+        this.setTargets(targetX, targetY, targetYAngle, targetZAngle);
+
+    }
+
+    public Fan() {
+        this(-GamePlayActivity.X_EDGE_POSITION, 0, -65, 0);
+
+    }
+
+    public void setTargets(float targetX, float targetY, float targetYAngle, float targetZAngle) {
+        this.targetYAngle = targetYAngle;
+        this.targetZAngle = targetZAngle;
+        this.targetX = targetX;
+        this.targetY = targetY;
     }
 
     @Override
@@ -53,7 +69,62 @@ public class Fan extends Model
 
     @Override
     public boolean initializationRoutine() {
-        return super.initializationRoutine();
+        if (initialized) {
+            return true;
+        }
+        if (initialTime == 0) {
+            prevTime = System.nanoTime();
+            initialTime = System.currentTimeMillis();
+            initRoutineX = xPos;
+            initRoutineY = yPos;
+            initRoutineZAngle = inwardRotation;
+            initRoutineYAngle = yAngle;
+            parametricX = 0;
+            parametricY = 0;
+        }
+        long time = System.currentTimeMillis();
+        float deltaTime = (time - initialTime) / 1000.0f;
+        time = System.nanoTime();
+        float littleDelta = (time - prevTime) / 1000000000.0f;
+        prevTime = time;
+
+        if (deltaTime < GamePlayActivity.INITIALIZATION_TIME) {
+            parametricX = (this.targetX - initRoutineX) * (littleDelta
+                    / GamePlayActivity.INITIALIZATION_TIME);
+            parametricY = (this.targetY - initRoutineY) * (littleDelta
+                    / GamePlayActivity.INITIALIZATION_TIME);
+
+            //parametricX = (this.targetX - initRoutineX)*(deltaTime/GamePlayActivity
+            // .INITIALIZATION_TIME);
+            //parametricY = (this.targetY - initRoutineY)*(deltaTime/GamePlayActivity
+            // .INITIALIZATION_TIME);
+            xPos += parametricX;
+            yPos += parametricY;
+            yAngle = (this.targetYAngle - initRoutineYAngle) * (deltaTime
+                    / GamePlayActivity.INITIALIZATION_TIME) + initRoutineYAngle;
+            inwardRotation = (this.targetZAngle - initRoutineZAngle) * (deltaTime
+                    / GamePlayActivity.INITIALIZATION_TIME) + initRoutineZAngle;
+        } else {
+            parametricX = 0;//this.targetX - xPos;// (Fan.TARGET_X - initRoutineX) - parametricX;
+            parametricY = 0;//this.targetY - yPos;// (Fan.TARGET_Y - initRoutineY) - parametricY;
+            inwardRotation = this.targetZAngle;
+            yAngle = this.targetYAngle;
+            xPos = this.targetX;
+            yPos = this.targetY;
+            initialTime = 0;
+            parametricAngle = (float) Math.PI;
+            fingerRotation = 0;
+            initialized = true;
+
+            Matrix.setIdentityM(modelMatrix, 0);
+            Matrix.translateM(modelMatrix, 0, xPos, yPos, 0);
+            Matrix.setIdentityM(getWind().modelMatrix, 0);
+            Matrix.translateM(getWind().modelMatrix, 0, xPos, yPos, 0);
+        }
+        getWind().updatePosition(parametricX, parametricY);
+        getWind().setRotationMatrix(inwardRotation);
+
+        return deltaTime >= GamePlayActivity.INITIALIZATION_TIME;
     }
 
     @Override
@@ -76,41 +147,38 @@ public class Fan extends Model
         getWind().resumeGame();
     }
 
-    private float[] calculateInwardParametricRotation()
+    private void calculateInwardParametricRotation()
     {
         //if parametricAngle = Pi -> inwardRotation = 0
         //if parametricAngle = Pi/2 -> inwardRotation = Pi/2
         //if parametricAngle = 0 -> inwardRotation = Pi
         //if parametricAngle = 3Pi/4 -> inwardRotation = -Pi/2
 
-        float inwardRotation =
+        inwardRotation =
                 180 * (parametricAngle - (float) Math.PI) / (float) Math.PI + fingerRotation;
 
-        float[] rotationMatrix = new float[16];
-        Matrix.setIdentityM(rotationMatrix, 0);
-        Matrix.setRotateM(rotationMatrix, 0, inwardRotation, 0, 0, 1);
         getWind().setRotationMatrix(inwardRotation);
-
-        return rotationMatrix;
     }
 
     @Override
     public float[] createTransformationMatrix()
     {
         float[] bladeRotation = new float[16];
+        float[] rotationMatrix = new float[16];
+        Matrix.setIdentityM(rotationMatrix, 0);
+        Matrix.setRotateM(rotationMatrix, 0, inwardRotation, 0, 0, 1);
 
         // Create a rotation transformation for the triangle
         long time = SystemClock.uptimeMillis() % 4000L; //modulo makes rotation look smooth
         float angle = 0.6f * (float) time;
-        prevRotationTime = angle;
 
-        //if (deltaX != 0 || deltaY != 0)
-        //{
-            moveParametric();
-        //}
+        getWind().updatePosition(parametricX, parametricY);
+
         //don't use deltaX, otherwise it can be updated between the moveParametric
         //call and the translateM call
         Matrix.translateM(modelMatrix, 0, parametricX, parametricY, 0);
+//        Matrix.translateM(rotationMatrix, 0, xPos, yPos, 0);
+
 
         //Matrix.scaleM( translationMatrix, 0, 0.05f, 0.05f, 0.05f );
         //Log.e( "blowme", "DeltaX " + deltaX + "DeltaY " + deltaY );
@@ -120,12 +188,10 @@ public class Fan extends Model
         deltaX = 0;
         deltaY = 0;
 
-        //Matrix.rotateM(modelMatrix, 0, deltaAngle, 0, -1, 0);
-
-        Matrix.multiplyMM(bladeRotation, 0, modelMatrix, 0, calculateInwardParametricRotation(), 0);
+        Matrix.multiplyMM(bladeRotation, 0, modelMatrix, 0, rotationMatrix, 0);
 
         //rotate -65 degrees about y-axis
-        Matrix.rotateM(bladeRotation, 0, -65, 0, 1, 0);
+        Matrix.rotateM(bladeRotation, 0, yAngle, 0, 1, 0);
         //rotate 90 degrees about x-axis
         Matrix.rotateM(bladeRotation, 0, 90, 1, 0, 0);
 
@@ -182,6 +248,8 @@ public class Fan extends Model
         xPos = newX;
         yPos = newY;
 
+        Log.e("moveParametric", "xPos " + xPos + " yPos " + yPos);
+
         getWind().xPos = xPos;
         getWind().yPos = yPos;
 
@@ -189,7 +257,8 @@ public class Fan extends Model
                 [0] / 2, yPos + getSize()[1] / 2);
         //getWind().setBounds( new float[]{-0.4f, -0.25f, 0.4f, 0.25f} );
         //getWind().getBounds().calculateBounds(calculateInwardParametricRotation());
-        getWind().updatePosition(parametricX, parametricY);
+        //getWind().updatePosition(parametricX,parametricY);
+        calculateInwardParametricRotation();
     }
 
     /**
@@ -250,8 +319,9 @@ public class Fan extends Model
         initialX = x;
         initialY = y;
 
-        //moveParametric();
         updateCount++;
+
+        moveParametric();
     }
 
     public void touch(float x)
@@ -282,6 +352,11 @@ public class Fan extends Model
 
     public void updateFingerRotation(float fingerRotation) {
         this.fingerRotation += fingerRotation;
+        calculateInwardParametricRotation();
+    }
+
+    public void setInitialized(boolean initialized) {
+        this.initialized = initialized;
     }
 
     private float deltaX;
@@ -301,7 +376,23 @@ public class Fan extends Model
 
     public boolean stop = true;
 
-    private float prevRotationTime;
+    private float prevTime;
 
     private float fingerRotation = 0;
+
+    private long initialTime = 0;
+    private float initRoutineX;
+    private float initRoutineY;
+    private float initRoutineZAngle;
+    private float initRoutineYAngle;
+
+    private float inwardRotation = 0;
+
+    private boolean initialized = false;
+
+    private float yAngle;
+    private float targetYAngle;
+    private float targetZAngle;
+    private float targetX;
+    private float targetY;
 }

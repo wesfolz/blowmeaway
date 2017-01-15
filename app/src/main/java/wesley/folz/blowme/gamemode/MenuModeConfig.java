@@ -9,6 +9,7 @@ import wesley.folz.blowme.graphics.effects.Explosion;
 import wesley.folz.blowme.graphics.models.Dispenser;
 import wesley.folz.blowme.graphics.models.FallingObject;
 import wesley.folz.blowme.graphics.models.Fan;
+import wesley.folz.blowme.ui.GamePlayActivity;
 import wesley.folz.blowme.util.Physics;
 
 
@@ -22,8 +23,10 @@ public class MenuModeConfig extends ModeConfig
     public MenuModeConfig()
     {
         super();
-        positionsInitialized = true;
         initializeGameObjects();
+        TARGET_Y_ANGLE = 0;
+        TARGET_X = 0;
+        TARGET_Y = GamePlayActivity.Y_EDGE_POSITION;
     }
 
     @Override
@@ -142,4 +145,7 @@ public class MenuModeConfig extends ModeConfig
         }
         //line.draw();
     }
+
+    public static final float FAN_TARGET_X = 0;
+    public static final float FAN_TARGET_Y = GamePlayActivity.Y_EDGE_POSITION;
 }

@@ -4,6 +4,7 @@ import android.opengl.Matrix;
 import android.os.SystemClock;
 
 import wesley.folz.blowme.graphics.effects.DustCloud;
+import wesley.folz.blowme.ui.GamePlayActivity;
 import wesley.folz.blowme.util.Bounds;
 import wesley.folz.blowme.util.GraphicsUtilities;
 
@@ -55,7 +56,6 @@ public class Vortex extends Model
         {
             orbitingObject.enableGraphics(graphicsData);
         }
-
     }
 
     @Override
@@ -116,20 +116,28 @@ public class Vortex extends Model
     @Override
     public boolean initializationRoutine()
     {
-        if (scaleCount < 100)
+        if (initialTime == 0)
         {
-            scaleCount++;
-            deltaY = scaleCount / 500f;
+            initialTime = System.currentTimeMillis();
         }
-        updatePosition(0, 0);
+        long time = System.currentTimeMillis();
+        float deltaTime = (time - initialTime) / 1000.0f;
 
-        return scaleCount >= 100;
+        if (deltaTime < GamePlayActivity.INITIALIZATION_TIME) {
+            scaleCount = 100 * (deltaTime / GamePlayActivity.INITIALIZATION_TIME);
+        } else {
+            scaleCount = 100.0f;
+        }
+
+        deltaY = scaleCount / 500.0f;
+        updatePosition(0, 0);
+        return deltaTime >= GamePlayActivity.INITIALIZATION_TIME;
     }
 
     @Override
     public void updatePosition(float x, float y)
     {
-        dustCloud.updatePosition(0, 0);
+        dustCloud.updatePosition(0, deltaY / 30);
         for (OrbitingObject orbitingObject : orbitingObjects)
         {
             orbitingObject.updatePosition(0, deltaY);
@@ -182,5 +190,7 @@ public class Vortex extends Model
     private OrbitingObject[] orbitingObjects = new OrbitingObject[3];
 
     private String type;
+
+    private long initialTime = 0;
 
 }

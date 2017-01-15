@@ -18,6 +18,7 @@ import wesley.folz.blowme.graphics.models.Fan;
 import wesley.folz.blowme.graphics.models.Model;
 import wesley.folz.blowme.graphics.models.RicochetObstacle;
 import wesley.folz.blowme.graphics.models.Vortex;
+import wesley.folz.blowme.ui.GamePlayActivity;
 import wesley.folz.blowme.ui.GamePlaySurfaceView;
 import wesley.folz.blowme.util.GraphicsUtilities;
 
@@ -27,8 +28,14 @@ import wesley.folz.blowme.util.GraphicsUtilities;
 
 public abstract class ModeConfig
 {
-    protected ModeConfig()
+    public ModeConfig()
     {
+    }
+
+    public void reinitialize() {
+        fan.setTargets(TARGET_X, TARGET_Y, TARGET_Y_ANGLE, TARGET_Z_ANGLE);
+        fan.setInitialized(false);
+        positionsInitialized = false;
     }
 
     public void enableModelGraphics()
@@ -410,4 +417,9 @@ public abstract class ModeConfig
     boolean initialPositionSet = false;
 
     protected String level;
+
+    protected float TARGET_X = -GamePlayActivity.X_EDGE_POSITION;
+    protected float TARGET_Y = 0;
+    protected float TARGET_Z_ANGLE = 0;
+    protected float TARGET_Y_ANGLE = -65;
 }

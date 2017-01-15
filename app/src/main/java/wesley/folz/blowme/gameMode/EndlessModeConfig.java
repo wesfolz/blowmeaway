@@ -269,8 +269,6 @@ public class EndlessModeConfig extends ModeConfig implements
                 vortexCount++;
             }
 
-            objectiveFailed = numLives <= 0;
-
             //falling object is being dispensed
             if (falObj.getyPos() > 0.95f && !objectEffected) {
                 //falObj.updatePosition(100 * dispenser.getDeltaX(), 0);
@@ -303,6 +301,7 @@ public class EndlessModeConfig extends ModeConfig implements
             }
             modelCount++;
         }
+        objectiveFailed = numLives <= 0;
         //line.updatePosition(0, 0);
     }
 

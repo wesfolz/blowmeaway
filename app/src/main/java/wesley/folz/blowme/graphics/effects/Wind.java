@@ -49,7 +49,7 @@ public class Wind extends ParticleSystem
         GraphicsUtilities.readShader(this);
 
         setSize(new float[]{3.0f, 0.3f});
-        setBounds(new Bounds(-1.15f, -0.15f, 1.85f, 0.15f));
+        setBounds(new Bounds(-1.5f, -0.15f, 1.5f, 0.15f));
 
         wBounds = new WindBounds(getBounds());
 
