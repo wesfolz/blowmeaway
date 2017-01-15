@@ -18,7 +18,7 @@ public class Explosion extends ParticleSystem
         super();
         this.VERTEX_SHADER = R.raw.particle_vertex_shader;
         this.FRAGMENT_SHADER = R.raw.particle_fragment_shader;
-        this.TEXTURE_RESOURCE = R.raw.yellow_circle;
+        this.TEXTURE_RESOURCE = R.drawable.yellow_circle;
         GraphicsUtilities.readShader(this);
 
         initialXPos = xPos;

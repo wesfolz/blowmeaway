@@ -45,7 +45,7 @@ public class Wind extends ParticleSystem
 
         this.VERTEX_SHADER = R.raw.wind_vertex_shader;
         this.FRAGMENT_SHADER = R.raw.wind_fragment_shader;
-        this.TEXTURE_RESOURCE = R.raw.yellow_circle;
+        this.TEXTURE_RESOURCE = R.drawable.yellow_circle;
         GraphicsUtilities.readShader(this);
 
         setSize(new float[]{3.0f, 0.3f});

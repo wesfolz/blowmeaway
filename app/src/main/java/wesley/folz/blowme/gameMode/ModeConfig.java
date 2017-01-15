@@ -52,17 +52,17 @@ public abstract class ModeConfig
         graphicsData.storeModelData("fan", R.raw.fan_orig);
         graphicsData.storeModelData("vortex", R.raw.uv_vortex);
 
-        graphicsData.storeTexture("yellow_circle", R.raw.yellow_circle);
-        graphicsData.storeTexture("sky", R.raw.sky_texture);
-        graphicsData.storeTexture("grid", R.raw.grid);
-        graphicsData.storeTexture("cube_wood", R.raw.cube_wood_tex);
-        graphicsData.storeTexture("brick", R.raw.cube_brick_tex);
+        graphicsData.storeTexture("yellow_circle", R.drawable.yellow_circle);
+        graphicsData.storeTexture("sky", R.drawable.sky_texture);
+        graphicsData.storeTexture("grid", R.drawable.grid);
+        graphicsData.storeTexture("cube_wood", R.drawable.cube_wood_tex);
+        graphicsData.storeTexture("brick", R.drawable.cube_brick_tex);
 
-        graphicsData.storeTexture("fan_test", R.raw.fan_orig_tex);
-        graphicsData.storeTexture("vortex_tex", R.raw.vortex_tex);
+        graphicsData.storeTexture("fan_test", R.drawable.fan_orig_tex);
+        graphicsData.storeTexture("vortex_tex", R.drawable.vortex_tex);
 
-        graphicsData.storeTexture("grey_circle", R.raw.grey_circle);
-        graphicsData.storeTexture("sun", R.raw.sun);
+        graphicsData.storeTexture("grey_circle", R.drawable.grey_circle);
+        graphicsData.storeTexture("sun", R.drawable.sun);
 
         String[] particleAttributes = new String[]{"position", "direction", "normalVector", "speed", "color"};
         String[] modelAttributes = new String[]{"position", "color", "normalVector"};

@@ -171,7 +171,8 @@ public abstract class ParticleSystem extends Model
 
         //texture data
         textureDataHandle = GraphicsUtilities.loadTexture(MainApplication.getAppContext(), this.TEXTURE_RESOURCE);
-        secondTexture = GraphicsUtilities.loadTexture(MainApplication.getAppContext(), R.raw.grey_circle);
+        secondTexture = GraphicsUtilities.loadTexture(MainApplication.getAppContext(),
+                R.drawable.grey_circle);
 
         // IMPORTANT: Unbind from the buffer when we're done with it.
         GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);

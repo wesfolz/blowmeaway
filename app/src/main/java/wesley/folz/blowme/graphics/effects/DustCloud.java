@@ -21,7 +21,7 @@ public class DustCloud extends ParticleSystem
         super();
         this.VERTEX_SHADER = R.raw.dust_cloud_vertex_shader;
         this.FRAGMENT_SHADER = R.raw.dust_cloud_fragment_shader;
-        this.TEXTURE_RESOURCE = R.raw.grey_circle;
+        this.TEXTURE_RESOURCE = R.drawable.grey_circle;
         GraphicsUtilities.readShader(this);
         xPos = 0;
         yPos = 0;//GamePlayActivity.Y_EDGE_POSITION;

@@ -16,7 +16,7 @@ public class Flame extends ParticleSystem
         super();
         this.VERTEX_SHADER = R.raw.flame_vertex_shader;
         this.FRAGMENT_SHADER = R.raw.flame_fragment_shader;
-        this.TEXTURE_RESOURCE = R.raw.yellow_circle;
+        this.TEXTURE_RESOURCE = R.drawable.yellow_circle;
         GraphicsUtilities.readShader(this);
         xPos = x;
         yPos = y;//GamePlayActivity.Y_EDGE_POSITION;

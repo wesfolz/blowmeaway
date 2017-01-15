@@ -22,7 +22,7 @@ public abstract class Model
         //GraphicsUtilities.readOBJFile( this );
         this.VERTEX_SHADER = R.raw.defaultvertexshader;
         this.FRAGMENT_SHADER = R.raw.defaultfragmentshader;
-        this.TEXTURE_RESOURCE = R.raw.wood_texture;
+        this.TEXTURE_RESOURCE = R.drawable.yellow_circle;
         GraphicsUtilities.readShader(this);
     }
 
