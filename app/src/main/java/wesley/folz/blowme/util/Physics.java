@@ -167,5 +167,5 @@ public abstract class Physics
 
     public static final float GRAVITY = 9.8f;
 
-    public static final float KINETIC_FRICTION = 9.7f;
+    public static final float KINETIC_FRICTION = 9.75f;
 }

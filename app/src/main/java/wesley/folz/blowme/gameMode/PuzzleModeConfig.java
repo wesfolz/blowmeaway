@@ -164,7 +164,6 @@ public class PuzzleModeConfig extends ModeConfig implements
         }
     }
 
-
     @Override
     protected void updateModelPositions() {
         //dispenser.updatePosition(0, 0);
@@ -398,7 +397,7 @@ public class PuzzleModeConfig extends ModeConfig implements
             double distance;
             double minDistance = 100;
             float glX = (x - 1) / 2.0f;
-            float glY = -1.0f * (y - 1) / 2.0f;
+            float glY = -1.0f * (y - 1);// / 2.0f;
 
             for (Fan f : fans) {
                 distance = Math.sqrt(

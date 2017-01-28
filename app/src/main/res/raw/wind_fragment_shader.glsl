@@ -6,6 +6,8 @@ varying vec3 v_Position; // Interpolated position for this fragment.
 // triangle per fragment.
 varying vec3 v_Normal; // Interpolated normal for this fragment.
 
+varying float pre_X;
+
 
 // The entry point for our fragment shader.
 void main()
@@ -33,6 +35,6 @@ void main()
 
     // Multiply the color by the diffuse illumination level to get final output color.
 //    gl_FragColor = texture2D(second_Texture, gl_PointCoord)*texture2D(u_Texture, gl_PointCoord)*vec4(1.0, 1.0, 1.0, 0.1);
-    gl_FragColor = vec4(1.0, 1.0, 1.0, 0.01);//texture2D(u_Texture, gl_PointCoord)*vec4(1.0, 1.0, 1.0, 0.1);
+    gl_FragColor = vec4(1.0, 1.0, 1.0, 0.035*(2.0-1.25*pre_X));//texture2D(u_Texture, gl_PointCoord)*vec4(1.0, 1.0, 1.0, 0.1);
 
 }

@@ -77,8 +77,8 @@ public class Fan extends Model
             initialTime = System.currentTimeMillis();
             initRoutineX = xPos;
             initRoutineY = yPos;
-            initRoutineZAngle = inwardRotation;
-            initRoutineYAngle = yAngle;
+            initRoutineZAngle = inwardRotation % 360;
+            initRoutineYAngle = yAngle % 360;
             parametricX = 0;
             parametricY = 0;
         }
@@ -131,7 +131,9 @@ public class Fan extends Model
     public void draw()
     {
         super.draw();
-        getWind().draw();
+        if (isBlowing()) {
+            getWind().draw();
+        }
     }
 
     @Override
@@ -169,7 +171,7 @@ public class Fan extends Model
         Matrix.setRotateM(rotationMatrix, 0, inwardRotation, 0, 0, 1);
 
         // Create a rotation transformation for the triangle
-        long time = SystemClock.uptimeMillis() % 4000L; //modulo makes rotation look smooth
+        long time = SystemClock.uptimeMillis() % 36000L; //modulo makes rotation look smooth
         float angle = 0.6f * (float) time;
 
         getWind().updatePosition(parametricX, parametricY);
@@ -359,6 +361,14 @@ public class Fan extends Model
         this.initialized = initialized;
     }
 
+    public boolean isBlowing() {
+        return blowing;
+    }
+
+    public void setBlowing(boolean blowing) {
+        this.blowing = blowing;
+    }
+
     private float deltaX;
     private float deltaY;
 
@@ -389,6 +399,8 @@ public class Fan extends Model
     private float inwardRotation = 0;
 
     private boolean initialized = false;
+
+    private boolean blowing = true;
 
     private float yAngle;
     private float targetYAngle;

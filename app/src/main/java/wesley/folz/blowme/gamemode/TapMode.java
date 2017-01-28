@@ -11,27 +11,27 @@ import wesley.folz.blowme.graphics.Border;
 import wesley.folz.blowme.graphics.effects.Explosion;
 import wesley.folz.blowme.graphics.models.DestructiveObstacle;
 import wesley.folz.blowme.graphics.models.FallingObject;
+import wesley.folz.blowme.graphics.models.Fan;
 import wesley.folz.blowme.graphics.models.Model;
 import wesley.folz.blowme.graphics.models.RicochetObstacle;
 import wesley.folz.blowme.graphics.models.Vortex;
 import wesley.folz.blowme.ui.GamePlaySurfaceView;
-import wesley.folz.blowme.ui.RotationGestureDetector;
 import wesley.folz.blowme.util.Physics;
 
 /**
- * Created by Wesley on 9/24/2016.
+ * Created by Wesley on 1/27/2017.
  */
 
-public class EndlessModeConfig extends ModeConfig implements
-        RotationGestureDetector.OnRotationGestureListener
-{
-    public EndlessModeConfig(ModeConfig mode, GamePlaySurfaceView surfaceView) {
+public class TapMode extends ModeConfig {
+
+    public TapMode(ModeConfig mode, GamePlaySurfaceView surfaceView) {
         models = new ArrayList<>();
         obstacles = new ArrayList<>();
         fallingObjects = new ArrayList<>();
         explosions = new ArrayList<>();
         vortexes = new ArrayList<>();
         hazards = new ArrayList<>();
+        fans = new ArrayList<>();
 
         initializeFromExistingMode(mode, null);
         //Log.e("json", "fanx " + fan.getxPos() + " fany " + fan.getyPos());
@@ -50,8 +50,6 @@ public class EndlessModeConfig extends ModeConfig implements
                 }
             }
         });
-
-        rotationDetector = new RotationGestureDetector(this);
     }
 
     @Override
@@ -129,6 +127,29 @@ public class EndlessModeConfig extends ModeConfig implements
                     (float) (i + 1) * (2.0f / (numVortexes + 1.0f)) - 1);
             models.add(v);
             vortexes.add(v);
+        }
+
+        int side = 1;
+        float counter = 0;
+        float angle = 0;
+        for (int i = 0; i < numFans; i++) {
+            if (i >= 5) {
+                side = -1;
+                counter = i - 5;
+                angle = 180;
+            }
+            //          if(i == 0)
+            //          {
+            //              fan.setTargets(side*Border.XLEFT, Border.YTOP - counter*0.3f, -65,
+            // angle);
+            //              fans.add(fan);
+            //          }
+            //          else {
+            Fan f = new Fan(side * Border.XLEFT, Border.YTOP - counter * 0.3f, -65, angle);
+            models.add(f);
+            fans.add(f);
+            //         }
+            counter++;
         }
 
         //dispenser = new Dispenser();
@@ -278,18 +299,23 @@ public class EndlessModeConfig extends ModeConfig implements
 
             //determine forces due to collisions with obstacles
             falObj.calculateRicochetCollisions(obstacles);
+            for (Fan f : fans) {
+                if (f.isBlowing()) {
+                    if (Physics.isCollision(f.getWind().getBounds(), falObj.getBounds())
+                            && !objectEffected) {
+                        Physics.calculateWindForce(f.getWind(), falObj);
+                        //Log.e("wind", "xforce " + fan.getWind().getxForce() + " yforce " + fan
+                        // .getWind().getyForce());
 
-            //calculate wind influence
-            if (Physics.isCollision(falObj.getBounds(), fan.getWind().getBounds())
-                    && !objectEffected) {
-                Physics.calculateWindForce(fan.getWind(), falObj);
-                //Log.e("wind", "xforce " + fan.getWind().getxForce() + " yforce " + fan.getWind
-                // ().getyForce());
-                //Log.e("mode", "wind collision");
-                //falObj.updatePosition(fan.getWind().getxForce(), fan.getWind().getyForce());
-                xForce = fan.getWind().getxForce();
-                yForce = fan.getWind().getyForce();
-                //objectEffected = true;
+
+                        //Log.e("mode", "wind collision");
+                        //falObj.updatePosition(fan.getWind().getxForce(), fan.getWind()
+                        // .getyForce());
+                        xForce += f.getWind().getxForce();
+                        yForce += f.getWind().getyForce();
+                        //objectEffected = true;
+                    }
+                }
             }
 
             if (!falObj.isSpiraling()) {
@@ -304,6 +330,39 @@ public class EndlessModeConfig extends ModeConfig implements
         objectiveFailed = numLives <= 0;
 
         //line.updatePosition(0, 0);
+    }
+
+    @Override
+    protected void drawModels() {
+        background.draw();
+        for (Fan f : fans) {
+            f.draw();
+        }
+        dispenser.draw();
+
+        for (RicochetObstacle o : obstacles) {
+            o.draw();
+        }
+        for (DestructiveObstacle h : hazards) {
+            h.draw();
+        }
+
+        for (FallingObject falObj : fallingObjects) {
+            if (!falObj.isOffscreen()) {
+                falObj.draw();
+            }
+        }
+
+        for (Vortex v : vortexes) {
+            v.draw();
+        }
+
+        for (Explosion e : explosions) {
+            if (e.isExploding()) {
+                e.draw();
+            }
+        }
+        //line.draw();
     }
 
     private float[] generateRandomLocation() {
@@ -352,48 +411,63 @@ public class EndlessModeConfig extends ModeConfig implements
     public void handleTouchDrag(MotionEvent event, float x, float y) {
 
         final int action = MotionEventCompat.getActionMasked(event);
-        rotationDetector.onTouchEvent(event);
-        if (rotationDetector.isRotating()) {
-            Log.e("rotation", "angle " + rotationDetector.getAngle());
-            fan.updateFingerRotation(rotationDetector.getAngle());
-            //      Log.e("rotate", "rotation " + fan.getFingerRotation());
-        } else {
-            if (fanReadyToMove) {
-                switch (action) {
-                    case MotionEvent.ACTION_POINTER_UP:
-                        touchActionStarted = true;
-                        //gameMode.handleFanMovementDown(x, y);
-                        break;
-                    case MotionEvent.ACTION_POINTER_DOWN:
-                        //gameMode.handleFanMovementDown(x, y);
-                        touchActionStarted = true;
-                        break;
 
-                    case MotionEvent.ACTION_UP:
-                        touchActionStarted = true;
-                        //gameMode.handleFanMovementDown(x, y);
-                        break;
+        if (fanReadyToMove) {
+            switch (action) {
+                case MotionEvent.ACTION_POINTER_UP:
+                    touchActionStarted = true;
+                    //gameMode.handleFanMovementDown(x, y);
+                    break;
+                case MotionEvent.ACTION_POINTER_DOWN:
+                    //gameMode.handleFanMovementDown(x, y);
+                    touchActionStarted = true;
+                    break;
 
-                    case MotionEvent.ACTION_DOWN:
-                        //gameMode.handleFanMovementDown(x, y);
-                        touchActionStarted = true;
-                        break;
+                case MotionEvent.ACTION_UP:
+                    touchActionStarted = true;
+                    //gameMode.handleFanMovementDown(x, y);
+                    break;
 
-                    case MotionEvent.ACTION_MOVE:
-                        if (touchActionStarted) {
-                            this.handleFanMovementDown(x, y);
-                            touchActionStarted = false;
-                        }
-                        this.handleFanMovementMove(x, y);
-                        Log.e("rotate", "no rotation");
+                case MotionEvent.ACTION_DOWN:
+                    //gameMode.handleFanMovementDown(x, y);
+                    touchActionStarted = true;
+                    break;
 
-                        //Log.e( "blowme", "Move: X " + (event.getRawX() / WIDTH) + " Y " +
-                        // (event.getRawY() / HEIGHT) );
-                        break;
-                }
+                case MotionEvent.ACTION_MOVE:
+                    if (touchActionStarted) {
+                        this.handleFanMovementDown(x, y);
+                        touchActionStarted = false;
+                    }
+                    break;
             }
         }
     }
+
+    @Override
+    public void handleFanMovementDown(float x, float y) {
+        if (fanReadyToMove) {
+            double distance;
+            double minDistance = 100;
+            //[-0.5, 0.5]
+            float glX = (x - 1) / 2.0f;
+            //[-1.0, 1.0]
+            float glY = -1.0f * (y - 1);// / 2.0f;
+
+            Log.e("touch", "glx " + glX + " gly " + glY + " x " + x + " y " + y);
+
+            for (Fan f : fans) {
+                distance = Math.sqrt(
+                        (f.getxPos() - glX) * (f.getxPos() - glX) + (f.getyPos() - glY) * (
+                                f.getyPos() - glY));
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    fan = f;
+                }
+            }
+            fan.setBlowing(!fan.isBlowing());
+        }
+    }
+
 
     public int getNumLives() {
         return numLives;
@@ -406,14 +480,11 @@ public class EndlessModeConfig extends ModeConfig implements
     private ArrayList<Integer> xLocations = new ArrayList<>();
     private ArrayList<Integer> yLocations = new ArrayList<>();
 
+    private ArrayList<Fan> fans;
+
     private int numLives = 3;
     private int score = 0;
 
+    private int numFans = 10;
 
-    @Override
-    public boolean OnRotation(RotationGestureDetector rotationDetector) {
-        return false;
-    }
-
-    private RotationGestureDetector rotationDetector;
 }

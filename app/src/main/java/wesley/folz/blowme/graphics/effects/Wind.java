@@ -2,6 +2,7 @@ package wesley.folz.blowme.graphics.effects;
 
 import android.opengl.GLES20;
 import android.opengl.Matrix;
+import android.os.SystemClock;
 
 import java.util.Random;
 
@@ -19,23 +20,6 @@ public class Wind extends ParticleSystem
     public Wind()
     {
         super();
-
-       /* interleavedData = new float[]{
-                - 1.0f, 0.25f, 0.0f,    // top left
-                 0.0f, 0.0f, 1.0f,      //normal
-                 0.0f, 0.0f, 1.0f, 0.8f, //color
-                - 1.0f, - 0.25f, 0.0f,  // bottom left
-                0.0f, 0.0f, 1.0f,       //normal
-                0.0f, 0.0f, 1.0f, 0.8f, //color
-                1.0f, - 0.25f, 0.0f,    // bottom right
-                0.0f, 0.0f, 1.0f,       //normal
-                0.0f, 0.0f, 1.0f, 0.8f, //color
-                1.0f, 0.25f, 0.0f,      // top right
-                0.0f, 0.0f , 1.0f,      //normal
-                0.0f, 0.0f, 1.0f, 0.8f};//color
-
-        vertexOrder = new short[]{0, 1, 2, 0, 2, 3};
-*/
 
         xPos = -GamePlayActivity.X_EDGE_POSITION;//+.01f;
         yPos = 0;
@@ -71,11 +55,43 @@ public class Wind extends ParticleSystem
         {
             Random rand = new Random();
             //direction vectors
-            interleavedData[numAttributes * i] = 1.0f - 1.3f * rand.nextFloat();//direction[0]; //x direction
-            interleavedData[numAttributes * i + 1] = 0.1f - 0.2f * rand.nextFloat();//direction[1]; //y direction
-            interleavedData[numAttributes * i + 2] = 0;// 1 - 2 * rand.nextFloat();//direction[2]; //y direction
+            // [-0.3, 0.3]
+//            interleavedData[numAttributes * i] = 1.0f - 1.3f * rand.nextFloat();//direction[0];
+// x direction
+            // [-0.1, 0.1]
+            interleavedData[numAttributes * i + 1] =
+                    0.15f - 0.3f * rand.nextFloat();//direction[1]; //y direction
+//            interleavedData[numAttributes * i + 2] = 0;// 1 - 2 * rand.nextFloat();
+// direction[2]; //y direction
+
+            interleavedData[numAttributes * i] = 0;
+//            interleavedData[numAttributes * i] = 1.0f - 1.3f * rand.nextFloat();//direction[0];
+// x direction
+            // [-0.1, 0.1]
+/*
+            float yFloat = rand.nextFloat();
+            if(yFloat <= 0.25) {
+                interleavedData[numAttributes * i + 1] = -0.1f;//
+                interleavedData[numAttributes * i + 2] = 0.0f;
+            }
+            else if(yFloat <= 0.5) {
+                interleavedData[numAttributes * i + 1] = -0.033f;//-0.033f;
+                interleavedData[numAttributes * i + 2] = -0.1f;
+            }
+            else if(yFloat <= 0.75) {
+                interleavedData[numAttributes * i + 1] = 0.033f;//0.033f;
+                interleavedData[numAttributes * i + 2] = 0.1f;
+            }
+            else {
+                interleavedData[numAttributes * i + 1] = 0.1f;//0.1f;
+                interleavedData[numAttributes * i + 2] = 0.1f;
+            }
+*/
+            interleavedData[numAttributes * i + 2] =
+                    0;// 1 - 2 * rand.nextFloat();//direction[2]; //z direction
 
             //speed
+            // [0, 0.5]
             interleavedData[numAttributes * i + 3] = rand.nextFloat() / 2.0f;//currentParticle.getSpeed();
             //interleavedData[10*i+9] = 1.0f;//(float)Math.random();
             vertexOrder[i] = (short) i;
@@ -147,8 +163,8 @@ public class Wind extends ParticleSystem
         int normalHandle = GLES20.glGetUniformLocation(programHandle, "normalVector");
         GLES20.glUniform3f(normalHandle, 0, 0, 1);
 
-        int deltaYHandle = GLES20.glGetUniformLocation(programHandle, "deltaY");
-        GLES20.glUniform1f(deltaYHandle, totalDelta);
+//        int deltaYHandle = GLES20.glGetUniformLocation(programHandle, "deltaY");
+//        GLES20.glUniform1f(deltaYHandle, totalDelta);
 
         GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, orderVBO);
 
@@ -201,57 +217,15 @@ public class Wind extends ParticleSystem
     }
 
 
-    public void calculateWindForce()
-    {
-        xForce = (-1) * xPos * maxWindForce;
-        yForce = (-1) * yPos * maxWindForce;
-    }
-
-    /**
-     * TODO: Rotate fan so that it doesn't compete with blade rotation (make wind force a function of distance)
-     * Rotate fan so that it's pointing towards the center of the screen
-     *
-     * @return - rotation matrix about z axis that points fan towards center of screen
-     */
-    private float[] calculateInwardRotation()
-    {
-        float[] rotationMatrix = new float[16];
-        float inwardRotation;
-        float cornerAngle = 45;//(float) (180 * Math.atan( GamePlayActivity.X_EDGE_POSITION /
-        // GamePlayActivity.Y_EDGE_POSITION ) / Math
-        //.PI);
-
-        float xRatio = (90 - cornerAngle) / GamePlayActivity.X_EDGE_POSITION;
-        float yRatio = cornerAngle / GamePlayActivity.Y_EDGE_POSITION;
-
-        //on negative x edge
-        if( xPos == (- GamePlayActivity.X_EDGE_POSITION) )
-        {
-            //inwardRotation = yRatio * ( yPos + (yPos/Math.abs(yPos))*(X_EDGE_POSITION + xPos) );
-            inwardRotation = yRatio * yPos;
-            //Log.e( "blowme", "negative x edge" );
-        }
-        //on positive x edge
-        else if( xPos == GamePlayActivity.X_EDGE_POSITION )
-        {
-            inwardRotation = 180 - cornerAngle + yRatio * (GamePlayActivity.Y_EDGE_POSITION - yPos);
-            //Log.e( "blowme", "negative x edge" );
-        }
-        //on y edge
-        else
-        {
-            inwardRotation = (yPos / Math.abs( yPos )) * (xRatio * xPos + 90);
-            //Log.e( "blowme", "negative y edge" );
-        }
-
-        Matrix.setRotateM( rotationMatrix, 0, inwardRotation, 0, 0, 1 );
-        return rotationMatrix;
-    }
-
     @Override
     public float[] createTransformationMatrix()
     {
         float[] transformation = new float[16];
+
+        // Create a rotation transformation for the triangle
+        long time = SystemClock.uptimeMillis() % 3600L; //modulo makes rotation look smooth
+        float angle = 0.6f * (float) time;
+
 
         //Matrix.setIdentityM(modelMatrix, 0);
         Matrix.setIdentityM(transformation, 0);
@@ -260,6 +234,9 @@ public class Wind extends ParticleSystem
         Matrix.translateM(modelMatrix, 0, deltaX, deltaY, 0);
 
         Matrix.multiplyMM(transformation, 0, modelMatrix, 0, rotationMatrix, 0);
+        //  Matrix.rotateM(transformation, 0, -80, 0, 1, 0);
+        //  Matrix.rotateM(transformation, 0, angle, 1, 0, 0);
+
         //Matrix.translateM(transformation, 0, deltaX, deltaY, 0);
 
         //Log.e( "blowme", "xmin " + transformation[0] + " ymin " + transformation[1] + " xmax "
