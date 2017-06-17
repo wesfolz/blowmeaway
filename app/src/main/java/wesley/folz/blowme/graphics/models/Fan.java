@@ -73,26 +73,27 @@ public class Fan extends Model
             return true;
         }
         if (initialTime == 0) {
-            prevTime = System.nanoTime();
-            initialTime = System.currentTimeMillis();
             initRoutineX = xPos;
             initRoutineY = yPos;
             initRoutineZAngle = inwardRotation % 360;
             initRoutineYAngle = yAngle % 360;
             parametricX = 0;
             parametricY = 0;
+            initRoutineDeltaX = targetX - initRoutineX;
+            initRoutineDeltaY = targetY - initRoutineY;
+            initialTime = System.nanoTime();
+            prevTime = initialTime;
+            Log.e("initRoutine", "deltaX " + initRoutineDeltaX + " deltaY " + initRoutineDeltaY);
         }
-        long time = System.currentTimeMillis();
-        float deltaTime = (time - initialTime) / 1000.0f;
-        time = System.nanoTime();
+        long time = System.nanoTime();
+        float deltaTime = (time - initialTime) / 1000000000.0f;
+        //time = System.nanoTime();
         float littleDelta = (time - prevTime) / 1000000000.0f;
         prevTime = time;
 
         if (deltaTime < GamePlayActivity.INITIALIZATION_TIME) {
-            parametricX = (this.targetX - initRoutineX) * (littleDelta
-                    / GamePlayActivity.INITIALIZATION_TIME);
-            parametricY = (this.targetY - initRoutineY) * (littleDelta
-                    / GamePlayActivity.INITIALIZATION_TIME);
+            parametricX = initRoutineDeltaX * (littleDelta / GamePlayActivity.INITIALIZATION_TIME);
+            parametricY = initRoutineDeltaY * (littleDelta / GamePlayActivity.INITIALIZATION_TIME);
 
             //parametricX = (this.targetX - initRoutineX)*(deltaTime/GamePlayActivity
             // .INITIALIZATION_TIME);
@@ -250,8 +251,6 @@ public class Fan extends Model
         xPos = newX;
         yPos = newY;
 
-        Log.e("moveParametric", "xPos " + xPos + " yPos " + yPos);
-
         getWind().xPos = xPos;
         getWind().yPos = yPos;
 
@@ -393,6 +392,8 @@ public class Fan extends Model
     private long initialTime = 0;
     private float initRoutineX;
     private float initRoutineY;
+    private float initRoutineDeltaX;
+    private float initRoutineDeltaY;
     private float initRoutineZAngle;
     private float initRoutineYAngle;
 

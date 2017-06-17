@@ -235,7 +235,7 @@ public class Wind extends ParticleSystem
 
         Matrix.multiplyMM(transformation, 0, modelMatrix, 0, rotationMatrix, 0);
         //  Matrix.rotateM(transformation, 0, -80, 0, 1, 0);
-        //  Matrix.rotateM(transformation, 0, angle, 1, 0, 0);
+        //       Matrix.rotateM(transformation, 0, angle, 1, 0, 0);
 
         //Matrix.translateM(transformation, 0, deltaX, deltaY, 0);
 

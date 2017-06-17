@@ -154,10 +154,12 @@ public class PuzzleModeConfig extends ModeConfig implements
     @Override
     protected void initializationRoutine() {
         boolean initialized = true;
-        for (Model m : models) {
-            initialized &= m.initializationRoutine();
+        if (!fanReadyToMove) {
+            for (Model m : models) {
+                initialized &= m.initializationRoutine();
+            }
+            fanReadyToMove = initialized;
         }
-        fanReadyToMove = initialized;
         positionsInitialized = initialized & puzzleStarted;
         if (positionsInitialized) {
             startTiming();
@@ -199,7 +201,7 @@ public class PuzzleModeConfig extends ModeConfig implements
                 }
             }
 
-            if (falObj.isOffscreen() && !objectExplosion.isExploding()) {
+            if (falObj.isOffscreen() || objectExplosion.isExploding()) {
                 objectiveFailed = true;
             }
 
@@ -346,7 +348,6 @@ public class PuzzleModeConfig extends ModeConfig implements
 
     @Override
     public void handleTouchDrag(MotionEvent event, float x, float y) {
-
         final int action = MotionEventCompat.getActionMasked(event);
         rotationDetector.onTouchEvent(event);
         if (rotationDetector.isRotating()) {

@@ -28,10 +28,10 @@ import java.util.Locale;
 
 import wesley.folz.blowme.R;
 import wesley.folz.blowme.gamemode.ActionModeConfig;
+import wesley.folz.blowme.gamemode.EndlessModeConfig;
 import wesley.folz.blowme.gamemode.MenuModeConfig;
 import wesley.folz.blowme.gamemode.ModeConfig;
 import wesley.folz.blowme.gamemode.PuzzleModeConfig;
-import wesley.folz.blowme.gamemode.TapMode;
 import wesley.folz.blowme.util.ImageAdapter;
 
 public class GamePlayActivity extends Activity
@@ -343,8 +343,8 @@ public class GamePlayActivity extends Activity
 
     private void initializeEndlessMode() {
         currentGameMode = "endless";
-        //gameMode = new EndlessModeConfig(menuMode, surfaceView);
-        gameMode = new TapMode(menuMode, surfaceView);
+        gameMode = new EndlessModeConfig(menuMode, surfaceView);
+        //gameMode = new TapMode(menuMode, surfaceView);
         gameMode.reinitialize();
 
         numLivesView = (TextView) findViewById(R.id.numLivesTextView);
@@ -406,8 +406,8 @@ public class GamePlayActivity extends Activity
         gameRunnable = new Runnable() {
             @Override
             public void run() {
-                //EndlessModeConfig endlessMode = (EndlessModeConfig) gameMode;
-                TapMode endlessMode = (TapMode) gameMode;
+                EndlessModeConfig endlessMode = (EndlessModeConfig) gameMode;
+                //TapMode endlessMode = (TapMode) gameMode;
 
                 scoreTextView.setText(
                         String.format(Locale.getDefault(), "%d", endlessMode.getScore()));

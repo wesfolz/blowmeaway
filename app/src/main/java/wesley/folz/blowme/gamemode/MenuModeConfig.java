@@ -137,7 +137,7 @@ public class MenuModeConfig extends ModeConfig
         background.draw();
         fan.draw();
 
-        //  dispenser.draw();
+        dispenser.draw();
 
         for (FallingObject falObj : fallingObjects)
         {

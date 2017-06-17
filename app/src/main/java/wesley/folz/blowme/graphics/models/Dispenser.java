@@ -1,7 +1,6 @@
 package wesley.folz.blowme.graphics.models;
 
 import android.opengl.Matrix;
-import android.util.Log;
 
 import wesley.folz.blowme.graphics.Border;
 import wesley.folz.blowme.ui.GamePlayActivity;
@@ -15,8 +14,9 @@ public class Dispenser extends Model
     public Dispenser()
     {
         super();
-        xPos = 0;//+.01f;
+        xPos = 1.0f;//GamePlayActivity.X_EDGE_POSITION;//+.01f;
         yPos = 0.935f;//GamePlayActivity.Y_EDGE_POSITION;
+        targetX = 0.0f;
         motionMultiplier = 1;
 
         scaleFactor = 0.2f;
@@ -78,19 +78,32 @@ public class Dispenser extends Model
     @Override
     public boolean initializationRoutine()
     {
-        if (targetX >= Border.XRIGHT) {
-            updatePosition(0, 0);
-            return true;
+        //when first called
+        if (initialTime == 0) {
+            initRoutineDeltaX = targetX - xPos;
+            initialTime = System.nanoTime();
+            prevTime = initialTime;
         }
-        // deltaX = (targetX - xPos)/100.0f;
-        Log.e("json", "deltaX " + deltaX + " target x " + targetX + " xPos " + xPos);
-        initializeCount++;
-        if (initializeCount >= 100) {
+        long time = System.nanoTime();
+        float deltaTime = (time - initialTime) / 1000000000.0f;
+        float littleDelta = (time - prevTime) / 1000000000.0f;
+        prevTime = time;
+
+        //init time not yet expired
+        if (deltaTime < GamePlayActivity.INITIALIZATION_TIME) {
+            deltaX = initRoutineDeltaX * (littleDelta / GamePlayActivity.INITIALIZATION_TIME);
+            xPos += deltaX;
+        }
+        //init time expired
+        else {
             deltaX = 0;
-            xPos = targetX;
-            return true;
+            xPos = this.targetX; //set xPos to target
+            initialTime = 0;
+            //move to target position
+            Matrix.setIdentityM(modelMatrix, 0);
+            Matrix.translateM(modelMatrix, 0, xPos, yPos, 0);
         }
-        return true;
+        return deltaTime >= GamePlayActivity.INITIALIZATION_TIME;
     }
 
     @Override
@@ -101,7 +114,7 @@ public class Dispenser extends Model
 
         if( xPos >= GamePlayActivity.X_EDGE_POSITION )
             motionMultiplier = - 1;
-        if( xPos <= -GamePlayActivity.X_EDGE_POSITION )
+        else if (xPos <= -GamePlayActivity.X_EDGE_POSITION)
             motionMultiplier = 1;
         deltaX *= motionMultiplier;
         xPos += deltaX;//*motionMultiplier;
@@ -115,5 +128,7 @@ public class Dispenser extends Model
 
     private float targetX = Border.XRIGHT;
 
-    private int initializeCount = 0;
+    private long prevTime;
+    private long initialTime = 0;
+    private float initRoutineDeltaX;
 }

@@ -22,7 +22,7 @@ void main()
     float xPos = mod((direction.x + 2.0*deltaT*speed), 2.0);//sin(3.0*deltaT*speed) + 1.0;// - 0.5*speed*sin(8.0*deltaT*speed + speed);
     //float yPos = direction.y + 0.025*sin(20.0*deltaT*xPos) + 0.02*sin(15.0*xPos);// + 0.1*speed*cos(2.0*deltaT*speed + speed);
     float yPos = direction.y + 0.01*sin(45.0*xPos);// + 0.1*speed*cos(2.0*deltaT*speed + speed);
-    float zPos = direction.z;// + 0.1*cos(20.0*xPos);//*deltaT*speed);
+    float zPos = direction.z + 0.1*cos(20.0*xPos);//*deltaT*speed);
 
     pre_X = xPos;
 
