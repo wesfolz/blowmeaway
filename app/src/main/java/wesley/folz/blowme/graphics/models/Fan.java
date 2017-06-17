@@ -92,6 +92,7 @@ public class Fan extends Model
         prevTime = time;
 
         if (deltaTime < GamePlayActivity.INITIALIZATION_TIME) {
+
             parametricX = initRoutineDeltaX * (littleDelta / GamePlayActivity.INITIALIZATION_TIME);
             parametricY = initRoutineDeltaY * (littleDelta / GamePlayActivity.INITIALIZATION_TIME);
 
@@ -99,32 +100,37 @@ public class Fan extends Model
             // .INITIALIZATION_TIME);
             //parametricY = (this.targetY - initRoutineY)*(deltaTime/GamePlayActivity
             // .INITIALIZATION_TIME);
-            xPos += parametricX;
-            yPos += parametricY;
+            //xPos += parametricX;
+            //yPos += parametricY;
             yAngle = (this.targetYAngle - initRoutineYAngle) * (deltaTime
                     / GamePlayActivity.INITIALIZATION_TIME) + initRoutineYAngle;
             inwardRotation = (this.targetZAngle - initRoutineZAngle) * (deltaTime
                     / GamePlayActivity.INITIALIZATION_TIME) + initRoutineZAngle;
+
         } else {
-            parametricX = 0;//this.targetX - xPos;// (Fan.TARGET_X - initRoutineX) - parametricX;
-            parametricY = 0;//this.targetY - yPos;// (Fan.TARGET_Y - initRoutineY) - parametricY;
+            parametricX =
+                    this.targetX - modelMatrix[12];// (Fan.TARGET_X - initRoutineX) - parametricX;
+            parametricY =
+                    this.targetY - modelMatrix[13];// (Fan.TARGET_Y - initRoutineY) - parametricY;
             inwardRotation = this.targetZAngle;
             yAngle = this.targetYAngle;
-            xPos = this.targetX;
-            yPos = this.targetY;
+            //xPos = this.targetX;
+            //yPos = this.targetY;
             initialTime = 0;
             parametricAngle = (float) Math.PI;
             fingerRotation = 0;
             initialized = true;
 
-            Matrix.setIdentityM(modelMatrix, 0);
-            Matrix.translateM(modelMatrix, 0, xPos, yPos, 0);
-            Matrix.setIdentityM(getWind().modelMatrix, 0);
-            Matrix.translateM(getWind().modelMatrix, 0, xPos, yPos, 0);
+            //Matrix.setIdentityM(modelMatrix, 0);
+            //Matrix.translateM(modelMatrix, 0, xPos, yPos, 0);
+            //Matrix.setIdentityM(getWind().modelMatrix, 0);
+            //Matrix.translateM(getWind().modelMatrix, 0, xPos, yPos, 0);
         }
         getWind().updatePosition(parametricX, parametricY);
         getWind().setRotationMatrix(inwardRotation);
 
+        Log.e("initRoutine",
+                "fan ready to move " + (deltaTime >= GamePlayActivity.INITIALIZATION_TIME));
         return deltaTime >= GamePlayActivity.INITIALIZATION_TIME;
     }
 
@@ -177,9 +183,27 @@ public class Fan extends Model
 
         getWind().updatePosition(parametricX, parametricY);
 
+        xPos += parametricX; //newX;
+        yPos += parametricY; //newY;
+
+        getWind().xPos = xPos;
+        getWind().yPos = yPos;
+
+        getBounds().setBounds(xPos - getSize()[0] / 2, yPos - getSize()[1] / 2, xPos + getSize()
+                [0] / 2, yPos + getSize()[1] / 2);
+
         //don't use deltaX, otherwise it can be updated between the moveParametric
         //call and the translateM call
         Matrix.translateM(modelMatrix, 0, parametricX, parametricY, 0);
+
+        //xPos = modelMatrix[12]; //+= parametricX; //newX;
+        //yPos = modelMatrix[13]; //+= parametricY; //newY;
+
+        //Matrix.setIdentityM(modelMatrix, 0);
+        //Matrix.translateM(modelMatrix, 0, xPos, yPos, 0);
+        //Matrix.setIdentityM(getWind().modelMatrix, 0);
+        //Matrix.translateM(getWind().modelMatrix, 0, xPos, yPos, 0);
+
 //        Matrix.translateM(rotationMatrix, 0, xPos, yPos, 0);
 
 
@@ -191,6 +215,7 @@ public class Fan extends Model
         deltaX = 0;
         deltaY = 0;
 
+        //Matrix.multiplyMM(bladeRotation, 0, translationMatrix, 0, rotationMatrix, 0);
         Matrix.multiplyMM(bladeRotation, 0, modelMatrix, 0, rotationMatrix, 0);
 
         //rotate -65 degrees about y-axis
@@ -248,14 +273,17 @@ public class Fan extends Model
 
         parametricX = newX - xPos;
         parametricY = newY - yPos;
-        xPos = newX;
-        yPos = newY;
+
+        /*
+        xPos += parametricX; //newX;
+        yPos += parametricY; //newY;
 
         getWind().xPos = xPos;
         getWind().yPos = yPos;
 
         getBounds().setBounds(xPos - getSize()[0] / 2, yPos - getSize()[1] / 2, xPos + getSize()
                 [0] / 2, yPos + getSize()[1] / 2);
+         */
         //getWind().setBounds( new float[]{-0.4f, -0.25f, 0.4f, 0.25f} );
         //getWind().getBounds().calculateBounds(calculateInwardParametricRotation());
         //getWind().updatePosition(parametricX,parametricY);
@@ -356,10 +384,6 @@ public class Fan extends Model
         calculateInwardParametricRotation();
     }
 
-    public void setInitialized(boolean initialized) {
-        this.initialized = initialized;
-    }
-
     public boolean isBlowing() {
         return blowing;
     }
@@ -398,8 +422,6 @@ public class Fan extends Model
     private float initRoutineYAngle;
 
     private float inwardRotation = 0;
-
-    private boolean initialized = false;
 
     private boolean blowing = true;
 

@@ -78,6 +78,9 @@ public class Dispenser extends Model
     @Override
     public boolean initializationRoutine()
     {
+        if (initialized) {
+            return true;
+        }
         //when first called
         if (initialTime == 0) {
             initRoutineDeltaX = targetX - xPos;
@@ -102,7 +105,9 @@ public class Dispenser extends Model
             //move to target position
             Matrix.setIdentityM(modelMatrix, 0);
             Matrix.translateM(modelMatrix, 0, xPos, yPos, 0);
+            this.initialized = true;
         }
+
         return deltaTime >= GamePlayActivity.INITIALIZATION_TIME;
     }
 
@@ -131,4 +136,5 @@ public class Dispenser extends Model
     private long prevTime;
     private long initialTime = 0;
     private float initRoutineDeltaX;
+
 }

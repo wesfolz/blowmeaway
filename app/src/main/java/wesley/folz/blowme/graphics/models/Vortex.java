@@ -21,16 +21,17 @@ public class Vortex extends Model
         setBounds(new Bounds());
         setSize(new float[]{0.3f, 0.3f});
 
+        visualYOffset = 0.35f;
+
         xPos = x;//+.01f;
         yPos = -1.0f;//0.935f;//GamePlayActivity.Y_EDGE_POSITION;
 
         scaleFactor = 0.04f;
         //     scaleFactor = 0.1f;
 
-
         initialXPos = xPos;
         initialYPos = yPos;
-        yPos = -0.65f;
+        yPos = yPos + visualYOffset;
 
         scaleCount = 1.0f;
 

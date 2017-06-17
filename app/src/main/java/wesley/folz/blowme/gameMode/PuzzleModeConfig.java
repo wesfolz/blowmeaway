@@ -154,12 +154,13 @@ public class PuzzleModeConfig extends ModeConfig implements
     @Override
     protected void initializationRoutine() {
         boolean initialized = true;
-        if (!fanReadyToMove) {
-            for (Model m : models) {
-                initialized &= m.initializationRoutine();
-            }
-            fanReadyToMove = initialized;
+        for (Model m : models) {
+            boolean status = m.initializationRoutine();
+            //Log.e("initRoutine", "ready to move " + status);
+            initialized &= status;
+            //initialized &= m.initializationRoutine();
         }
+        fanReadyToMove = initialized;
         positionsInitialized = initialized & puzzleStarted;
         if (positionsInitialized) {
             startTiming();

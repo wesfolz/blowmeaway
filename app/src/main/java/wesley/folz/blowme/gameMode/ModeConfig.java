@@ -34,7 +34,9 @@ public abstract class ModeConfig
 
     public void reinitialize() {
         fan.setTargets(TARGET_X, TARGET_Y, TARGET_Y_ANGLE, TARGET_Z_ANGLE);
-        fan.setInitialized(false);
+        for (Model m : models) {
+            m.setInitialized(false);
+        }
         positionsInitialized = false;
     }
 
@@ -320,6 +322,7 @@ public abstract class ModeConfig
     public void pauseGame()
     {
         Log.e("pause", "pause mode");
+        fanReadyToMove = false;
         for (Model m : models)
         {
             m.pauseGame();
@@ -329,6 +332,7 @@ public abstract class ModeConfig
     public void resumeGame()
     {
         Log.e("pause", "resume mode");
+        fanReadyToMove = true;
         for (Model m : models)
         {
             m.resumeGame();

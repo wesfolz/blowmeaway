@@ -169,6 +169,8 @@ public abstract class Model
             Matrix.setIdentityM(modelMatrix, 0);
             //translate model to initial position
             Matrix.translateM(modelMatrix, 0, initialXPos, initialYPos, 0);
+            xPos = initialXPos + visualXOffset;
+            yPos = initialYPos + visualYOffset;
         }
     }
 
@@ -245,8 +247,15 @@ public abstract class Model
 
     public boolean initializationRoutine()
     {
+        this.initialized = true;
         return true;
     }
+
+    public void setInitialized(boolean initialized) {
+        this.initialized = initialized;
+    }
+
+    protected boolean initialized = false;
 
     public String fragmentShaderCode;
     public String vertexShaderCode;
@@ -264,6 +273,10 @@ public abstract class Model
     protected float initialXPos;
 
     protected float initialYPos;
+
+    protected float visualXOffset = 0;
+
+    protected float visualYOffset = 0;
 
     protected float[] modelMatrix = new float[16];
 
