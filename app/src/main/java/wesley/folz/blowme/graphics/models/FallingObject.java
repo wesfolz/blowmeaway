@@ -2,6 +2,7 @@ package wesley.folz.blowme.graphics.models;
 
 import android.opengl.Matrix;
 import android.os.SystemClock;
+import android.util.Log;
 
 import java.util.ArrayList;
 
@@ -156,6 +157,14 @@ public class FallingObject extends Model
 
         //counter clockwise rotation
         parametricAngle += arcLength;// / slowdown;
+
+        calculateCollisionVelocity();
+        if (collision == Physics.COLLISION.NONE) {
+            xVelocity = 0;
+            yVelocity = 0;
+        } else {
+            Log.e("collision", "spiral collision");
+        }
 
         deltaX = newX - xPos;
         deltaY = arcLength / 50.0f;
@@ -315,9 +324,44 @@ public class FallingObject extends Model
     {
         for (RicochetObstacle o : obstacles)
         {
+            //find first collision
             collision = Physics.calculateCollision(o.getBounds(), getBounds());
             if (collision != Physics.COLLISION.NONE)
                 break;
+        }
+    }
+
+    private void calculateCollisionVelocity() {
+        float elasticityCoefficient = 0.6f;
+
+        //reflection of falling object off of side border or collision with a RicochetObstacle
+        //if object collides of off right border, xVelocity must be negative
+        if (this.getBounds().getxRight() >= Border.XRIGHT
+                || collision == Physics.COLLISION.RIGHT_LEFT) {
+            xVelocity = -elasticityCoefficient * Math.abs(xVelocity);
+        }
+        //if object collides of off left border, xVelocity must be positive
+        else {
+            if (this.getBounds().getxLeft() <= Border.XLEFT
+                    || collision == Physics.COLLISION.LEFT_RIGHT) {
+                xVelocity = elasticityCoefficient * Math.abs(xVelocity);
+            }
+            //reflection of falling object off of top border, yVelocity must be negative
+            else {
+                if (Physics.isTopBorderCollision(this.getBounds())
+                        || collision == Physics.COLLISION.TOP_BOTTOM) {
+                    yVelocity = -elasticityCoefficient * Math.abs(yVelocity);
+                } else {
+                    if (collision == Physics.COLLISION.BOTTOM_TOP) {
+                        yVelocity = elasticityCoefficient * Math.abs(yVelocity);
+                        //this prevents the object falling through the obstacle
+                        float minVelocity = 1.0f / (MASS * 10);
+                        if (yVelocity < minVelocity) {
+                            yVelocity = minVelocity;
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -338,44 +382,13 @@ public class FallingObject extends Model
         float fallingTime = MASS * deltaTime;
 
         float[] force = Physics.sumOfForces(x, y);
-        float elasticityCoefficient = 0.6f;
 
         xVelocity += force[0] * fallingTime;
         yVelocity += force[1] * fallingTime;
 
-
-        //reflection of falling object off of side border
-        //if object collides of off right border, xVelocity must be negative
-        if (this.getBounds().getxRight() >= Border.XRIGHT || collision == Physics.COLLISION.RIGHT_LEFT)
-        {
-            xVelocity = -elasticityCoefficient * Math.abs(xVelocity);
-        }
-        //if object collides of off left border, xVelocity must be positive
-        else
-        {
-            if (this.getBounds().getxLeft() <= Border.XLEFT || collision == Physics.COLLISION.LEFT_RIGHT)
-            {
-                xVelocity = elasticityCoefficient * Math.abs(xVelocity);
-            }
-            //reflection of falling object off of top border, yVelocity must be negative
-            else
-            {
-                if (Physics.isTopBorderCollision(this.getBounds()) || collision == Physics.COLLISION.TOP_BOTTOM)
-                {
-                    yVelocity = -elasticityCoefficient * Math.abs(yVelocity);
-                }
-                else
-                {
-                    if (collision == Physics.COLLISION.BOTTOM_TOP)
-                    {
-                        yVelocity = elasticityCoefficient * Math.abs(yVelocity);
-                    }
-                }
-            }
-        }
+        calculateCollisionVelocity();
 
         deltaX = fallingTime * xVelocity;
-
         deltaY = fallingTime * yVelocity;
 
         xPos += deltaX;

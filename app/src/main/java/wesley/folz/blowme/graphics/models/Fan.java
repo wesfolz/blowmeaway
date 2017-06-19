@@ -129,8 +129,6 @@ public class Fan extends Model
         getWind().updatePosition(parametricX, parametricY);
         getWind().setRotationMatrix(inwardRotation);
 
-        Log.e("initRoutine",
-                "fan ready to move " + (deltaTime >= GamePlayActivity.INITIALIZATION_TIME));
         return deltaTime >= GamePlayActivity.INITIALIZATION_TIME;
     }
 

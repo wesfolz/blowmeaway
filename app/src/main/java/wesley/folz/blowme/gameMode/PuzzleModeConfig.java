@@ -181,60 +181,13 @@ public class PuzzleModeConfig extends ModeConfig implements
             float xForce = 0;
             float yForce = 0;
 
-            objectEffected = false;
-            Explosion objectExplosion = explosions.get(explosionIndex);
-
-            if (!falObj.isOffscreen()) {
-                for (DestructiveObstacle h : hazards) {
-                    if (Physics.isCollision(h.getBounds(), falObj.getBounds())) {
-                        objectExplosion.reinitialize(falObj.getxPos(), falObj.getyPos());
-                        falObj.setOffscreen(true);
-                        //rotate through all explosions
-                        //this is done to avoid creating new explosion objects during gameplay
-                        //since generating the particles is costly
-                        if (explosionIndex < explosions.size() - 1) {
-                            explosionIndex++;
-                        } else {
-                            explosionIndex = 0;
-                        }
-                        break;
-                    }
-                }
-            }
-
-            if (falObj.isOffscreen() || objectExplosion.isExploding()) {
+            if (falObj.isOffscreen() || destructionInteraction(falObj)) {
                 objectiveFailed = true;
             }
 
-            int vortexCount = 0;
-            for (Vortex vortex : vortexes) {
-                //vortex position - falling object position
-                if (Physics.isCollision(vortex.getBounds(), falObj.getBounds())
-                        || (falObj.isSpiraling() && vortex.isCollecting()
-                        && vortexCount == falObj.getCollectingVortexIndex())) {
-                    vortex.setCollecting(true);
-                    //falObj.travelOnVector(vortex.getxPos() - falObj.getxPos(), vortex.getyPos()
-                    // - falObj.getyPos());
-                    falObj.setCollectingVortexIndex(vortexCount);
-                    if (vortex.getType().equals(falObj.getType())) {
-                        falObj.spiralIntoVortex(vortex.getxPos());
-                    } else {
-                        falObj.spiralOutOfVortex(vortex);
-                    }
-                    objectEffected = true;
-                    break;
-                } else {
-                    vortex.setCollecting(false);
-                }
-                vortexCount++;
-            }
+            objectEffected = vortexInteraction(falObj);
 
-            //falling object is being dispensed
-            if (falObj.getyPos() > 0.95f && !objectEffected) {
-                //falObj.updatePosition(100 * dispenser.getDeltaX(), 0);
-                xForce = 100 * dispenser.getDeltaX();
-                //objectEffected = true;
-            }
+            xForce = dispenseInteraction(falObj, objectEffected);
 
             //determine forces due to collisions with obstacles
             falObj.calculateRicochetCollisions(obstacles);
@@ -244,13 +197,6 @@ public class PuzzleModeConfig extends ModeConfig implements
                 if (Physics.isCollision(f.getWind().getBounds(), falObj.getBounds())
                         && !objectEffected) {
                     Physics.calculateWindForce(f.getWind(), falObj);
-                    //Log.e("wind", "xforce " + fan.getWind().getxForce() + " yforce " + fan
-                    // .getWind().getyForce());
-
-
-                    //Log.e("mode", "wind collision");
-                    //falObj.updatePosition(fan.getWind().getxForce(), fan.getWind()
-                    // .getyForce());
                     xForce += f.getWind().getxForce();
                     yForce += f.getWind().getyForce();
                     //objectEffected = true;

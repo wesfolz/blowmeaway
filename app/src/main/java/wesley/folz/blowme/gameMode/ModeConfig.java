@@ -21,6 +21,7 @@ import wesley.folz.blowme.graphics.models.Vortex;
 import wesley.folz.blowme.ui.GamePlayActivity;
 import wesley.folz.blowme.ui.GamePlaySurfaceView;
 import wesley.folz.blowme.util.GraphicsUtilities;
+import wesley.folz.blowme.util.Physics;
 
 /**
  * Created by Wesley on 9/24/2016.
@@ -188,6 +189,101 @@ public abstract class ModeConfig
         }
         positionsInitialized = initialized;
         fanReadyToMove = positionsInitialized;
+    }
+
+    protected float dispenseInteraction(FallingObject falObj, boolean objectEffected) {
+        float xForce = 0;
+        //falling object is being dispensed
+        if (falObj.getyPos() > 0.95f && !objectEffected) {
+            //falObj.updatePosition(100 * dispenser.getDeltaX(), 0);
+            xForce = 100 * dispenser.getDeltaX();
+            //objectEffected = true;
+        }
+        return xForce;
+    }
+
+
+    protected boolean windInteraction(FallingObject falObj, boolean objectEffected) {
+        boolean windCollision = false;
+        //calculate wind influence
+        if (Physics.isCollision(falObj.getBounds(), fan.getWind().getBounds())
+                && !objectEffected) {
+            Physics.calculateWindForce(fan.getWind(), falObj);
+            windCollision = true;
+        }
+        return windCollision;
+    }
+
+    protected FallingObject offscreenInteraction(FallingObject falObj, int modelCount) {
+        if (falObj.isOffscreen()) {
+            try {
+                models.remove(falObj);
+                //falObj = falObj.getClass().getConstructor(float.class).newInstance
+                // (dispenser.getxPos());
+                String type = falObj.getType();
+                falObj = new FallingObject(type, dispenser.getxPos());
+                fallingObjects.set(modelCount, falObj);
+                falObj.enableGraphics(graphicsData);
+                falObj.initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
+                models.add(falObj);
+            } catch (Exception e) {
+                Log.e("error", e.getMessage());
+            }
+        }
+        return falObj;
+    }
+
+    protected boolean destructionInteraction(FallingObject falObj) {
+        Explosion objectExplosion = explosions.get(explosionIndex);
+
+        boolean didExplode = false;
+
+        if (!falObj.isOffscreen()) {
+            for (DestructiveObstacle h : hazards) {
+                if (Physics.isCollision(h.getBounds(), falObj.getBounds())) {
+                    objectExplosion.reinitialize(falObj.getxPos(), falObj.getyPos());
+                    falObj.setOffscreen(true);
+                    didExplode = true;
+                    //rotate through all explosions
+                    //this is done to avoid creating new explosion objects during gameplay
+                    //since generating the particles is costly
+                    if (explosionIndex < explosions.size() - 1) {
+                        explosionIndex++;
+                    } else {
+                        explosionIndex = 0;
+                    }
+                    break;
+                }
+            }
+        }
+        return didExplode;
+    }
+
+    protected boolean vortexInteraction(FallingObject falObj) {
+        boolean objectEffected = false;
+        int vortexCount = 0;
+        for (Vortex vortex : vortexes) {
+            //vortex position - falling object position
+            if (Physics.isCollision(vortex.getBounds(), falObj.getBounds())
+                    || (falObj.isSpiraling() && vortex.isCollecting()
+                    && vortexCount == falObj.getCollectingVortexIndex())) {
+                vortex.setCollecting(true);
+                //falObj.travelOnVector(vortex.getxPos() - falObj.getxPos(), vortex.getyPos()
+                // - falObj.getyPos());
+                falObj.setCollectingVortexIndex(vortexCount);
+                if (vortex.getType().equals(falObj.getType())) {
+                    falObj.spiralIntoVortex(vortex.getxPos());
+                } else {
+                    falObj.spiralOutOfVortex(vortex);
+                }
+                objectEffected = true;
+                break;
+            } else {
+                vortex.setCollecting(false);
+            }
+            vortexCount++;
+        }
+        return objectEffected;
     }
 
     public void updatePositionsAndDrawModels()
