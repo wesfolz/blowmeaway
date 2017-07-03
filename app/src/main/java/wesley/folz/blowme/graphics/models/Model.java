@@ -255,6 +255,16 @@ public abstract class Model
         this.initialized = initialized;
     }
 
+    public void setOffscreen(boolean offscreen) {
+        this.offscreen = offscreen;
+    }
+
+    public boolean isOffscreen() {
+        return offscreen;
+    }
+
+    protected boolean offscreen;
+
     protected boolean initialized = false;
 
     public String fragmentShaderCode;

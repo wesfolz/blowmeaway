@@ -110,10 +110,11 @@ public class FallingObject extends Model
         return deltaY;
     }
 
+    @Override
     public boolean isOffscreen()
     {
 //        return false;
-        return collectedCount >= 10 || this.getBounds().getyTop() < Border.YBOTTOM || offscreen;
+        return (collectedCount >= 10 || this.getBounds().getyTop() < Border.YBOTTOM || offscreen);
     }
 
     @Override
@@ -129,6 +130,8 @@ public class FallingObject extends Model
         float vortexX = vortex.getxPos();
         if (!spiraling)
         {
+            spiralOut = true;
+            spiraling = true;
             spiralY = yPos;
             spiralTime = System.currentTimeMillis();
             initialRadius = vortex.getSize()[0] / 2.0f;//Math.abs(xPos - vortexX);
@@ -158,23 +161,22 @@ public class FallingObject extends Model
         //counter clockwise rotation
         parametricAngle += arcLength;// / slowdown;
 
-        calculateCollisionVelocity();
-        if (collision == Physics.COLLISION.NONE) {
+/*
+        if (!calculateCollisionVelocity()) {
             xVelocity = 0;
             yVelocity = 0;
         } else {
-            Log.e("collision", "spiral collision");
+            Log.e("collision", "spiral collision ");
         }
-
-        deltaX = newX - xPos;
-        deltaY = arcLength / 50.0f;
+*/
+        deltaX = newX - xPos;// + 10*xVelocity;
+        deltaY = arcLength / 50.0f;// - 2*yVelocity;
         deltaZ = newZ - zPos;
-        xPos = newX;//xPos + deltaX;
+        xPos = newX;// + 10*xVelocity;//xPos + deltaX;
         //yPos += deltaY;
         spiralY += deltaY;
         zPos = newZ;//zPos + deltaZ;
-
-        spiraling = true;
+        Log.e("collision", "spiral y pos " + yPos);
 
         //move inwards
         spiralCount++;
@@ -206,10 +208,12 @@ public class FallingObject extends Model
                 yPos = spiralY;
                 spiralY = 0;
                 spiraling = false;
+                spiralOut = false;
                 vortex.setCollecting(false);
                 spiralFactor = 0;
                 parametricAngle = 0;
                 yVelocity = 0;
+                xVelocity = 0;
                 previousTime = System.nanoTime();
                 //travelOnVector(0, 0.001f);
             }
@@ -218,11 +222,11 @@ public class FallingObject extends Model
         getBounds().setBounds(xPos - scaleFactor, yPos - scaleFactor, xPos + scaleFactor, yPos + scaleFactor);
     }
 
-
     public void spiralIntoVortex(float vortexX)
     {
         if (!spiraling)
         {
+            spiraling = true;
             spiralTime = System.currentTimeMillis();
             initialRadius = Math.abs(xPos - vortexX);
             if (xPos - vortexX > 0)
@@ -287,13 +291,10 @@ public class FallingObject extends Model
                 travelOnVector(0, 0.001f);
             }
         }
-        spiraling = true;
-
         getBounds().setBounds(xPos - scaleFactor, yPos - scaleFactor, xPos + scaleFactor, yPos + scaleFactor);
     }
 
-
-    public void travelOnVector(float xComponent, float yComponent)
+    private void travelOnVector(float xComponent, float yComponent)
     {
         float time = (System.nanoTime() - previousTime) / 1000000000.0f;
         previousTime = System.nanoTime();
@@ -331,38 +332,51 @@ public class FallingObject extends Model
         }
     }
 
-    private void calculateCollisionVelocity() {
+    private boolean calculateCollisionVelocity() {
         float elasticityCoefficient = 0.6f;
+        boolean didCollide = true;
 
         //reflection of falling object off of side border or collision with a RicochetObstacle
         //if object collides of off right border, xVelocity must be negative
         if (this.getBounds().getxRight() >= Border.XRIGHT
                 || collision == Physics.COLLISION.RIGHT_LEFT) {
+            Log.e("collision", "RIGHT_LEFT if true right border if false " + (collision
+                    == Physics.COLLISION.RIGHT_LEFT));
             xVelocity = -elasticityCoefficient * Math.abs(xVelocity);
         }
         //if object collides of off left border, xVelocity must be positive
         else {
             if (this.getBounds().getxLeft() <= Border.XLEFT
                     || collision == Physics.COLLISION.LEFT_RIGHT) {
+                Log.e("collision", "LEFT_RIGHT if true left border if false " + (collision
+                        == Physics.COLLISION.LEFT_RIGHT));
                 xVelocity = elasticityCoefficient * Math.abs(xVelocity);
             }
             //reflection of falling object off of top border, yVelocity must be negative
             else {
                 if (Physics.isTopBorderCollision(this.getBounds())
                         || collision == Physics.COLLISION.TOP_BOTTOM) {
+                    Log.e("collision", "TOP_BOTTOM if true top border if false " + (collision
+                            == Physics.COLLISION.TOP_BOTTOM));
                     yVelocity = -elasticityCoefficient * Math.abs(yVelocity);
                 } else {
                     if (collision == Physics.COLLISION.BOTTOM_TOP) {
+                        Log.e("collision", "BOTTOM_TOP if true bottom border if false " + (collision
+                                == Physics.COLLISION.BOTTOM_TOP));
+
                         yVelocity = elasticityCoefficient * Math.abs(yVelocity);
                         //this prevents the object falling through the obstacle
                         float minVelocity = 1.0f / (MASS * 10);
                         if (yVelocity < minVelocity) {
                             yVelocity = minVelocity;
                         }
+                    } else {
+                        didCollide = false;
                     }
                 }
             }
         }
+        return didCollide;
     }
 
     /**
@@ -412,11 +426,6 @@ public class FallingObject extends Model
         this.collectingVortexIndex = collectingVortexIndex;
     }
 
-    public void setOffscreen(boolean offscreen)
-    {
-        this.offscreen = offscreen;
-    }
-
     public boolean isCollected()
     {
         return collected;
@@ -449,26 +458,13 @@ public class FallingObject extends Model
 
     private float yVelocity;
 
-    private static final float MASS = 2.0f;
+    private static final float MASS = 1.5f;
 
     private float stretchX = 1.0f;
 
     private float stretchY = 1.0f;
 
     private Physics.COLLISION collision;
-
-    public void setInitialY(float initialY)
-    {
-        this.initialY = initialY;
-    }
-
-    public void setInitialX(float initialX)
-    {
-        this.initialX = initialX;
-    }
-
-    private float initialX;
-    private float initialY;
 
     private float parametricAngle = 0;
     private float spiralFactor = 0;
@@ -486,11 +482,11 @@ public class FallingObject extends Model
 
     private int collectingVortexIndex = -1;
 
-    private boolean offscreen = false;
-
     private String type;
 
     private float spiralY = 0;
 
     private boolean firstUpdate = true;
+
+    private boolean spiralOut = false;
 }

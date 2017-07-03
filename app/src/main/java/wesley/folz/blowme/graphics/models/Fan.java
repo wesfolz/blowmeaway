@@ -56,7 +56,6 @@ public class Fan extends Model
         programHandle = graphicsData.shaderProgramIdMap.get("texture");
         textureDataHandle = graphicsData.textureIdMap.get("fan_test");
         getWind().enableGraphics(graphicsData);
-        getWind().wBounds.enableGraphics(graphicsData);
     }
 
     @Override
@@ -64,7 +63,6 @@ public class Fan extends Model
     {
         super.initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
         getWind().initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
-        getWind().wBounds.initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
     }
 
     @Override
@@ -365,6 +363,10 @@ public class Fan extends Model
     public void setWind(Wind wind)
     {
         this.wind = wind;
+    }
+
+    public float getInwardRotation() {
+        return inwardRotation;
     }
 
     public void setInitialY(float initialY)

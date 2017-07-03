@@ -31,7 +31,8 @@ public class Dispenser extends Model
         dataVBO = graphicsData.modelVBOMap.get("dispenser");
         orderVBO = graphicsData.orderVBOMap.get("dispenser");
         numVertices = graphicsData.numVerticesMap.get("dispenser");
-        programHandle = graphicsData.shaderProgramIdMap.get("lighting");
+        programHandle = graphicsData.shaderProgramIdMap.get("texture");
+        textureDataHandle = graphicsData.textureIdMap.get("fan_test");
     }
 
     @Override

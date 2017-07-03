@@ -11,6 +11,7 @@ import wesley.folz.blowme.graphics.Border;
 import wesley.folz.blowme.graphics.effects.Explosion;
 import wesley.folz.blowme.graphics.models.DestructiveObstacle;
 import wesley.folz.blowme.graphics.models.FallingObject;
+import wesley.folz.blowme.graphics.models.Missile;
 import wesley.folz.blowme.graphics.models.Model;
 import wesley.folz.blowme.graphics.models.RicochetObstacle;
 import wesley.folz.blowme.graphics.models.Vortex;
@@ -26,11 +27,6 @@ public class EndlessModeConfig extends ModeConfig implements
 {
     public EndlessModeConfig(ModeConfig mode, GamePlaySurfaceView surfaceView) {
         models = new ArrayList<>();
-        obstacles = new ArrayList<>();
-        fallingObjects = new ArrayList<>();
-        explosions = new ArrayList<>();
-        vortexes = new ArrayList<>();
-        hazards = new ArrayList<>();
 
         initializeFromExistingMode(mode, null);
         //Log.e("json", "fanx " + fan.getxPos() + " fany " + fan.getyPos());
@@ -58,11 +54,12 @@ public class EndlessModeConfig extends ModeConfig implements
         int numRicochetObstacles = 2;
         int numDestructiveObstacles = 2;
         int numFallingObjects = 2;
-        int numRings = 1;
-        int numCubes = 1;
+        int numRings = 0;
+        int numCubes = 0;
         int numVortexes = 2;
         int numRingVortexes = 1;
         int numCubeVortexes = 1;
+        int numMissiles = 1;
         numCubesRemaining = 1;
         numRingsRemaining = 1;
         models = new ArrayList<>();
@@ -71,6 +68,7 @@ public class EndlessModeConfig extends ModeConfig implements
         explosions = new ArrayList<>();
         vortexes = new ArrayList<>();
         hazards = new ArrayList<>();
+        missiles = new ArrayList<>();
 
         //fan = new Fan();
         models.add(fan);
@@ -87,7 +85,7 @@ public class EndlessModeConfig extends ModeConfig implements
             fallingObjects.add(fo);
         }
 
-        for (int i = 0; i < numFallingObjects; i++) {
+        for (int i = 0; i < numFallingObjects + numMissiles; i++) {
             Explosion explosion = new Explosion();
             models.add(explosion);
             explosions.add(explosion);
@@ -111,6 +109,12 @@ public class EndlessModeConfig extends ModeConfig implements
             DestructiveObstacle destObj = new DestructiveObstacle(xLoc, pos[1]);
             models.add(destObj);
             hazards.add(destObj);
+        }
+
+        for (int i = 0; i < numMissiles; i++) {
+            Missile m = new Missile(-0.5f, 0);
+            models.add(m);
+            missiles.add(m);
         }
 
         //create array list of different vortex type strings
@@ -153,6 +157,10 @@ public class EndlessModeConfig extends ModeConfig implements
 
     @Override
     protected void updateModelPositions() {
+        float xForce;
+        float yForce;
+        int modelCount = 0;
+
         background.updatePosition(0, 0);
 
         //fan.updatePosition(0, 0);
@@ -160,12 +168,40 @@ public class EndlessModeConfig extends ModeConfig implements
 
         dispenser.updatePosition(0, 0);
 
+        for (Missile m : missiles) {
+            xForce = 0;
+            yForce = 0;
+
+            if (m.isOffscreen()) {
+                models.remove(m);
+                float pos[] = generateRandomLocation();
+                float x;
+                if (Math.random() > 0.5) {
+                    x = -0.56f;//Border.XLEFT;
+                } else {
+                    x = 0.56f;//Border.XRIGHT;
+                }
+                m = new Missile(x, pos[1]);
+                missiles.set(modelCount, m);
+                m.enableGraphics(graphicsData);
+                m.initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
+                models.add(m);
+            } else {
+                if (windInteraction(m, false)) {
+                    xForce = fan.getWind().getxForce();
+                    yForce = fan.getWind().getyForce();
+                }
+                m.updatePosition(xForce, yForce);
+            }
+        }
+
         for (Vortex v : vortexes) {
             v.updatePosition(0, 0);
         }
 
-        int modelCount = 0;
+        modelCount = 0;
         for (RicochetObstacle o : obstacles) {
+            missileInteraction(o);
             if (o.isOffscreen()) {
                 models.remove(o);
                 float pos[] = generateRandomLocation();
@@ -182,6 +218,7 @@ public class EndlessModeConfig extends ModeConfig implements
 
         modelCount = 0;
         for (DestructiveObstacle h : hazards) {
+            missileInteraction(h);
             if (h.isOffscreen()) {
                 models.remove(h);
                 float pos[] = generateRandomLocation();
@@ -205,10 +242,10 @@ public class EndlessModeConfig extends ModeConfig implements
         boolean objectEffected;
         modelCount = 0;
         for (FallingObject falObj : fallingObjects) {
-            float xForce = 0;
-            float yForce = 0;
+            xForce = 0;
+            yForce = 0;
 
-            if (destructionInteraction(falObj)) {
+            if (destructionInteraction(falObj) || missileInteraction(falObj)) {
                 numLives--;
             }
 

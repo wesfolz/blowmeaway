@@ -15,6 +15,7 @@ import wesley.folz.blowme.graphics.models.DestructiveObstacle;
 import wesley.folz.blowme.graphics.models.Dispenser;
 import wesley.folz.blowme.graphics.models.FallingObject;
 import wesley.folz.blowme.graphics.models.Fan;
+import wesley.folz.blowme.graphics.models.Missile;
 import wesley.folz.blowme.graphics.models.Model;
 import wesley.folz.blowme.graphics.models.RicochetObstacle;
 import wesley.folz.blowme.graphics.models.Vortex;
@@ -54,6 +55,10 @@ public abstract class ModeConfig
         //graphicsData.storeModelData("fan", R.raw.uv_fan);
         graphicsData.storeModelData("fan", R.raw.fan_orig);
         graphicsData.storeModelData("vortex", R.raw.uv_vortex);
+
+        graphicsData.storeModelData("missile", R.raw.missile);
+
+        graphicsData.storeTexture("missile_tex", R.drawable.colored_missile_texture);
 
         graphicsData.storeTexture("yellow_circle", R.drawable.yellow_circle);
         graphicsData.storeTexture("sky", R.drawable.sky_texture);
@@ -203,7 +208,7 @@ public abstract class ModeConfig
     }
 
 
-    protected boolean windInteraction(FallingObject falObj, boolean objectEffected) {
+    protected boolean windInteraction(Model falObj, boolean objectEffected) {
         boolean windCollision = false;
         //calculate wind influence
         if (Physics.isCollision(falObj.getBounds(), fan.getWind().getBounds())
@@ -216,6 +221,7 @@ public abstract class ModeConfig
 
     protected FallingObject offscreenInteraction(FallingObject falObj, int modelCount) {
         if (falObj.isOffscreen()) {
+            Log.e("collision", "offscreen " + falObj.getType());
             try {
                 models.remove(falObj);
                 //falObj = falObj.getClass().getConstructor(float.class).newInstance
@@ -233,16 +239,42 @@ public abstract class ModeConfig
         return falObj;
     }
 
-    protected boolean destructionInteraction(FallingObject falObj) {
+    protected boolean missileInteraction(Model model) {
+        Explosion objectExplosion = explosions.get(explosionIndex);
+        boolean didExplode = false;
+
+        if (!model.isOffscreen()) {
+            for (Missile m : missiles) {
+                if (Physics.isCollision(m.getBounds(), model.getBounds())) {
+                    objectExplosion.reinitialize(model.getxPos(), model.getyPos());
+                    model.setOffscreen(true);
+                    m.setOffscreen(true);
+                    didExplode = true;
+                    //rotate through all explosions
+                    //this is done to avoid creating new explosion objects during gameplay
+                    //since generating the particles is costly
+                    if (explosionIndex < explosions.size() - 1) {
+                        explosionIndex++;
+                    } else {
+                        explosionIndex = 0;
+                    }
+                    break;
+                }
+            }
+        }
+        return didExplode;
+    }
+
+    protected boolean destructionInteraction(Model model) {
         Explosion objectExplosion = explosions.get(explosionIndex);
 
         boolean didExplode = false;
 
-        if (!falObj.isOffscreen()) {
+        if (!model.isOffscreen()) {
             for (DestructiveObstacle h : hazards) {
-                if (Physics.isCollision(h.getBounds(), falObj.getBounds())) {
-                    objectExplosion.reinitialize(falObj.getxPos(), falObj.getyPos());
-                    falObj.setOffscreen(true);
+                if (Physics.isCollision(h.getBounds(), model.getBounds())) {
+                    objectExplosion.reinitialize(model.getxPos(), model.getyPos());
+                    model.setOffscreen(true);
                     didExplode = true;
                     //rotate through all explosions
                     //this is done to avoid creating new explosion objects during gameplay
@@ -263,6 +295,9 @@ public abstract class ModeConfig
         boolean objectEffected = false;
         int vortexCount = 0;
         for (Vortex vortex : vortexes) {
+            //Log.e("collision", "is collision " + Physics.isCollision(vortex.getBounds(), falObj
+            // .getBounds()) + " spiraling "
+            //       + falObj.isSpiraling());
             //vortex position - falling object position
             if (Physics.isCollision(vortex.getBounds(), falObj.getBounds())
                     || (falObj.isSpiraling() && vortex.isCollecting()
@@ -274,6 +309,7 @@ public abstract class ModeConfig
                 if (vortex.getType().equals(falObj.getType())) {
                     falObj.spiralIntoVortex(vortex.getxPos());
                 } else {
+                    Log.e("collision", "spiraling");
                     falObj.spiralOutOfVortex(vortex);
                 }
                 objectEffected = true;
@@ -316,6 +352,10 @@ public abstract class ModeConfig
         for (DestructiveObstacle h : hazards)
         {
             h.draw();
+        }
+
+        for (Missile m : missiles) {
+            m.draw();
         }
 
         for (FallingObject falObj : fallingObjects)
@@ -482,6 +522,7 @@ public abstract class ModeConfig
     ArrayList<FallingObject> fallingObjects;
     ArrayList<Explosion> explosions;
     ArrayList<Vortex> vortexes;
+    ArrayList<Missile> missiles;
 
     protected Fan fan;
     protected Background background;

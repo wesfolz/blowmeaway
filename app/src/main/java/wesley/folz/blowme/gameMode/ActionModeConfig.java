@@ -34,6 +34,7 @@ public class ActionModeConfig extends ModeConfig
         hazards = new ArrayList<>();
         obstaclesInQueue = new ArrayList<>();
         hazardsInQueue = new ArrayList<>();
+        missiles = new ArrayList<>();
 
         initializeFromExistingMode(mode, null);
         //Log.e("json", "fanx " + fan.getxPos() + " fany " + fan.getyPos());

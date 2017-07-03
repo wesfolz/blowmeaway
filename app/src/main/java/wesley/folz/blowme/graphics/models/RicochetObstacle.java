@@ -94,9 +94,10 @@ public class RicochetObstacle extends Model
         this.time = time;
     }
 
+    @Override
     public boolean isOffscreen()
     {
-        return this.getBounds().getyBottom() > Border.YTOP;
+        return this.getBounds().getyBottom() > Border.YTOP || offscreen;
     }
 
     private float deltaY;
