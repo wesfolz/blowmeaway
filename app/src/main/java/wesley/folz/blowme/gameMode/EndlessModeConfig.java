@@ -54,8 +54,8 @@ public class EndlessModeConfig extends ModeConfig implements
         int numRicochetObstacles = 2;
         int numDestructiveObstacles = 2;
         int numFallingObjects = 2;
-        int numRings = 0;
-        int numCubes = 0;
+        int numRings = 1;
+        int numCubes = 1;
         int numVortexes = 2;
         int numRingVortexes = 1;
         int numCubeVortexes = 1;
@@ -112,7 +112,7 @@ public class EndlessModeConfig extends ModeConfig implements
         }
 
         for (int i = 0; i < numMissiles; i++) {
-            Missile m = new Missile(-0.5f, 0);
+            Missile m = new Missile(-0.5f, 0.5f);
             models.add(m);
             missiles.add(m);
         }

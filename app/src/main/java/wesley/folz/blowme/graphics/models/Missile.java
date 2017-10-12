@@ -113,8 +113,8 @@ public class Missile extends Model {
         long time = System.nanoTime();
         float deltaTime = (time - previousTime) / 1000000000.0f;
         previousTime = time;//System.nanoTime();
+        /*
         float displacementTime = INITIAL_VELOCITY * deltaTime;
-
         xDirection -= x;
         yDirection -= y;
 
@@ -123,6 +123,19 @@ public class Missile extends Model {
 
         deltaX = displacementTime * xVelocity;
         deltaY = displacementTime * yVelocity;
+        */
+        xDirection -= x;
+        yDirection -= y;
+        xVelocity = -INITIAL_VELOCITY * xDirection;
+        yVelocity = -INITIAL_VELOCITY * yDirection;
+        float velocity = (float) Math.sqrt(xVelocity * xVelocity + yVelocity * yVelocity);
+        float acceleration =
+                INITIAL_ACCELERATION;//1aqMath.max(0, INITIAL_ACCELERATION -
+        // KINETIC_FRICTION*velocity);
+        deltaX = (INITIAL_VELOCITY * deltaTime + 0.5f * acceleration * deltaTime * deltaTime) * (
+                xVelocity / velocity);
+        deltaY = (INITIAL_VELOCITY * deltaTime + 0.5f * acceleration * deltaTime * deltaTime) * (
+                yVelocity / velocity);
 
         xPos += deltaX;
         yPos += deltaY;
@@ -147,7 +160,10 @@ public class Missile extends Model {
 
     private boolean firstUpdate = true;
 
-    private static final float INITIAL_VELOCITY = 0.85f;
+    private static final float INITIAL_VELOCITY = 0.1f;
+    private static final float INITIAL_ACCELERATION = 80.0f;
+    private static final float KINETIC_FRICTION = 8.0f;
+
 
     private MissileTrail trail;
 }
