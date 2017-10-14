@@ -207,7 +207,6 @@ public abstract class ModeConfig
         return xForce;
     }
 
-
     protected boolean windInteraction(Model falObj, boolean objectEffected) {
         boolean windCollision = false;
         //calculate wind influence
@@ -291,35 +290,28 @@ public abstract class ModeConfig
         return didExplode;
     }
 
-    protected boolean vortexInteraction(FallingObject falObj) {
-        boolean objectEffected = false;
+    protected void vortexInteraction(FallingObject falObj) {
         int vortexCount = 0;
         for (Vortex vortex : vortexes) {
-            //Log.e("collision", "is collision " + Physics.isCollision(vortex.getBounds(), falObj
-            // .getBounds()) + " spiraling "
-            //       + falObj.isSpiraling());
-            //vortex position - falling object position
             if (Physics.isCollision(vortex.getBounds(), falObj.getBounds())
-                    || (falObj.isSpiraling() && vortex.isCollecting()
+                    || (falObj.isSpiralIn() && vortex.isCollecting()
                     && vortexCount == falObj.getCollectingVortexIndex())) {
                 vortex.setCollecting(true);
-                //falObj.travelOnVector(vortex.getxPos() - falObj.getxPos(), vortex.getyPos()
-                // - falObj.getyPos());
+
                 falObj.setCollectingVortexIndex(vortexCount);
                 if (vortex.getType().equals(falObj.getType())) {
-                    falObj.spiralIntoVortex(vortex.getxPos());
+                    falObj.setSpiralIn(true, vortex);
+                    //falObj.spiralIntoVortex(vortex.getxPos());
                 } else {
-                    Log.e("collision", "spiraling");
-                    falObj.spiralOutOfVortex(vortex);
+                    falObj.setSpiralOut(true, vortex);
+                    //xForce = falObj.spiralOutOfVortex(vortex);
                 }
-                objectEffected = true;
                 break;
             } else {
                 vortex.setCollecting(false);
             }
             vortexCount++;
         }
-        return objectEffected;
     }
 
     public void updatePositionsAndDrawModels()

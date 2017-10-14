@@ -52,14 +52,14 @@ public class EndlessModeConfig extends ModeConfig implements
     @Override
     protected void initializeGameObjects() {
         int numRicochetObstacles = 2;
-        int numDestructiveObstacles = 2;
+        int numDestructiveObstacles = 0;
         int numFallingObjects = 2;
         int numRings = 1;
         int numCubes = 1;
         int numVortexes = 2;
         int numRingVortexes = 1;
         int numCubeVortexes = 1;
-        int numMissiles = 1;
+        int numMissiles = 0;
         numCubesRemaining = 1;
         numRingsRemaining = 1;
         models = new ArrayList<>();
@@ -239,10 +239,9 @@ public class EndlessModeConfig extends ModeConfig implements
             modelCount++;
         }
 
-        boolean objectEffected;
+        boolean objectEffected = false;
         modelCount = 0;
         for (FallingObject falObj : fallingObjects) {
-            xForce = 0;
             yForce = 0;
 
             if (destructionInteraction(falObj) || missileInteraction(falObj)) {
@@ -254,7 +253,7 @@ public class EndlessModeConfig extends ModeConfig implements
             //determine forces due to collisions with obstacles
             falObj.calculateRicochetCollisions(obstacles);
 
-            objectEffected = vortexInteraction(falObj);
+            vortexInteraction(falObj);
 
             xForce = dispenseInteraction(falObj, objectEffected);
 
@@ -263,9 +262,9 @@ public class EndlessModeConfig extends ModeConfig implements
                 yForce = fan.getWind().getyForce();
             }
 
-            if (!falObj.isSpiraling()) {
-                falObj.updatePosition(xForce, yForce);
-            }
+
+            falObj.updatePosition(xForce, yForce);
+
             if (falObj.isCollected()) {
                 falObj.setCollected(false);
                 score++;

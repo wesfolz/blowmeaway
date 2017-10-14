@@ -3,6 +3,7 @@ package wesley.folz.blowme.ui;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ConfigurationInfo;
 import android.graphics.Point;
 import android.os.Bundle;
@@ -32,6 +33,7 @@ import wesley.folz.blowme.gamemode.EndlessModeConfig;
 import wesley.folz.blowme.gamemode.MenuModeConfig;
 import wesley.folz.blowme.gamemode.ModeConfig;
 import wesley.folz.blowme.gamemode.PuzzleModeConfig;
+import wesley.folz.blowme.sound.BackgroundMusic;
 import wesley.folz.blowme.util.ImageAdapter;
 
 public class GamePlayActivity extends Activity
@@ -95,6 +97,9 @@ public class GamePlayActivity extends Activity
         WIDTH = p.x;
         HEIGHT = p.y;
 
+        Intent objIntent = new Intent(this, BackgroundMusic.class);
+        startService(objIntent);
+
         //Log.e( "blowme", "WIDTH " + WIDTH + " HEIGHT " + HEIGHT );
 
         if( supportsEs2 )
@@ -133,6 +138,8 @@ public class GamePlayActivity extends Activity
         if (resultsWindow != null) {
             resultsWindow.dismiss();
         }
+        Intent objIntent = new Intent(this, BackgroundMusic.class);
+        stopService(objIntent);
     }
 
     @Override
@@ -140,6 +147,8 @@ public class GamePlayActivity extends Activity
         super.onResume();
         Log.e("appflow", "onResume");
         surfaceView.onResume();
+        Intent objIntent = new Intent(this, BackgroundMusic.class);
+        startService(objIntent);
     }
 
     @Override

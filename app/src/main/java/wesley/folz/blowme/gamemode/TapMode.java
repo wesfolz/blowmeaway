@@ -271,16 +271,16 @@ public class TapMode extends ModeConfig {
             for (Vortex vortex : vortexes) {
                 //vortex position - falling object position
                 if (Physics.isCollision(vortex.getBounds(), falObj.getBounds())
-                        || (falObj.isSpiraling() && vortex.isCollecting()
+                        || (falObj.isSpiralIn() && vortex.isCollecting()
                         && vortexCount == falObj.getCollectingVortexIndex())) {
                     vortex.setCollecting(true);
                     //falObj.travelOnVector(vortex.getxPos() - falObj.getxPos(), vortex.getyPos()
                     // - falObj.getyPos());
                     falObj.setCollectingVortexIndex(vortexCount);
                     if (vortex.getType().equals(falObj.getType())) {
-                        falObj.spiralIntoVortex(vortex.getxPos());
+                        falObj.setSpiralIn(true, vortex);
                     } else {
-                        falObj.spiralOutOfVortex(vortex);
+                        falObj.setSpiralOut(true, vortex);
                     }
                     objectEffected = true;
                     break;
@@ -318,9 +318,8 @@ public class TapMode extends ModeConfig {
                 }
             }
 
-            if (!falObj.isSpiraling()) {
-                falObj.updatePosition(xForce, yForce);
-            }
+            falObj.updatePosition(xForce, yForce);
+
             if (falObj.isCollected()) {
                 falObj.setCollected(false);
                 score++;

@@ -175,7 +175,7 @@ public class PuzzleModeConfig extends ModeConfig implements
             v.updatePosition(0, 0);
         }
 
-        boolean objectEffected;
+        boolean objectEffected = false;
 
         for (FallingObject falObj : fallingObjects) {
             float xForce = 0;
@@ -185,7 +185,7 @@ public class PuzzleModeConfig extends ModeConfig implements
                 objectiveFailed = true;
             }
 
-            objectEffected = vortexInteraction(falObj);
+            vortexInteraction(falObj);
 
             xForce = dispenseInteraction(falObj, objectEffected);
 
@@ -202,9 +202,9 @@ public class PuzzleModeConfig extends ModeConfig implements
                     //objectEffected = true;
                 }
             }
-            if (!falObj.isSpiraling()) {
-                falObj.updatePosition(xForce, yForce);
-            }
+
+            falObj.updatePosition(xForce, yForce);
+
             if (falObj.isCollected()) {
                 falObj.setCollected(false);
                 if (numObjectsRemaining > 0) {

@@ -206,7 +206,7 @@ public class ActionModeConfig extends ModeConfig
             }
         }
 
-        boolean objectEffected;
+        boolean objectEffected = false;
         int modelCount = 0;
         for (FallingObject falObj : fallingObjects) {
             float xForce = 0;
@@ -216,7 +216,7 @@ public class ActionModeConfig extends ModeConfig
 
             falObj = offscreenInteraction(falObj, modelCount);
 
-            objectEffected = vortexInteraction(falObj);
+            vortexInteraction(falObj);
 
             xForce = dispenseInteraction(falObj, objectEffected);
 
@@ -228,9 +228,8 @@ public class ActionModeConfig extends ModeConfig
                 yForce = fan.getWind().getyForce();
             }
 
-            if (!falObj.isSpiraling()) {
-                falObj.updatePosition(xForce, yForce);
-            }
+            falObj.updatePosition(xForce, yForce);
+
             if (falObj.isCollected()) {
                 falObj.setCollected(false);
                 switch (falObj.getType()) {

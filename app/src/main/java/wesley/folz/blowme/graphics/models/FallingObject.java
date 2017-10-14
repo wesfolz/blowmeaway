@@ -125,16 +125,15 @@ public class FallingObject extends Model
         spiralTime = System.currentTimeMillis();
     }
 
-    public void spiralOutOfVortex(Vortex vortex)
+    private void spiralOutOfVortex()
     {
-        float vortexX = vortex.getxPos();
+        float vortexX = spiralVortex.getxPos();
         if (!spiraling)
         {
-            spiralOut = true;
             spiraling = true;
             spiralY = yPos;
             spiralTime = System.currentTimeMillis();
-            initialRadius = vortex.getSize()[0] / 2.0f;//Math.abs(xPos - vortexX);
+            initialRadius = spiralVortex.getSize()[0] / 2.0f;//Math.abs(xPos - vortexX);
             if (xPos - vortexX > 0)
             {
                 initialAngle = 0;
@@ -152,31 +151,25 @@ public class FallingObject extends Model
         float spiralIncrement = arcLength / 50.0f;//0.01f;
 
         float radius = initialRadius - spiralFactor;
-        float newX;
-        float newZ;
+        float prevX = radius * (float) Math.cos(parametricAngle - arcLength + initialAngle)
+                + vortexX;
 
-        newX = radius * (float) Math.cos(parametricAngle + initialAngle) + vortexX;
-        newZ = radius * (float) Math.sin(parametricAngle + initialAngle);
+        float xShift = (parametricAngle == 0) ? 0 : (xPos - prevX);
+
+        float newX = radius * (float) Math.cos(parametricAngle + initialAngle) + vortexX + xShift;
+        float newZ = radius * (float) Math.sin(parametricAngle + initialAngle);
 
         //counter clockwise rotation
         parametricAngle += arcLength;// / slowdown;
 
-/*
-        if (!calculateCollisionVelocity()) {
-            xVelocity = 0;
-            yVelocity = 0;
-        } else {
-            Log.e("collision", "spiral collision ");
-        }
-*/
-        deltaX = newX - xPos;// + 10*xVelocity;
-        deltaY = arcLength / 50.0f;// - 2*yVelocity;
+        Log.e("spiral", "spiral factor " + spiralFactor);
+        xVelocity = newX - xPos;// + 10*xVelocity;
+        yVelocity = arcLength / (40.0f + 950 * spiralFactor);// - 2*yVelocity;
         deltaZ = newZ - zPos;
-        xPos = newX;// + 10*xVelocity;//xPos + deltaX;
+        //xPos = newX;// + 10*xVelocity;//xPos + deltaX;
         //yPos += deltaY;
-        spiralY += deltaY;
+        //spiralY += deltaY; //can't increase yPos otherwise a vortex collision will not be detected
         zPos = newZ;//zPos + deltaZ;
-        Log.e("collision", "spiral y pos " + yPos);
 
         //move inwards
         spiralCount++;
@@ -185,13 +178,13 @@ public class FallingObject extends Model
             spiralFactor += spiralIncrement;
             if (initialAngle == 0)
             {
-                deltaX -= spiralIncrement;
-                xPos -= spiralIncrement;
+                xVelocity -= spiralIncrement;
+                //xPos -= spiralIncrement;
             }
             else
             {
-                deltaX += spiralIncrement;
-                xPos += spiralIncrement;
+                xVelocity += spiralIncrement;
+                //xPos += spiralIncrement;
             }
         }
         else
@@ -199,17 +192,17 @@ public class FallingObject extends Model
             if (spiralFactor >= initialRadius)
             {
                 spiralFactor = initialRadius;
-                deltaX += vortexX - xPos;
-                xPos = vortexX;
+                //deltaX += vortexX - xPos;
+                //xPos = vortexX;
                 //deltaZ = -zPos;
                 deltaZ = 0;
                 zPos = 0;
-                deltaY = 0;
-                yPos = spiralY;
+                //deltaY = 0;
+                //yPos = spiralY;
                 spiralY = 0;
                 spiraling = false;
                 spiralOut = false;
-                vortex.setCollecting(false);
+                spiralVortex.setCollecting(false);
                 spiralFactor = 0;
                 parametricAngle = 0;
                 yVelocity = 0;
@@ -219,11 +212,13 @@ public class FallingObject extends Model
             }
         }
         //updatePosition(deltaX, deltaY);
-        getBounds().setBounds(xPos - scaleFactor, yPos - scaleFactor, xPos + scaleFactor, yPos + scaleFactor);
+        //getBounds().setBounds(xPos - scaleFactor, yPos - scaleFactor, xPos + scaleFactor, yPos
+        // + scaleFactor);
     }
 
-    public void spiralIntoVortex(float vortexX)
+    private void spiralIntoVortex()
     {
+        float vortexX = spiralVortex.getxPos();
         if (!spiraling)
         {
             spiraling = true;
@@ -246,19 +241,17 @@ public class FallingObject extends Model
         float spiralIncrement = arcLength / 50.0f;//0.01f;
 
         float radius = initialRadius - spiralFactor;
-        float newX;
-        float newZ;
 
-        newX = radius * (float) Math.cos(parametricAngle + initialAngle) + vortexX;
-        newZ = radius * (float) Math.sin(parametricAngle + initialAngle);
+        float newX = radius * (float) Math.cos(parametricAngle + initialAngle) + vortexX;
+        float newZ = radius * (float) Math.sin(parametricAngle + initialAngle);
 
         //counter clockwise rotation
         parametricAngle += arcLength;// / slowdown;
 
-        deltaY = 0;
-        deltaX = newX - xPos;
+        yVelocity = 0;
+        xVelocity = newX - xPos;
         deltaZ = newZ - zPos;
-        xPos = newX;//xPos + deltaX;
+        //xPos = newX;//xPos + deltaX;
         //yPos = yPos + deltaY;
         zPos = newZ;//zPos + deltaZ;
 
@@ -269,13 +262,13 @@ public class FallingObject extends Model
             spiralFactor += spiralIncrement;
             if (initialAngle == 0)
             {
-                deltaX -= spiralIncrement;
-                xPos -= spiralIncrement;
+                xVelocity -= spiralIncrement;
+                //xPos -= spiralIncrement;
             }
             else
             {
-                deltaX += spiralIncrement;
-                xPos += spiralIncrement;
+                xVelocity += spiralIncrement;
+                //xPos += spiralIncrement;
             }
         }
         else
@@ -283,15 +276,18 @@ public class FallingObject extends Model
             if (spiralFactor >= initialRadius)
             {
                 spiralFactor = initialRadius;
-                deltaX += vortexX - xPos;
-                xPos = vortexX;
+                xVelocity += vortexX - xPos;
+                yVelocity = 0;
+                //xPos = vortexX;
                 deltaZ = -zPos;
                 zPos = 0;
                 previousTime = System.nanoTime();
+                //spiralIn = false;
+                //spiraling = false;
                 travelOnVector(0, 0.001f);
             }
         }
-        getBounds().setBounds(xPos - scaleFactor, yPos - scaleFactor, xPos + scaleFactor, yPos + scaleFactor);
+        //getBounds().setBounds(xPos - scaleFactor, yPos - scaleFactor, xPos + scaleFactor, yPos + scaleFactor);
     }
 
     private void travelOnVector(float xComponent, float yComponent)
@@ -397,10 +393,22 @@ public class FallingObject extends Model
 
         float[] force = Physics.sumOfForces(x, y);
 
-        xVelocity += force[0] * fallingTime;
-        yVelocity += force[1] * fallingTime;
+        if (spiralIn) {
+            spiralIntoVortex();
+        } else if (spiralOut) {
+            spiralOutOfVortex();
+            //force[1] = 0;
+        }
 
-        calculateCollisionVelocity();
+        if (!spiralIn) {
+            xVelocity += force[0] * fallingTime;
+            yVelocity += force[1] * fallingTime;
+            calculateCollisionVelocity();
+        }
+
+        if (spiralIn || spiralOut) {
+            fallingTime = 1;
+        }
 
         deltaX = fallingTime * xVelocity;
         deltaY = fallingTime * yVelocity;
@@ -435,10 +443,23 @@ public class FallingObject extends Model
     {
         this.collected = collected;
     }
-    public boolean isSpiraling()
+
+    public boolean isSpiralIn()
     {
-        return spiraling;
+        return spiralIn;
     }
+
+    public void setSpiralIn(boolean spiralIn, Vortex vortex) {
+        this.spiralIn = spiralIn;
+        spiralVortex = vortex;
+    }
+
+    public void setSpiralOut(boolean spiralOut, Vortex vortex) {
+        this.spiralOut = spiralOut;
+        spiralVortex = vortex;
+    }
+
+    private Vortex spiralVortex;
 
     private int collectedCount = 0;
 
@@ -473,6 +494,10 @@ public class FallingObject extends Model
 
     private boolean collected = false;
 
+    private boolean spiralIn = false;
+
+    private boolean spiralOut = false;
+
     private boolean spiraling = false;
 
     private float initialRadius;
@@ -487,6 +512,4 @@ public class FallingObject extends Model
     private float spiralY = 0;
 
     private boolean firstUpdate = true;
-
-    private boolean spiralOut = false;
 }
