@@ -19,7 +19,6 @@ public class RicochetObstacle extends Model
         yPos = y;//GamePlayActivity.Y_EDGE_POSITION;
 
         deltaY = 0;
-        //previousTime = System.currentTimeMillis();
 
         setBounds(new Bounds());
 
@@ -48,10 +47,9 @@ public class RicochetObstacle extends Model
     {
         super.resumeGame();
         if (previousTime != 0) {
-            previousTime = System.currentTimeMillis();
+            previousTime = System.nanoTime();
         }
     }
-
 
     @Override
     public float[] createTransformationMatrix()
@@ -73,14 +71,14 @@ public class RicochetObstacle extends Model
     {
         if (previousTime == 0)
         {
-            previousTime = System.currentTimeMillis();
+            previousTime = System.nanoTime();
         }
-        long time = System.currentTimeMillis();
-        float deltaTime = (time - previousTime) / 10000.0f;
+        long time = System.nanoTime();
+        float deltaTime = (time - previousTime) / 1000000000.0f;
         previousTime = time;
 
-        deltaY = deltaTime;// * risingSpeed;
-        //deltaY = 0.002f;
+        deltaY = deltaTime * RISING_SPEED;
+
         yPos += deltaY;
 
         getBounds().setBounds(xPos - scaleFactor, yPos - scaleFactor, xPos + scaleFactor, yPos + scaleFactor);
@@ -106,7 +104,7 @@ public class RicochetObstacle extends Model
 
     private long previousTime = 0;
 
-    private float risingSpeed = 0.1f;
+    private static final float RISING_SPEED = 0.1f;
 
     private int time = 0;
 

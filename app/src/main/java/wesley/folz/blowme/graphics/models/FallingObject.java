@@ -73,19 +73,10 @@ public class FallingObject extends Model
     {
         float[] transformation = new float[16];
 
-        //float[] result = new float[16];
-
         long time = SystemClock.uptimeMillis();// % 4000L;
         float angle = 0.1f * ((int) time);
         long deltaT = time - prevRenderTime;
 
-        //updatePosition( 0, 0 );
-
-        //Matrix.setIdentityM( transformation, 0 );
-
-        //Matrix.translateM( transformation, 0, deltaX, deltaY, 0 );
-
-        //Matrix.multiplyMM( result, 0, mvpMatrix, 0, transformation, 0 );
         if (deltaT > 50 && collected)
         {
             //Matrix.translateM(modelMatrix, 0, deltaX, 0, deltaZ);

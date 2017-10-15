@@ -12,6 +12,7 @@ import wesley.folz.blowme.graphics.effects.Explosion;
 import wesley.folz.blowme.graphics.models.DestructiveObstacle;
 import wesley.folz.blowme.graphics.models.FallingObject;
 import wesley.folz.blowme.graphics.models.Missile;
+import wesley.folz.blowme.graphics.models.MissileLauncher;
 import wesley.folz.blowme.graphics.models.Model;
 import wesley.folz.blowme.graphics.models.RicochetObstacle;
 import wesley.folz.blowme.graphics.models.Vortex;
@@ -52,14 +53,14 @@ public class EndlessModeConfig extends ModeConfig implements
     @Override
     protected void initializeGameObjects() {
         int numRicochetObstacles = 2;
-        int numDestructiveObstacles = 0;
+        int numDestructiveObstacles = 2;
         int numFallingObjects = 2;
         int numRings = 1;
         int numCubes = 1;
         int numVortexes = 2;
         int numRingVortexes = 1;
         int numCubeVortexes = 1;
-        int numMissiles = 0;
+        int numMissileLaunchers = 1;
         numCubesRemaining = 1;
         numRingsRemaining = 1;
         models = new ArrayList<>();
@@ -68,7 +69,7 @@ public class EndlessModeConfig extends ModeConfig implements
         explosions = new ArrayList<>();
         vortexes = new ArrayList<>();
         hazards = new ArrayList<>();
-        missiles = new ArrayList<>();
+        missileLaunchers = new ArrayList<>();
 
         //fan = new Fan();
         models.add(fan);
@@ -85,7 +86,7 @@ public class EndlessModeConfig extends ModeConfig implements
             fallingObjects.add(fo);
         }
 
-        for (int i = 0; i < numFallingObjects + numMissiles; i++) {
+        for (int i = 0; i < numFallingObjects + numMissileLaunchers; i++) {
             Explosion explosion = new Explosion();
             models.add(explosion);
             explosions.add(explosion);
@@ -111,10 +112,10 @@ public class EndlessModeConfig extends ModeConfig implements
             hazards.add(destObj);
         }
 
-        for (int i = 0; i < numMissiles; i++) {
-            Missile m = new Missile(-0.5f, 0.5f);
-            models.add(m);
-            missiles.add(m);
+        for (int i = 0; i < numMissileLaunchers; i++) {
+            MissileLauncher ml = new MissileLauncher(-0.44f, 0.5f);
+            models.add(ml);
+            missileLaunchers.add(ml);
         }
 
         //create array list of different vortex type strings
@@ -157,49 +158,18 @@ public class EndlessModeConfig extends ModeConfig implements
 
     @Override
     protected void updateModelPositions() {
-        float xForce;
-        float yForce;
         int modelCount = 0;
 
         background.updatePosition(0, 0);
 
-        //fan.updatePosition(0, 0);
-        //fan.getWind().updatePosition(0, 0);
-
         dispenser.updatePosition(0, 0);
 
-        for (Missile m : missiles) {
-            xForce = 0;
-            yForce = 0;
-
-            if (m.isOffscreen()) {
-                models.remove(m);
-                float pos[] = generateRandomLocation();
-                float x;
-                if (Math.random() > 0.5) {
-                    x = -0.56f;//Border.XLEFT;
-                } else {
-                    x = 0.56f;//Border.XRIGHT;
-                }
-                m = new Missile(x, pos[1]);
-                missiles.set(modelCount, m);
-                m.enableGraphics(graphicsData);
-                m.initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
-                models.add(m);
-            } else {
-                if (windInteraction(m, false)) {
-                    xForce = fan.getWind().getxForce();
-                    yForce = fan.getWind().getyForce();
-                }
-                m.updatePosition(xForce, yForce);
-            }
-        }
+        updateMissileLaunchers();
 
         for (Vortex v : vortexes) {
             v.updatePosition(0, 0);
         }
 
-        modelCount = 0;
         for (RicochetObstacle o : obstacles) {
             missileInteraction(o);
             if (o.isOffscreen()) {
@@ -239,31 +209,11 @@ public class EndlessModeConfig extends ModeConfig implements
             modelCount++;
         }
 
-        boolean objectEffected = false;
         modelCount = 0;
         for (FallingObject falObj : fallingObjects) {
-            yForce = 0;
 
-            if (destructionInteraction(falObj) || missileInteraction(falObj)) {
+            if (fallingObjectInteractions(falObj, modelCount))
                 numLives--;
-            }
-
-            falObj = offscreenInteraction(falObj, modelCount);
-
-            //determine forces due to collisions with obstacles
-            falObj.calculateRicochetCollisions(obstacles);
-
-            vortexInteraction(falObj);
-
-            xForce = dispenseInteraction(falObj, objectEffected);
-
-            if (windInteraction(falObj, objectEffected)) {
-                xForce = fan.getWind().getxForce();
-                yForce = fan.getWind().getyForce();
-            }
-
-
-            falObj.updatePosition(xForce, yForce);
 
             if (falObj.isCollected()) {
                 falObj.setCollected(false);
@@ -274,6 +224,43 @@ public class EndlessModeConfig extends ModeConfig implements
         objectiveFailed = numLives <= 0;
 
         //line.updatePosition(0, 0);
+    }
+
+    private void updateMissileLaunchers() {
+        float xForce;
+        float yForce;
+        int modelCount = 0;
+        for (MissileLauncher ml : missileLaunchers) {
+            xForce = 0;
+            yForce = 0;
+
+            Missile m = ml.getMissile();
+            if (ml.isOffscreen()) {
+                float pos[] = generateRandomLocation();
+                float x;
+                if (Math.random() > 0.5) {
+                    x = -0.44f;//Border.XLEFT;
+                } else {
+                    x = 0.44f;//Border.XRIGHT;
+                }
+                ml = new MissileLauncher(x, pos[1]);
+                missileLaunchers.set(modelCount, ml);
+                ml.enableGraphics(graphicsData);
+                ml.initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
+                models.add(ml);
+                modelCount++;
+            }
+            ml.updatePosition(0, 0);
+            ml.fireMissile();
+
+            if (!m.isOffscreen()) {
+                if (windInteraction(m)) {
+                    xForce = fan.getWind().getxForce();
+                    yForce = fan.getWind().getyForce();
+                }
+                m.updatePosition(xForce, yForce);
+            }
+        }
     }
 
     private float[] generateRandomLocation() {
@@ -326,7 +313,6 @@ public class EndlessModeConfig extends ModeConfig implements
         if (rotationDetector.isRotating()) {
             Log.e("rotation", "angle " + rotationDetector.getAngle());
             fan.updateFingerRotation(rotationDetector.getAngle());
-            //      Log.e("rotate", "rotation " + fan.getFingerRotation());
         } else {
             if (fanReadyToMove) {
                 switch (action) {
@@ -355,10 +341,6 @@ public class EndlessModeConfig extends ModeConfig implements
                             touchActionStarted = false;
                         }
                         this.handleFanMovementMove(x, y);
-                        Log.e("rotate", "no rotation");
-
-                        //Log.e( "blowme", "Move: X " + (event.getRawX() / WIDTH) + " Y " +
-                        // (event.getRawY() / HEIGHT) );
                         break;
                 }
             }

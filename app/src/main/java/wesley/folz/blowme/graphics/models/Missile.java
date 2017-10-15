@@ -56,8 +56,12 @@ public class Missile extends Model {
 
     @Override
     public void draw() {
-        super.draw();
-        trail.draw();
+        if (!offscreen) {
+            super.draw();
+            if (flying) {
+                trail.draw();
+            }
+        }
     }
 
     @Override
@@ -79,13 +83,12 @@ public class Missile extends Model {
 
         Matrix.setIdentityM(rotation, 0);
 
-        // Create a rotation transformation for the triangle
         long time = SystemClock.uptimeMillis() % 36000L; //modulo makes rotation look smooth
         float angle = 0.2f * (float) time;
 
-        Matrix.translateM(modelMatrix, 0, deltaX, deltaY, 0);
+        Matrix.translateM(modelMatrix, 0, deltaX, deltaY, 0); //translate missile
 
-        Matrix.multiplyMM(rotation, 0, modelMatrix, 0, rotation, 0);
+        Matrix.multiplyMM(rotation, 0, modelMatrix, 0, rotation, 0); //spin missile
 
         float rotationAngle = -90.0f;
         if (yDirection != 0) {
@@ -106,36 +109,33 @@ public class Missile extends Model {
     @Override
     public void updatePosition(float x, float y) {
 
-        if (firstUpdate) {
+        if (previousTime == 0) {
             previousTime = System.nanoTime();
-            firstUpdate = false;
         }
+
         long time = System.nanoTime();
         float deltaTime = (time - previousTime) / 1000000000.0f;
         previousTime = time;//System.nanoTime();
-        /*
-        float displacementTime = INITIAL_VELOCITY * deltaTime;
-        xDirection -= x;
-        yDirection -= y;
 
-        xVelocity = -INITIAL_VELOCITY * xDirection * displacementTime;
-        yVelocity = -INITIAL_VELOCITY * yDirection * displacementTime;
-
-        deltaX = displacementTime * xVelocity;
-        deltaY = displacementTime * yVelocity;
-        */
-        xDirection -= x;
-        yDirection -= y;
-        xVelocity = -INITIAL_VELOCITY * xDirection;
-        yVelocity = -INITIAL_VELOCITY * yDirection;
-        float velocity = (float) Math.sqrt(xVelocity * xVelocity + yVelocity * yVelocity);
-        float acceleration =
-                INITIAL_ACCELERATION;//1aqMath.max(0, INITIAL_ACCELERATION -
-        // KINETIC_FRICTION*velocity);
-        deltaX = (INITIAL_VELOCITY * deltaTime + 0.5f * acceleration * deltaTime * deltaTime) * (
-                xVelocity / velocity);
-        deltaY = (INITIAL_VELOCITY * deltaTime + 0.5f * acceleration * deltaTime * deltaTime) * (
-                yVelocity / velocity);
+        if (flying) {
+            xDirection -= x;
+            yDirection -= y;
+            xVelocity = -INITIAL_VELOCITY * xDirection;
+            yVelocity = -INITIAL_VELOCITY * yDirection;
+            float velocity = (float) Math.sqrt(xVelocity * xVelocity + yVelocity * yVelocity);
+            float acceleration =
+                    INITIAL_ACCELERATION;//1aqMath.max(0, INITIAL_ACCELERATION -
+            // KINETIC_FRICTION*velocity);
+            deltaX =
+                    (INITIAL_VELOCITY * deltaTime + 0.5f * acceleration * deltaTime * deltaTime) * (
+                            xVelocity / velocity);
+            deltaY =
+                    (INITIAL_VELOCITY * deltaTime + 0.5f * acceleration * deltaTime * deltaTime) * (
+                            yVelocity / velocity);
+        } else { //if not flying just move up
+            deltaX = 0;
+            deltaY = deltaTime * RISING_SPEED;
+        }
 
         xPos += deltaX;
         yPos += deltaY;
@@ -144,6 +144,14 @@ public class Missile extends Model {
                 yPos + scaleFactor);
 
         trail.updatePosition(deltaX, deltaY);
+    }
+
+    public boolean isFlying() {
+        return flying;
+    }
+
+    public void setFlying(boolean flying) {
+        this.flying = flying;
     }
 
     private float deltaX;
@@ -156,14 +164,14 @@ public class Missile extends Model {
 
     private float yDirection = 0.0f;
 
-    private float previousTime;
+    private float previousTime = 0;
 
-    private boolean firstUpdate = true;
+    private boolean flying = false;
 
+    private static final float RISING_SPEED = 0.1f;
     private static final float INITIAL_VELOCITY = 0.1f;
     private static final float INITIAL_ACCELERATION = 80.0f;
     private static final float KINETIC_FRICTION = 8.0f;
-
 
     private MissileTrail trail;
 }

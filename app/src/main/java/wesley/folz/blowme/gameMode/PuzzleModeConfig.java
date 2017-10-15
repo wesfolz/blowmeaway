@@ -175,10 +175,8 @@ public class PuzzleModeConfig extends ModeConfig implements
             v.updatePosition(0, 0);
         }
 
-        boolean objectEffected = false;
-
         for (FallingObject falObj : fallingObjects) {
-            float xForce = 0;
+            float xForce;
             float yForce = 0;
 
             if (falObj.isOffscreen() || destructionInteraction(falObj)) {
@@ -187,15 +185,14 @@ public class PuzzleModeConfig extends ModeConfig implements
 
             vortexInteraction(falObj);
 
-            xForce = dispenseInteraction(falObj, objectEffected);
+            xForce = dispenseInteraction(falObj);
 
             //determine forces due to collisions with obstacles
             falObj.calculateRicochetCollisions(obstacles);
 
             //calculate wind influence
             for (Fan f : fans) {
-                if (Physics.isCollision(f.getWind().getBounds(), falObj.getBounds())
-                        && !objectEffected) {
+                if (Physics.isCollision(f.getWind().getBounds(), falObj.getBounds())) {
                     Physics.calculateWindForce(f.getWind(), falObj);
                     xForce += f.getWind().getxForce();
                     yForce += f.getWind().getyForce();

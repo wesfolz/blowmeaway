@@ -16,6 +16,7 @@ import wesley.folz.blowme.graphics.models.Dispenser;
 import wesley.folz.blowme.graphics.models.FallingObject;
 import wesley.folz.blowme.graphics.models.Fan;
 import wesley.folz.blowme.graphics.models.Missile;
+import wesley.folz.blowme.graphics.models.MissileLauncher;
 import wesley.folz.blowme.graphics.models.Model;
 import wesley.folz.blowme.graphics.models.RicochetObstacle;
 import wesley.folz.blowme.graphics.models.Vortex;
@@ -55,16 +56,18 @@ public abstract class ModeConfig
         //graphicsData.storeModelData("fan", R.raw.uv_fan);
         graphicsData.storeModelData("fan", R.raw.fan_orig);
         graphicsData.storeModelData("vortex", R.raw.uv_vortex);
-
         graphicsData.storeModelData("missile", R.raw.missile);
+        graphicsData.storeModelData("launcher_stand", R.raw.launcher_stand);
+        graphicsData.storeModelData("launcher_tube", R.raw.launcher_tube);
 
         graphicsData.storeTexture("missile_tex", R.drawable.colored_missile_texture);
-
         graphicsData.storeTexture("yellow_circle", R.drawable.yellow_circle);
         graphicsData.storeTexture("sky", R.drawable.sky_texture);
         graphicsData.storeTexture("grid", R.drawable.grid);
         graphicsData.storeTexture("cube_wood", R.drawable.cube_wood_tex);
         graphicsData.storeTexture("brick", R.drawable.cube_brick_tex);
+        graphicsData.storeTexture("launcher_stand_tex", R.drawable.launcher_stand_texture);
+        graphicsData.storeTexture("launcher_tube_tex", R.drawable.launcher_tube_texture);
 
         graphicsData.storeTexture("fan_test", R.drawable.fan_orig_tex);
         graphicsData.storeTexture("vortex_tex", R.drawable.vortex_tex);
@@ -91,11 +94,6 @@ public abstract class ModeConfig
 
         background.enableGraphics(graphicsData);
         fan.enableGraphics(graphicsData);
-        for (Model m : models)
-        {
-            //          m.enableGraphics(graphicsData);
-        }
-        Log.e("pause", "enable graphics mode");
     }
 
     public void surfaceGraphicsChanged(int width, int height)
@@ -196,10 +194,10 @@ public abstract class ModeConfig
         fanReadyToMove = positionsInitialized;
     }
 
-    protected float dispenseInteraction(FallingObject falObj, boolean objectEffected) {
+    protected float dispenseInteraction(FallingObject falObj) {
         float xForce = 0;
         //falling object is being dispensed
-        if (falObj.getyPos() > 0.95f && !objectEffected) {
+        if (falObj.getyPos() > 0.95f) {
             //falObj.updatePosition(100 * dispenser.getDeltaX(), 0);
             xForce = 100 * dispenser.getDeltaX();
             //objectEffected = true;
@@ -207,11 +205,10 @@ public abstract class ModeConfig
         return xForce;
     }
 
-    protected boolean windInteraction(Model falObj, boolean objectEffected) {
+    protected boolean windInteraction(Model falObj) {
         boolean windCollision = false;
         //calculate wind influence
-        if (Physics.isCollision(falObj.getBounds(), fan.getWind().getBounds())
-                && !objectEffected) {
+        if (Physics.isCollision(falObj.getBounds(), fan.getWind().getBounds())) {
             Physics.calculateWindForce(fan.getWind(), falObj);
             windCollision = true;
         }
@@ -243,7 +240,8 @@ public abstract class ModeConfig
         boolean didExplode = false;
 
         if (!model.isOffscreen()) {
-            for (Missile m : missiles) {
+            for (MissileLauncher ml : missileLaunchers) {
+                Missile m = ml.getMissile();
                 if (Physics.isCollision(m.getBounds(), model.getBounds())) {
                     objectExplosion.reinitialize(model.getxPos(), model.getyPos());
                     model.setOffscreen(true);
@@ -314,6 +312,29 @@ public abstract class ModeConfig
         }
     }
 
+    protected boolean fallingObjectInteractions(FallingObject falObj, int modelCount) {
+        float yForce = 0;
+        boolean destroyed = destructionInteraction(falObj) | missileInteraction(falObj);
+
+        falObj = offscreenInteraction(falObj, modelCount);
+
+        //determine forces due to collisions with obstacles
+        falObj.calculateRicochetCollisions(obstacles);
+
+        vortexInteraction(falObj);
+
+        float xForce = dispenseInteraction(falObj);
+
+        if (windInteraction(falObj)) {
+            xForce = fan.getWind().getxForce();
+            yForce = fan.getWind().getyForce();
+        }
+
+        falObj.updatePosition(xForce, yForce);
+
+        return destroyed;
+    }
+
     public void updatePositionsAndDrawModels()
     {
         if (!positionsInitialized)
@@ -346,8 +367,8 @@ public abstract class ModeConfig
             h.draw();
         }
 
-        for (Missile m : missiles) {
-            m.draw();
+        for (MissileLauncher ml : missileLaunchers) {
+            ml.draw();
         }
 
         for (FallingObject falObj : fallingObjects)
@@ -514,7 +535,7 @@ public abstract class ModeConfig
     ArrayList<FallingObject> fallingObjects;
     ArrayList<Explosion> explosions;
     ArrayList<Vortex> vortexes;
-    ArrayList<Missile> missiles;
+    ArrayList<MissileLauncher> missileLaunchers;
 
     protected Fan fan;
     protected Background background;

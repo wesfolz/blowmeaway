@@ -34,7 +34,7 @@ public class ActionModeConfig extends ModeConfig
         hazards = new ArrayList<>();
         obstaclesInQueue = new ArrayList<>();
         hazardsInQueue = new ArrayList<>();
-        missiles = new ArrayList<>();
+        missileLaunchers = new ArrayList<>();
 
         initializeFromExistingMode(mode, null);
         //Log.e("json", "fanx " + fan.getxPos() + " fany " + fan.getyPos());
@@ -209,26 +209,8 @@ public class ActionModeConfig extends ModeConfig
         boolean objectEffected = false;
         int modelCount = 0;
         for (FallingObject falObj : fallingObjects) {
-            float xForce = 0;
-            float yForce = 0;
 
-            destructionInteraction(falObj);
-
-            falObj = offscreenInteraction(falObj, modelCount);
-
-            vortexInteraction(falObj);
-
-            xForce = dispenseInteraction(falObj, objectEffected);
-
-            //determine forces due to collisions with obstacles
-            falObj.calculateRicochetCollisions(obstacles);
-
-            if (windInteraction(falObj, objectEffected)) {
-                xForce = fan.getWind().getxForce();
-                yForce = fan.getWind().getyForce();
-            }
-
-            falObj.updatePosition(xForce, yForce);
+            fallingObjectInteractions(falObj, modelCount);
 
             if (falObj.isCollected()) {
                 falObj.setCollected(false);
