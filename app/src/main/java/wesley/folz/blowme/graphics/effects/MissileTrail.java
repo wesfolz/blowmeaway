@@ -2,7 +2,6 @@ package wesley.folz.blowme.graphics.effects;
 
 import android.opengl.GLES20;
 import android.opengl.Matrix;
-import android.os.SystemClock;
 
 import java.util.Random;
 
@@ -191,45 +190,24 @@ public class MissileTrail extends ParticleSystem {
     public float[] createTransformationMatrix() {
         float[] transformation = new float[16];
 
-        // Create a rotation transformation for the triangle
-        long time = SystemClock.uptimeMillis() % 3600L; //modulo makes rotation look smooth
-        float angle = 0.6f * (float) time;
-
         movedDelta += totalDelta / 50.0f;
-        //if(deltaY != 0)
-        //movedDelta += (deltaY/deltaY)*totalDelta/50.0f;
-        //if(deltaY == 0) {
-        //    totalDelta = 0;
-        //    movedDelta = totalDelta;
-        //}
 
-        //if((deltaY > 0 && Math.abs(movedDelta) > Math.abs(totalDelta)) ||(deltaY < 0 && Math
-        // .abs(movedDelta) < Math.abs(totalDelta)))
         if (Math.abs(movedDelta) > Math.abs(totalDelta)) {
             movedDelta = totalDelta;
         }
-
 
         //Matrix.setIdentityM(modelMatrix, 0);
         Matrix.setIdentityM(transformation, 0);
 
 //        Matrix.translateM(modelMatrix, 0, 0, deltaY / 2, 0);
-        Matrix.translateM(modelMatrix, 0, deltaX, deltaY, 0);
+//        Matrix.translateM(modelMatrix, 0, deltaX, deltaY, 0);
+        Matrix.translateM(transformation, 0, xPos, yPos, 0);
+        Matrix.multiplyMM(transformation, 0, transformation, 0, rotationMatrix, 0);
 
-        Matrix.multiplyMM(transformation, 0, modelMatrix, 0, rotationMatrix, 0);
+//        Matrix.multiplyMM(transformation, 0, modelMatrix, 0, rotationMatrix, 0);
 
         Matrix.rotateM(transformation, 0, -90, 0, 0, 1);
         Matrix.translateM(transformation, 0, rocketOffset, 0, 0);
-
-        //  Matrix.rotateM(transformation, 0, -80, 0, 1, 0);
-        //       Matrix.rotateM(transformation, 0, angle, 1, 0, 0);
-
-        //Matrix.translateM(transformation, 0, deltaX, deltaY, 0);
-
-        //Log.e( "blowme", "xmin " + transformation[0] + " ymin " + transformation[1] + " xmax "
-        // + transformation[4] + " ymax " + transformation[5]);
-
-        //Matrix.multiplyMM(transformation, 0, modelMatrix, 0, transformation, 0);
 
         getBounds().calculateBounds(transformation);
 

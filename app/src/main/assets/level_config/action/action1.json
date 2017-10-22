@@ -4,7 +4,8 @@
       "model": "LevelParams",
       "time": 25,
       "numCubes": 2,
-      "numRings": 2
+      "numRings": 2,
+      "numVortexes": 2
     },
     {
       "model": "Fan",
@@ -18,13 +19,13 @@
     {
       "model": "Vortex",
       "index": 0,
-      "xPos": -0.25,
+      "capacity": 2,
       "type": "cube"
     },
     {
       "model": "Vortex",
       "index": 1,
-      "xPos": 0.25,
+      "capacity": 2,
       "type": "ring"
     },
     {

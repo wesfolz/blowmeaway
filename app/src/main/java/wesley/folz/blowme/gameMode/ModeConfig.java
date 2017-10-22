@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.MotionEvent;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 import wesley.folz.blowme.R;
 import wesley.folz.blowme.graphics.Background;
@@ -88,9 +89,8 @@ public abstract class ModeConfig
             fo.enableGraphics(graphicsData);
         }
 
-        for (Vortex v : vortexes) {
+        for (Vortex v : vortexes)
             v.enableGraphics(graphicsData);
-        }
 
         background.enableGraphics(graphicsData);
         fan.enableGraphics(graphicsData);
@@ -101,11 +101,11 @@ public abstract class ModeConfig
         float ratio = (float) width / height;
 
         // Set the camera position (View matrix)
-        Matrix.setLookAtM(viewMatrix, 0, 0, 0, 5f, 0, 0, 0.0f, 0, 1.0f, 0);
+        Matrix.setLookAtM(viewMatrix, 0, 0, 0, 5.0f, 0, 0, -1.0f, 0, 1.0f, 0);
 
         // this projection matrix is applied to object coordinates
         // in the onDrawFrame() method
-        //Matrix.frustumM( projectionMatrix, 0, - ratio, ratio, - 1, 1, 1, 10 );
+        //Matrix.frustumM( projectionMatrix, 0, - ratio, ratio, - 1, 1, 1, 5 );
         Matrix.orthoM(projectionMatrix, 0, -ratio, ratio, -1, 1, 1, 10);
 
         float[] mLightPosInWorldSpace = new float[4];
@@ -183,6 +183,16 @@ public abstract class ModeConfig
         }
     }
 
+    private void exitRoutine() {
+        boolean exited = true;
+        for (Model m : models) {
+            exited &= m.removalRoutine();
+        }
+
+        exiting = !exited;
+        modeComplete = exited;
+    }
+
     protected void initializationRoutine()
     {
         boolean initialized = true;
@@ -242,7 +252,7 @@ public abstract class ModeConfig
         if (!model.isOffscreen()) {
             for (MissileLauncher ml : missileLaunchers) {
                 Missile m = ml.getMissile();
-                if (Physics.isCollision(m.getBounds(), model.getBounds())) {
+                if (Physics.isCollision(m.getBounds(), model.getBounds()) && !m.isOffscreen()) {
                     objectExplosion.reinitialize(model.getxPos(), model.getyPos());
                     model.setOffscreen(true);
                     m.setOffscreen(true);
@@ -288,31 +298,38 @@ public abstract class ModeConfig
         return didExplode;
     }
 
-    protected void vortexInteraction(FallingObject falObj) {
+    protected void vortexInteraction(FallingObject falObj, boolean regenerate) {
         int vortexCount = 0;
-        for (Vortex vortex : vortexes) {
+        for (Iterator<Vortex> iterator = vortexes.iterator(); iterator.hasNext(); ) {
+            Vortex vortex = iterator.next();
             if (Physics.isCollision(vortex.getBounds(), falObj.getBounds())
                     || (falObj.isSpiralIn() && vortex.isCollecting()
                     && vortexCount == falObj.getCollectingVortexIndex())) {
-                vortex.setCollecting(true);
 
                 falObj.setCollectingVortexIndex(vortexCount);
                 if (vortex.getType().equals(falObj.getType())) {
                     falObj.setSpiralIn(true, vortex);
-                    //falObj.spiralIntoVortex(vortex.getxPos());
                 } else {
                     falObj.setSpiralOut(true, vortex);
-                    //xForce = falObj.spiralOutOfVortex(vortex);
                 }
                 break;
             } else {
                 vortex.setCollecting(false);
             }
+            if (vortex.isOffscreen()) {
+                models.remove(vortex);
+                if (regenerate) {
+                    generateVortex(vortex.getType(), vortexCount, vortex.getCapacity(), true);
+                } else {
+                    iterator.remove();
+                }
+            }
             vortexCount++;
         }
     }
 
-    protected boolean fallingObjectInteractions(FallingObject falObj, int modelCount) {
+    protected boolean fallingObjectInteractions(FallingObject falObj, int modelCount,
+            boolean regenerate) {
         float yForce = 0;
         boolean destroyed = destructionInteraction(falObj) | missileInteraction(falObj);
 
@@ -321,7 +338,7 @@ public abstract class ModeConfig
         //determine forces due to collisions with obstacles
         falObj.calculateRicochetCollisions(obstacles);
 
-        vortexInteraction(falObj);
+        vortexInteraction(falObj, regenerate);
 
         float xForce = dispenseInteraction(falObj);
 
@@ -335,8 +352,24 @@ public abstract class ModeConfig
         return destroyed;
     }
 
+    protected void generateVortex(String type, int index, int capacity, boolean reinitialize) {
+        Vortex v = new Vortex(type,
+                (float) (index + 1) * (2.0f / (numVortexes + 1.0f)) - 1, capacity);
+        if (reinitialize) {
+            v.enableGraphics(graphicsData);
+            v.initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
+            vortexes.set(index, v);
+        } else {
+            vortexes.add(v);
+        }
+        models.add(v);
+    }
+
     public void updatePositionsAndDrawModels()
     {
+        if (exiting) {
+            exitRoutine();
+        } else
         if (!positionsInitialized)
         {
             initializationRoutine();
@@ -389,7 +422,6 @@ public abstract class ModeConfig
                 e.draw();
             }
         }
-        //line.draw();
     }
 
     public void handleTouch(int action, float x, float y)
@@ -490,6 +522,11 @@ public abstract class ModeConfig
 
     public void stopGame() {
         Log.e("pause", "stop mode");
+        exiting = true;
+    }
+
+    public boolean isModeComplete() {
+        return modeComplete;
     }
 
     public long getTimeRemaining() {
@@ -523,7 +560,6 @@ public abstract class ModeConfig
     {
         return numRingsRemaining;
     }
-
 
     public String getLevel() {
         return level;
@@ -572,8 +608,14 @@ public abstract class ModeConfig
 
     protected String level;
 
+    protected int numVortexes = 0;
+
     protected float TARGET_X = -GamePlayActivity.X_EDGE_POSITION;
     protected float TARGET_Y = 0;
     protected float TARGET_Z_ANGLE = 0;
     protected float TARGET_Y_ANGLE = -65;
+
+    private boolean modeComplete = false;
+
+    private boolean exiting = false;
 }

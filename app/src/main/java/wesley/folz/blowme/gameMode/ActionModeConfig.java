@@ -68,6 +68,7 @@ public class ActionModeConfig extends ModeConfig
                         timeRemaining = jso.getInt("time");
                         numCubesRemaining = jso.getInt("numCubes");
                         numRingsRemaining = jso.getInt("numRings");
+                        numVortexes = jso.getInt("numVortexes");
                         break;
 
                     case "RicochetObstacle":
@@ -98,9 +99,8 @@ public class ActionModeConfig extends ModeConfig
                         break;
 
                     case "Vortex":
-                        Vortex v = new Vortex(jso.getString("type"), (float) jso.getDouble("xPos"));
-                        vortexes.add(v);
-                        models.add(v);
+                        generateVortex(jso.getString("type"), jso.getInt("index"),
+                                jso.getInt("capacity"), false);
                         break;
 
                     case "FallingObject":
@@ -206,11 +206,10 @@ public class ActionModeConfig extends ModeConfig
             }
         }
 
-        boolean objectEffected = false;
         int modelCount = 0;
         for (FallingObject falObj : fallingObjects) {
 
-            fallingObjectInteractions(falObj, modelCount);
+            fallingObjectInteractions(falObj, modelCount, false);
 
             if (falObj.isCollected()) {
                 falObj.setCollected(false);
@@ -261,7 +260,6 @@ public class ActionModeConfig extends ModeConfig
             }
         }, 0, 1000);
     }
-
 
     private float[] generateObstacleLocation(int xCell, int yCell) {
         //screen dimensions: -0.5 <= x <= 0.5, -1 <= y <= 1

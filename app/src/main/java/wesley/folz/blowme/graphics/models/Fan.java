@@ -347,6 +347,8 @@ public class Fan extends Model
         updateCount++;
 
         moveParametric();
+
+
     }
 
     public void touch(float x)

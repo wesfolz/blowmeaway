@@ -3,6 +3,8 @@ package wesley.folz.blowme.graphics.models;
 import android.opengl.Matrix;
 import android.os.SystemClock;
 
+import java.util.ArrayList;
+
 import wesley.folz.blowme.graphics.effects.DustCloud;
 import wesley.folz.blowme.ui.GamePlayActivity;
 import wesley.folz.blowme.util.Bounds;
@@ -13,7 +15,7 @@ import wesley.folz.blowme.util.GraphicsUtilities;
  */
 public class Vortex extends Model
 {
-    public Vortex(String collectionType, float x)
+    public Vortex(String collectionType, float x, int capacity)
     {
         super();
 
@@ -27,7 +29,6 @@ public class Vortex extends Model
         yPos = -1.0f;//0.935f;//GamePlayActivity.Y_EDGE_POSITION;
 
         scaleFactor = 0.04f;
-        //     scaleFactor = 0.1f;
 
         initialXPos = xPos;
         initialYPos = yPos;
@@ -37,10 +38,19 @@ public class Vortex extends Model
 
         dustCloud = new DustCloud(xPos, 1.0f);
 
-        for (int i = 0; i < 3; i++)
+        this.capacity = capacity;
+
+        orbitingObjects = new ArrayList<>();
+
+        for (int i = 0; i < capacity; i++)
         {
-            orbitingObjects[i] = new OrbitingObject(type, xPos, -1.0f, (float) Math.PI + i * (float) Math.PI / 2);
+            orbitingObjects.add(new OrbitingObject(type, xPos, -1.0f,
+                    (float) Math.PI + i * (float) Math.PI / 2));
         }
+    }
+
+    public Vortex(String collectionType, float x) {
+        this(collectionType, x, 3);
     }
 
     @Override
@@ -68,7 +78,6 @@ public class Vortex extends Model
         {
             orbitingObject.draw();
         }
-
     }
 
     @Override
@@ -110,13 +119,15 @@ public class Vortex extends Model
         {
             orbitingObject.initializeMatrices(viewMatrix, projectionMatrix, lightPositionInEyeSpace);
         }
-
-        //Log.e( "blowme", "xpos: " + xPos + " ypos " + yPos );
     }
 
     @Override
     public boolean initializationRoutine()
     {
+        if (initialized) {
+            updatePosition(0, 0);
+            return true;
+        }
         if (initialTime == 0)
         {
             initialTime = System.currentTimeMillis();
@@ -128,22 +139,66 @@ public class Vortex extends Model
             scaleCount = 100 * (deltaTime / GamePlayActivity.INITIALIZATION_TIME);
         } else {
             scaleCount = 100.0f;
+            initialTime = 0;
+            initialized = true;
         }
 
         deltaY = scaleCount / 500.0f;
-        updatePosition(0, 0);
+        //updatePosition(0, 0);
+        dustCloud.updatePosition(0, deltaY / 30);
+        for (OrbitingObject orbitingObject : orbitingObjects) {
+            orbitingObject.updatePosition(0, deltaY);
+        }
+        getBounds().setBounds(xPos - getSize()[0] / 2.0f, yPos - 0.21f, xPos + getSize()[0] / 2.0f,
+                yPos - 0.1f);
+
+        return deltaTime >= GamePlayActivity.INITIALIZATION_TIME;
+    }
+
+    @Override
+    public boolean removalRoutine() {
+        if (initialTime == 0) {
+            initialTime = System.currentTimeMillis();
+        }
+        long time = System.currentTimeMillis();
+        float deltaTime = (time - initialTime) / 1000.0f;
+
+        if (deltaTime < GamePlayActivity.INITIALIZATION_TIME) {
+            scaleCount = 100 * ((GamePlayActivity.INITIALIZATION_TIME - deltaTime)
+                    / GamePlayActivity.INITIALIZATION_TIME);
+        } else {
+            scaleCount = 0.0f;
+            initialTime = 0;
+            offscreen = true;
+        }
+
+        deltaY = scaleCount / 500.0f;
+
+        dustCloud.updatePosition(0, -deltaY / 30);
+        for (OrbitingObject orbitingObject : orbitingObjects) {
+            orbitingObject.updatePosition(0, deltaY);
+        }
+        getBounds().setBounds(xPos - getSize()[0] / 2.0f, yPos - 0.21f,
+                xPos + getSize()[0] / 2.0f, yPos - 0.1f);
+
         return deltaTime >= GamePlayActivity.INITIALIZATION_TIME;
     }
 
     @Override
     public void updatePosition(float x, float y)
     {
-        dustCloud.updatePosition(0, deltaY / 30);
-        for (OrbitingObject orbitingObject : orbitingObjects)
-        {
-            orbitingObject.updatePosition(0, deltaY);
+        if (!initialized) {
+            initializationRoutine();
+        } else if (numCollected >= capacity) {
+            removalRoutine();
+        } else {
+            dustCloud.updatePosition(0, deltaY / 30);
+            for (OrbitingObject orbitingObject : orbitingObjects) {
+                orbitingObject.updatePosition(0, deltaY);
+            }
+            getBounds().setBounds(xPos - getSize()[0] / 2.0f, yPos - 0.21f,
+                    xPos + getSize()[0] / 2.0f, yPos - 0.1f);
         }
-        getBounds().setBounds(xPos - getSize()[0] / 2.0f, yPos - 0.21f, xPos + getSize()[0] / 2.0f, yPos - 0.1f);
     }
 
     @Override
@@ -154,7 +209,6 @@ public class Vortex extends Model
             orbitingObject.pauseGame();
         }
     }
-
 
     @Override
     public void resumeGame() {
@@ -180,6 +234,18 @@ public class Vortex extends Model
         this.collecting = collecting;
     }
 
+    public void setNumCollected() {
+        numCollected++;
+        if (orbitingObjects.size() > 0) {
+            orbitingObjects.remove(0);
+        }
+        //else if(numCollected >= capacity)
+    }
+
+    public int getCapacity() {
+        return capacity;
+    }
+
     private DustCloud dustCloud;
 
     private float deltaY = 0;
@@ -188,10 +254,14 @@ public class Vortex extends Model
 
     private boolean collecting = false;
 
-    private OrbitingObject[] orbitingObjects = new OrbitingObject[3];
+    private ArrayList<OrbitingObject> orbitingObjects;
 
     private String type;
 
     private long initialTime = 0;
+
+    private int capacity;
+
+    private int numCollected = 0;
 
 }

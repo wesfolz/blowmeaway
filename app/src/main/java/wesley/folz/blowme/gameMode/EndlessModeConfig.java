@@ -57,9 +57,9 @@ public class EndlessModeConfig extends ModeConfig implements
         int numFallingObjects = 2;
         int numRings = 1;
         int numCubes = 1;
-        int numVortexes = 2;
         int numRingVortexes = 1;
         int numCubeVortexes = 1;
+        numVortexes = numRingVortexes + numCubeVortexes;
         int numMissileLaunchers = 1;
         numCubesRemaining = 1;
         numRingsRemaining = 1;
@@ -113,7 +113,7 @@ public class EndlessModeConfig extends ModeConfig implements
         }
 
         for (int i = 0; i < numMissileLaunchers; i++) {
-            MissileLauncher ml = new MissileLauncher(-0.44f, 0.5f);
+            MissileLauncher ml = new MissileLauncher(-0.44f, -0.5f);
             models.add(ml);
             missileLaunchers.add(ml);
         }
@@ -129,10 +129,7 @@ public class EndlessModeConfig extends ModeConfig implements
 
         //numVortexes=2 -> x1=-0.5
         for (int i = 0; i < numVortexes; i++) {
-            Vortex v = new Vortex(vortexTypes.get(i),
-                    (float) (i + 1) * (2.0f / (numVortexes + 1.0f)) - 1);
-            models.add(v);
-            vortexes.add(v);
+            generateVortex(vortexTypes.get(i), i, 3, false);
         }
 
         //dispenser = new Dispenser();
@@ -151,8 +148,6 @@ public class EndlessModeConfig extends ModeConfig implements
         this.background.pauseGame();
         this.background.resumeGame();
 
-        //line =  new Line();
-        //models.add(line);
         Log.e("pause", "constructor mode");
     }
 
@@ -170,6 +165,27 @@ public class EndlessModeConfig extends ModeConfig implements
             v.updatePosition(0, 0);
         }
 
+        updateRicochetObstacles();
+
+        updateDestructiveObstacles();
+
+        for (FallingObject falObj : fallingObjects) {
+
+            if (fallingObjectInteractions(falObj, modelCount, true)) {
+                numLives--;
+            }
+
+            if (falObj.isCollected()) {
+                falObj.setCollected(false);
+                score++;
+            }
+            modelCount++;
+        }
+        objectiveFailed = numLives <= 0;
+    }
+
+    private void updateRicochetObstacles() {
+        int modelCount = 0;
         for (RicochetObstacle o : obstacles) {
             missileInteraction(o);
             if (o.isOffscreen()) {
@@ -185,8 +201,10 @@ public class EndlessModeConfig extends ModeConfig implements
             }
             modelCount++;
         }
+    }
 
-        modelCount = 0;
+    private void updateDestructiveObstacles() {
+        int modelCount = 0;
         for (DestructiveObstacle h : hazards) {
             missileInteraction(h);
             if (h.isOffscreen()) {
@@ -208,22 +226,6 @@ public class EndlessModeConfig extends ModeConfig implements
             }
             modelCount++;
         }
-
-        modelCount = 0;
-        for (FallingObject falObj : fallingObjects) {
-
-            if (fallingObjectInteractions(falObj, modelCount))
-                numLives--;
-
-            if (falObj.isCollected()) {
-                falObj.setCollected(false);
-                score++;
-            }
-            modelCount++;
-        }
-        objectiveFailed = numLives <= 0;
-
-        //line.updatePosition(0, 0);
     }
 
     private void updateMissileLaunchers() {
@@ -250,15 +252,13 @@ public class EndlessModeConfig extends ModeConfig implements
                 models.add(ml);
                 modelCount++;
             }
-            ml.updatePosition(0, 0);
-            ml.fireMissile();
 
             if (!m.isOffscreen()) {
                 if (windInteraction(m)) {
                     xForce = fan.getWind().getxForce();
                     yForce = fan.getWind().getyForce();
                 }
-                m.updatePosition(xForce, yForce);
+                ml.updatePosition(xForce, yForce);
             }
         }
     }

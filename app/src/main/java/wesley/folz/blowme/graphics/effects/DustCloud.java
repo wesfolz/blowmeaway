@@ -189,7 +189,6 @@ public class DustCloud extends ParticleSystem
 
         Matrix.rotateM(mvp, 0, angle, 0, -1, 0);
 
-
         return mvp;
     }
 
@@ -199,7 +198,6 @@ public class DustCloud extends ParticleSystem
         super.initializeMatrices(viewMatrix, projectionMatrix, lightPositionInEyeSpace);
         if (!this.resuming)
         {
-            //rotate 130 degrees about x-axis
             Matrix.rotateM(modelMatrix, 0, 10, 1, 0, 0);
         }
 
@@ -209,7 +207,7 @@ public class DustCloud extends ParticleSystem
     @Override
     public void updatePosition(float x, float y)
     {
-        if (yUp <= 0.25f)
+        if (yUp <= 0.25f || y < 0)
         {
             //yUp += 0.002f;
             yUp += y;

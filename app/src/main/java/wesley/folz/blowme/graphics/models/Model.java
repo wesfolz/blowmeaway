@@ -251,6 +251,11 @@ public abstract class Model
         return true;
     }
 
+    public boolean removalRoutine() {
+        updatePosition(0, 0);
+        return true;
+    }
+
     public void setInitialized(boolean initialized) {
         this.initialized = initialized;
     }

@@ -60,10 +60,9 @@ public class MissileLauncher extends Model {
     public void updatePosition(float x, float y) {
         stand.updatePosition(x, y);
         tube.updatePosition(x, y);
-    }
-
-    public void fireMissile() {
-        missile.setFlying(true);
+        fireTimer++;
+        if (fireTimer >= 150) missile.setFlying(true);
+        missile.updatePosition(x, y);
     }
 
     public Missile getMissile() {
@@ -74,4 +73,6 @@ public class MissileLauncher extends Model {
 
     private LauncherStand stand;
     private LauncherTube tube;
+
+    private int fireTimer = 0;
 }

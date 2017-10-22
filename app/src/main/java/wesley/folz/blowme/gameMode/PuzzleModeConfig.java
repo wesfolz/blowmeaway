@@ -72,6 +72,9 @@ public class PuzzleModeConfig extends ModeConfig implements
             for (int i = 0; i < jsonArray.length(); i++) {
                 JSONObject jso = jsonArray.getJSONObject(i);
                 switch (jso.getString("model")) {
+                    case "LevelParams":
+                        numVortexes = jso.getInt("numVortexes");
+                        break;
                     case "RicochetObstacle":
                         float pos[] = generateObstacleLocation(jso.getInt("xPos"),
                                 jso.getInt("yPos"));
@@ -90,9 +93,8 @@ public class PuzzleModeConfig extends ModeConfig implements
                         break;
 
                     case "Vortex":
-                        Vortex v = new Vortex(jso.getString("type"), jso.getInt("xPos"));
-                        vortexes.add(v);
-                        models.add(v);
+                        generateVortex(jso.getString("type"), jso.getInt("index"),
+                                jso.getInt("capacity"), false);
                         break;
 
                     case "FallingObject":
@@ -155,10 +157,7 @@ public class PuzzleModeConfig extends ModeConfig implements
     protected void initializationRoutine() {
         boolean initialized = true;
         for (Model m : models) {
-            boolean status = m.initializationRoutine();
-            //Log.e("initRoutine", "ready to move " + status);
-            initialized &= status;
-            //initialized &= m.initializationRoutine();
+            initialized &= m.initializationRoutine();
         }
         fanReadyToMove = initialized;
         positionsInitialized = initialized & puzzleStarted;
@@ -183,7 +182,7 @@ public class PuzzleModeConfig extends ModeConfig implements
                 objectiveFailed = true;
             }
 
-            vortexInteraction(falObj);
+            vortexInteraction(falObj, false);
 
             xForce = dispenseInteraction(falObj);
 

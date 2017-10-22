@@ -88,7 +88,7 @@ public class Missile extends Model {
 
         Matrix.translateM(modelMatrix, 0, deltaX, deltaY, 0); //translate missile
 
-        Matrix.multiplyMM(rotation, 0, modelMatrix, 0, rotation, 0); //spin missile
+        Matrix.multiplyMM(rotation, 0, modelMatrix, 0, rotation, 0);
 
         float rotationAngle = -90.0f;
         if (yDirection != 0) {
@@ -99,9 +99,7 @@ public class Missile extends Model {
 
         Matrix.rotateM(rotation, 0, rotationAngle, 0, 0, 1);
 
-        //getBounds().calculateBounds(rotation);
-
-        Matrix.rotateM(rotation, 0, angle, 0, -1, 0);
+        Matrix.rotateM(rotation, 0, angle, 0, -1, 0); //spin missile
 
         return rotation;
     }
@@ -135,6 +133,14 @@ public class Missile extends Model {
         } else { //if not flying just move up
             deltaX = 0;
             deltaY = deltaTime * RISING_SPEED;
+            if (Math.abs(xDirection) >= 0.5) {
+                xMotion *= -1;
+            }
+            xDirection += xMotion * 0.01;//deltaTime;
+            if (Math.abs(yDirection) >= 0.5) {
+                yMotion *= -1;
+            }
+            yDirection += yMotion * 0.01;//deltaTime;
         }
 
         xPos += deltaX;
@@ -144,6 +150,14 @@ public class Missile extends Model {
                 yPos + scaleFactor);
 
         trail.updatePosition(deltaX, deltaY);
+    }
+
+    public void setxDirection(float xDirection) {
+        this.xDirection = xDirection;
+    }
+
+    public void setyDirection(float yDirection) {
+        this.yDirection = yDirection;
     }
 
     public boolean isFlying() {
@@ -160,7 +174,11 @@ public class Missile extends Model {
     private float xVelocity;
     private float yVelocity;
 
-    private float xDirection = 1.0f;
+    private float xMotion = 1;
+
+    private float yMotion = 1;
+
+    private float xDirection;
 
     private float yDirection = 0.0f;
 

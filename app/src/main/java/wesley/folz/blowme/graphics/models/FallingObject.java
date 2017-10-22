@@ -104,7 +104,6 @@ public class FallingObject extends Model
     @Override
     public boolean isOffscreen()
     {
-//        return false;
         return (collectedCount >= 10 || this.getBounds().getyTop() < Border.YBOTTOM || offscreen);
     }
 
@@ -153,7 +152,6 @@ public class FallingObject extends Model
         //counter clockwise rotation
         parametricAngle += arcLength;// / slowdown;
 
-        Log.e("spiral", "spiral factor " + spiralFactor);
         xVelocity = newX - xPos;// + 10*xVelocity;
         yVelocity = arcLength / (40.0f + 950 * spiralFactor);// - 2*yVelocity;
         deltaZ = newZ - zPos;
@@ -278,7 +276,6 @@ public class FallingObject extends Model
                 travelOnVector(0, 0.001f);
             }
         }
-        //getBounds().setBounds(xPos - scaleFactor, yPos - scaleFactor, xPos + scaleFactor, yPos + scaleFactor);
     }
 
     private void travelOnVector(float xComponent, float yComponent)
@@ -306,6 +303,10 @@ public class FallingObject extends Model
             collected = true;
         }
         collectedCount++;
+
+        if (collectedCount >= 10) {
+            spiralVortex.setNumCollected();
+        }
     }
 
     public void calculateRicochetCollisions(ArrayList<RicochetObstacle> obstacles)

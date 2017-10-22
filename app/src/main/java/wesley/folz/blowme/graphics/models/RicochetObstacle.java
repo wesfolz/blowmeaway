@@ -98,6 +98,10 @@ public class RicochetObstacle extends Model
         return this.getBounds().getyBottom() > Border.YTOP || offscreen;
     }
 
+    public float getDeltaY() {
+        return deltaY;
+    }
+
     private float deltaY;
 
     private float deltaX;

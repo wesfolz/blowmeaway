@@ -1,6 +1,10 @@
 {
   "Models": [
     {
+      "model": "LevelParams",
+      "numVortexes": 1
+    },
+    {
       "model": "Fan",
       "index": 0
     },
@@ -16,7 +20,7 @@
     {
       "model": "Vortex",
       "index": 0,
-      "xPos": 0,
+      "capacity": 1,
       "type": "cube"
     },
     {

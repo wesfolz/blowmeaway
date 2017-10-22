@@ -266,6 +266,14 @@ public class GamePlayActivity extends Activity
         }
         surfaceView.resumeGame();
         TransitionManager.go(mainMenuScene, transitionAnimation);
+
+        while (!gameMode.isModeComplete()) {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
         initializeMenuMode();
     }
 
