@@ -5,6 +5,7 @@ import android.opengl.Matrix;
 import wesley.folz.blowme.graphics.Border;
 import wesley.folz.blowme.util.Bounds;
 import wesley.folz.blowme.util.GraphicsUtilities;
+import wesley.folz.blowme.util.Physics;
 
 /**
  * Created by Wesley on 9/25/2016.
@@ -20,7 +21,7 @@ public class DestructiveObstacle extends Model
 
         deltaY = 0;
 
-        //previousTime = System.nanoTime();
+        //prevUpdateTime = System.nanoTime();
 
         setBounds(new Bounds());
 
@@ -37,8 +38,8 @@ public class DestructiveObstacle extends Model
     public void resumeGame()
     {
         super.resumeGame();
-        if (previousTime != 0) {
-            previousTime = System.currentTimeMillis();
+        if (prevUpdateTime != 0) {
+            prevUpdateTime = System.currentTimeMillis();
         }
     }
 
@@ -74,18 +75,7 @@ public class DestructiveObstacle extends Model
     @Override
     public void updatePosition(float x, float y)
     {
-        if (previousTime == 0)
-        {
-            previousTime = System.currentTimeMillis();
-        }
-        long time = System.currentTimeMillis();
-        float deltaTime = (time - previousTime) / 10000.0f;
-
-        previousTime = time;
-
-        deltaY = deltaTime;// * risingSpeed;
-        //deltaY = 0.002f;
-        yPos += deltaY;
+        Physics.rise(this, RISING_SPEED);
 
         getBounds().setBounds(xPos - xRadius, yPos - 4 * scaleFactor, xPos + xRadius, yPos + 4 * scaleFactor);
     }
@@ -104,15 +94,9 @@ public class DestructiveObstacle extends Model
         return this.getBounds().getyBottom() > Border.YTOP || offscreen;
     }
 
-    private float deltaY;
-
     private int time = 0;
 
-    private float deltaX;
-
-    private long previousTime = 0;
-
-    private float risingSpeed = 0.1f;
+    private static final float RISING_SPEED = 0.1f;
 
     private static final float xRadius = 0.06f;
 

@@ -143,6 +143,19 @@ public abstract class Physics
         return a.x * b.x + a.y * b.y;
     }
 
+    public static void rise(Model m, float risingSpeed) {
+        if (m.getPrevUpdateTime() == 0) {
+            m.setPrevUpdateTime(System.nanoTime());
+        }
+        long time = System.nanoTime();
+        float deltaTime = (time - m.getPrevUpdateTime()) / 1000000000.0f;
+        m.setPrevUpdateTime(time);
+
+        m.setDeltaY(deltaTime * risingSpeed);
+
+        m.setyPos(m.getyPos() + m.getDeltaY());
+    }
+
 
     public static float[] sumOfForces( float xForce, float yForce )
     {
@@ -163,7 +176,6 @@ public abstract class Physics
         TOP_BOTTOM,
         BOTTOM_TOP
     }
-
 
     public static final float GRAVITY = 9.8f;
 

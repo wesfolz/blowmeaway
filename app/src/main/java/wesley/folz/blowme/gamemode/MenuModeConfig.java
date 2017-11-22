@@ -19,7 +19,6 @@ import wesley.folz.blowme.util.Physics;
 
 public class MenuModeConfig extends ModeConfig
 {
-
     public MenuModeConfig()
     {
         super();
@@ -76,9 +75,7 @@ public class MenuModeConfig extends ModeConfig
 
         //line =  new Line();
         //models.add(line);
-        Log.e("pause", "constructor mode");
     }
-
 
     @Override
     protected void updateModelPositions()
@@ -134,9 +131,8 @@ public class MenuModeConfig extends ModeConfig
     @Override
     protected void drawModels()
     {
-        background.draw();
         fan.draw();
-
+        background.draw();
         dispenser.draw();
 
         for (FallingObject falObj : fallingObjects)

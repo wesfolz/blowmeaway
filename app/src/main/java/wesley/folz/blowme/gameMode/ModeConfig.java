@@ -11,6 +11,7 @@ import java.util.Iterator;
 import wesley.folz.blowme.R;
 import wesley.folz.blowme.graphics.Background;
 import wesley.folz.blowme.graphics.Line;
+import wesley.folz.blowme.graphics.Wormhole;
 import wesley.folz.blowme.graphics.effects.Explosion;
 import wesley.folz.blowme.graphics.models.DestructiveObstacle;
 import wesley.folz.blowme.graphics.models.Dispenser;
@@ -60,10 +61,12 @@ public abstract class ModeConfig
         graphicsData.storeModelData("missile", R.raw.missile);
         graphicsData.storeModelData("launcher_stand", R.raw.launcher_stand);
         graphicsData.storeModelData("launcher_tube", R.raw.launcher_tube);
+        graphicsData.storeModelData("wormhole", R.raw.wormhole);
 
         graphicsData.storeTexture("missile_tex", R.drawable.colored_missile_texture);
         graphicsData.storeTexture("yellow_circle", R.drawable.yellow_circle);
         graphicsData.storeTexture("sky", R.drawable.sky_texture);
+        graphicsData.storeTexture("planet", R.drawable.planet);
         graphicsData.storeTexture("grid", R.drawable.grid);
         graphicsData.storeTexture("cube_wood", R.drawable.cube_wood_tex);
         graphicsData.storeTexture("brick", R.drawable.cube_brick_tex);
@@ -84,6 +87,10 @@ public abstract class ModeConfig
         graphicsData.storeShader("wind", R.raw.wind_vertex_shader, R.raw.wind_fragment_shader, particleAttributes);
         graphicsData.storeShader("texture", R.raw.texture_vertex_shader, R.raw.texture_fragment_shader, modelAttributes);
         graphicsData.storeShader("lighting", R.raw.lighting_vertex_shader, R.raw.lighting_fragment_shader, modelAttributes);
+        graphicsData.storeShader("default", R.raw.defaultvertexshader, R.raw.defaultfragmentshader,
+                modelAttributes);
+        graphicsData.storeShader("distortion", R.raw.distortion_vertex_shader,
+                R.raw.texture_fragment_shader, modelAttributes);
 
         for (FallingObject fo : fallingObjects) {
             fo.enableGraphics(graphicsData);
@@ -94,6 +101,10 @@ public abstract class ModeConfig
 
         background.enableGraphics(graphicsData);
         fan.enableGraphics(graphicsData);
+
+        if (wormhole != null) {
+            wormhole.enableGraphics(graphicsData);
+        }
     }
 
     public void surfaceGraphicsChanged(int width, int height)
@@ -105,7 +116,7 @@ public abstract class ModeConfig
 
         // this projection matrix is applied to object coordinates
         // in the onDrawFrame() method
-        //Matrix.frustumM( projectionMatrix, 0, - ratio, ratio, - 1, 1, 1, 5 );
+        //Matrix.frustumM( projectionMatrix, 0, - ratio, ratio, - 1, 1, 1, 10 );
         Matrix.orthoM(projectionMatrix, 0, -ratio, ratio, -1, 1, 1, 10);
 
         float[] mLightPosInWorldSpace = new float[4];
@@ -130,7 +141,7 @@ public abstract class ModeConfig
 
     protected abstract void initializeGameObjects();
 
-    protected void initializeFromExistingMode(ModeConfig mode, GamePlaySurfaceView surfaceView)
+    void initializeFromExistingMode(ModeConfig mode, GamePlaySurfaceView surfaceView)
     {
         this.graphicsData = mode.graphicsData;
         this.projectionMatrix = mode.projectionMatrix;
@@ -204,7 +215,7 @@ public abstract class ModeConfig
         fanReadyToMove = positionsInitialized;
     }
 
-    protected float dispenseInteraction(FallingObject falObj) {
+    float dispenseInteraction(FallingObject falObj) {
         float xForce = 0;
         //falling object is being dispensed
         if (falObj.getyPos() > 0.95f) {
@@ -215,7 +226,7 @@ public abstract class ModeConfig
         return xForce;
     }
 
-    protected boolean windInteraction(Model falObj) {
+    boolean windInteraction(Model falObj) {
         boolean windCollision = false;
         //calculate wind influence
         if (Physics.isCollision(falObj.getBounds(), fan.getWind().getBounds())) {
@@ -225,7 +236,7 @@ public abstract class ModeConfig
         return windCollision;
     }
 
-    protected FallingObject offscreenInteraction(FallingObject falObj, int modelCount) {
+    FallingObject offscreenInteraction(FallingObject falObj, int modelCount) {
         if (falObj.isOffscreen()) {
             Log.e("collision", "offscreen " + falObj.getType());
             try {
@@ -245,7 +256,7 @@ public abstract class ModeConfig
         return falObj;
     }
 
-    protected boolean missileInteraction(Model model) {
+    boolean missileInteraction(Model model) {
         Explosion objectExplosion = explosions.get(explosionIndex);
         boolean didExplode = false;
 
@@ -272,7 +283,7 @@ public abstract class ModeConfig
         return didExplode;
     }
 
-    protected boolean destructionInteraction(Model model) {
+    boolean destructionInteraction(Model model) {
         Explosion objectExplosion = explosions.get(explosionIndex);
 
         boolean didExplode = false;
@@ -298,7 +309,7 @@ public abstract class ModeConfig
         return didExplode;
     }
 
-    protected void vortexInteraction(FallingObject falObj, boolean regenerate) {
+    void vortexInteraction(FallingObject falObj, boolean regenerate) {
         int vortexCount = 0;
         for (Iterator<Vortex> iterator = vortexes.iterator(); iterator.hasNext(); ) {
             Vortex vortex = iterator.next();
@@ -328,7 +339,36 @@ public abstract class ModeConfig
         }
     }
 
-    protected boolean fallingObjectInteractions(FallingObject falObj, int modelCount,
+    boolean wormholeInteraction(Model model) {
+        if (!model.isOffscreen() && !wormhole.isOffscreen()) {
+            if (Physics.isCollision(wormhole.getDistortion1().getBounds(), model.getBounds())) {
+                Log.e("wormhole collision",
+                        "distortion 1 collision " + wormhole.getDistortion2().getyPos());
+                model.setDeltaY(wormhole.getDistortion2().getyPos() - model.getyPos());
+                model.setDeltaX(wormhole.getDistortion2().getxPos() - model.getxPos());
+                model.setyPos(wormhole.getDistortion2().getyPos());
+                model.setxPos(wormhole.getDistortion2().getxPos());
+                model.getBounds().setBounds(model.getxPos() - 0.03f, model.getyPos() - 0.03f,
+                        model.getxPos() + 0.03f, model.getyPos() + 0.03f);
+
+                return true;
+            } else if (Physics.isCollision(wormhole.getDistortion2().getBounds(),
+                    model.getBounds())) {
+                Log.e("wormhole collision", "distortion 2 collision");
+                /*
+                model.setDeltaY(wormhole.getDistortion1().getyPos() - model.getyPos());
+                model.setDeltaX(wormhole.getDistortion1().getxPos() - model.getxPos());
+                model.setyPos(wormhole.getDistortion1().getyPos());
+                model.setxPos(wormhole.getDistortion1().getxPos());
+                model.getBounds().setBounds(model.getxPos() - 0.03f, model.getyPos() - 0.03f,
+                        model.getxPos() + 0.03f, model.getyPos() + 0.03f);
+                        */
+            }
+        }
+        return false;
+    }
+
+    boolean fallingObjectInteractions(FallingObject falObj, int modelCount,
             boolean regenerate) {
         float yForce = 0;
         boolean destroyed = destructionInteraction(falObj) | missileInteraction(falObj);
@@ -347,12 +387,14 @@ public abstract class ModeConfig
             yForce = fan.getWind().getyForce();
         }
 
-        falObj.updatePosition(xForce, yForce);
+        if (!wormholeInteraction(falObj)) {
+            falObj.updatePosition(xForce, yForce);
+        }
 
         return destroyed;
     }
 
-    protected void generateVortex(String type, int index, int capacity, boolean reinitialize) {
+    void generateVortex(String type, int index, int capacity, boolean reinitialize) {
         Vortex v = new Vortex(type,
                 (float) (index + 1) * (2.0f / (numVortexes + 1.0f)) - 1, capacity);
         if (reinitialize) {
@@ -387,6 +429,7 @@ public abstract class ModeConfig
     protected void drawModels()
     {
         background.draw();
+        wormhole.draw();
         fan.draw();
 
         dispenser.draw();
@@ -490,7 +533,7 @@ public abstract class ModeConfig
         }
     }
 
-    protected void handleFanMovementMove(float x, float y)
+    void handleFanMovementMove(float x, float y)
     {
         if (fanReadyToMove && initialPositionSet) {
             fan.updatePosition(x, y);
@@ -573,6 +616,8 @@ public abstract class ModeConfig
     ArrayList<Vortex> vortexes;
     ArrayList<MissileLauncher> missileLaunchers;
 
+    Wormhole wormhole;
+
     protected Fan fan;
     protected Background background;
     Dispenser dispenser;
@@ -596,7 +641,7 @@ public abstract class ModeConfig
 
     boolean objectiveComplete = false;
 
-    protected boolean touchActionStarted;
+    boolean touchActionStarted;
 
     boolean positionsInitialized;
 
@@ -608,12 +653,12 @@ public abstract class ModeConfig
 
     protected String level;
 
-    protected int numVortexes = 0;
+    int numVortexes = 0;
 
-    protected float TARGET_X = -GamePlayActivity.X_EDGE_POSITION;
-    protected float TARGET_Y = 0;
-    protected float TARGET_Z_ANGLE = 0;
-    protected float TARGET_Y_ANGLE = -65;
+    float TARGET_X = -GamePlayActivity.X_EDGE_POSITION;
+    float TARGET_Y = 0;
+    float TARGET_Z_ANGLE = 0;
+    float TARGET_Y_ANGLE = -65;
 
     private boolean modeComplete = false;
 

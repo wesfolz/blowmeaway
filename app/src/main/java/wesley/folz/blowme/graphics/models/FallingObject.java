@@ -47,7 +47,7 @@ public class FallingObject extends Model
 
         yVelocity = -1.0f;//-0.3f;//0;//0.1f;
 
-        previousTime = System.nanoTime();
+        prevUpdateTime = System.nanoTime();
 
         scaleFactor = 0.03f;
         //scaleFactor = 0.3f;
@@ -111,7 +111,7 @@ public class FallingObject extends Model
     public void resumeGame()
     {
         super.resumeGame();
-        previousTime = System.nanoTime();
+        prevUpdateTime = System.nanoTime();
         spiralTime = System.currentTimeMillis();
     }
 
@@ -196,7 +196,7 @@ public class FallingObject extends Model
                 parametricAngle = 0;
                 yVelocity = 0;
                 xVelocity = 0;
-                previousTime = System.nanoTime();
+                prevUpdateTime = System.nanoTime();
                 //travelOnVector(0, 0.001f);
             }
         }
@@ -270,7 +270,7 @@ public class FallingObject extends Model
                 //xPos = vortexX;
                 deltaZ = -zPos;
                 zPos = 0;
-                previousTime = System.nanoTime();
+                prevUpdateTime = System.nanoTime();
                 //spiralIn = false;
                 //spiraling = false;
                 travelOnVector(0, 0.001f);
@@ -280,8 +280,8 @@ public class FallingObject extends Model
 
     private void travelOnVector(float xComponent, float yComponent)
     {
-        float time = (System.nanoTime() - previousTime) / 1000000000.0f;
-        previousTime = System.nanoTime();
+        float time = (System.nanoTime() - prevUpdateTime) / 1000000000.0f;
+        prevUpdateTime = System.nanoTime();
         float fallingTime = MASS * time;
         deltaX = 5 * fallingTime * xComponent;
         //deltaY = 5 * fallingTime * yComponent;
@@ -375,12 +375,12 @@ public class FallingObject extends Model
     public void updatePosition(float x, float y)
     {
         if (firstUpdate) {
-            previousTime = System.nanoTime();
+            prevUpdateTime = System.nanoTime();
             firstUpdate = false;
         }
         long time = System.nanoTime();
-        float deltaTime = (time - previousTime) / 1000000000.0f;
-        previousTime = time;//System.nanoTime();
+        float deltaTime = (time - prevUpdateTime) / 1000000000.0f;
+        prevUpdateTime = time;//System.nanoTime();
         float fallingTime = MASS * deltaTime;
 
         float[] force = Physics.sumOfForces(x, y);
@@ -455,15 +455,7 @@ public class FallingObject extends Model
 
     private int collectedCount = 0;
 
-    private long previousTime;
-
     private long prevRenderTime;
-
-    private float deltaX;
-
-    private float deltaY;
-
-    private float deltaZ;
 
     private float zPos;
 

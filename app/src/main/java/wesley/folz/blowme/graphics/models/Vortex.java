@@ -111,7 +111,7 @@ public class Vortex extends Model
         {
             //rotate 130 degrees about x-axis
             Matrix.rotateM(modelMatrix, 0, 10, 1, 0, 0);
-            Matrix.scaleM(modelMatrix, 0, 1.0f, 0.01f, 1.0f);
+            //Matrix.scaleM(modelMatrix, 0, 1.0f, 0.01f, 1.0f);
         }
 
         dustCloud.initializeMatrices(viewMatrix, projectionMatrix, lightPositionInEyeSpace);
@@ -136,14 +136,14 @@ public class Vortex extends Model
         float deltaTime = (time - initialTime) / 1000.0f;
 
         if (deltaTime < GamePlayActivity.INITIALIZATION_TIME) {
-            scaleCount = 100 * (deltaTime / GamePlayActivity.INITIALIZATION_TIME);
+            scaleCount = (deltaTime / GamePlayActivity.INITIALIZATION_TIME);
         } else {
-            scaleCount = 100.0f;
+            scaleCount = 1.0f;
             initialTime = 0;
             initialized = true;
         }
 
-        deltaY = scaleCount / 500.0f;
+        deltaY = scaleCount / 5.0f;
         //updatePosition(0, 0);
         dustCloud.updatePosition(0, deltaY / 30);
         for (OrbitingObject orbitingObject : orbitingObjects) {
@@ -164,7 +164,7 @@ public class Vortex extends Model
         float deltaTime = (time - initialTime) / 1000.0f;
 
         if (deltaTime < GamePlayActivity.INITIALIZATION_TIME) {
-            scaleCount = 100 * ((GamePlayActivity.INITIALIZATION_TIME - deltaTime)
+            scaleCount = ((GamePlayActivity.INITIALIZATION_TIME - deltaTime)
                     / GamePlayActivity.INITIALIZATION_TIME);
         } else {
             scaleCount = 0.0f;
@@ -172,7 +172,7 @@ public class Vortex extends Model
             offscreen = true;
         }
 
-        deltaY = scaleCount / 500.0f;
+        deltaY = scaleCount / 5.0f;
 
         dustCloud.updatePosition(0, -deltaY / 30);
         for (OrbitingObject orbitingObject : orbitingObjects) {
@@ -248,8 +248,6 @@ public class Vortex extends Model
 
     private DustCloud dustCloud;
 
-    private float deltaY = 0;
-
     private float scaleCount = 1.0f;
 
     private boolean collecting = false;
@@ -263,5 +261,4 @@ public class Vortex extends Model
     private int capacity;
 
     private int numCollected = 0;
-
 }

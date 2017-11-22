@@ -14,6 +14,7 @@ import java.io.InputStreamReader;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 import java.nio.ShortBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -179,28 +180,105 @@ public class GraphicsUtilities
         }
     }
 
-    public static void readPLYFile(Model model)
+    public void draw_stencil()
     {
-        //opening input stream to obj file
-        InputStream stream = MainApplication.getAppContext().getResources().openRawResource(model
-                .OBJ_FILE_RESOURCE);
-        BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
-        String line;
-        try
-        {
-            while ((line = reader.readLine()) != null)
-            {
-                if (line.startsWith("element vertex"))
-                {
-                    StringTokenizer tokenizer = new StringTokenizer(line, " ");
+        GLES20.glEnable(GLES20.GL_STENCIL_TEST);
 
-                }
+        // Fill stencil buffer with 0's
+        GLES20.glClearStencil(0);
+        GLES20.glClear(GLES20.GL_STENCIL_BUFFER_BIT);
 
-            }
-        } catch (IOException e)
-        {
-            e.printStackTrace();
+        // Write 1's into stencil buffer where the hole will be
+        GLES20.glColorMask(false, false, false, false);
+        GLES20.glDepthMask(false);
+        GLES20.glStencilFunc(GLES20.GL_ALWAYS, 1, ~0);
+        GLES20.glStencilOp(GLES20.GL_KEEP, GLES20.GL_KEEP, GLES20.GL_REPLACE);
+        //GLES20.glStencilMask(0xFF);
+        //GLES20.glClear(GLES20.GL_STENCIL_BUFFER_BIT);
+
+        //drawDistortion();
+        //Matrix.translateM(modelMatrix, 0, 0.5f, 0, 0);
+        //drawDistortion();
+        //Matrix.translateM(modelMatrix, 0, -0.5f, 0, 0);
+
+        GLES20.glColorMask(true, true, true, true);
+        GLES20.glDepthMask(true);
+        GLES20.glStencilFunc(GLES20.GL_EQUAL, 1, ~0);
+        GLES20.glStencilOp(GLES20.GL_KEEP, GLES20.GL_KEEP, GLES20.GL_KEEP);
+
+
+        // Draw cube reflection
+        //GLES20.glStencilFunc(GLES20.GL_EQUAL, 1, 0xFF);
+        //GLES20.glStencilMask(0x00);
+        //GLES20.glDepthMask(true);
+        //Matrix.translateM(background.modelMatrix, 0, 0.1f, 0.1f, 0.0f);
+        //Matrix.scaleM(background.modelMatrix, 0, 2, 2, 2);
+        //drawBackground();
+        //background.draw();
+        //Matrix.translateM(background.modelMatrix, 0, -0.1f, -0.1f, 0.0f);
+        //Matrix.scaleM(background.modelMatrix, 0, 0.5f, 0.5f, 0.5f);
+        GLES20.glDisable(GLES20.GL_STENCIL_TEST);
+    }
+
+    private void renderToTexture() {
+        int[] frameBuffer = new int[1];
+        int[] depthRenderBuffer = new int[1];
+        int[] renderTexture = new int[1];
+
+        //generate buffers
+        GLES20.glGenFramebuffers(1, frameBuffer, 0);
+        GLES20.glGenRenderbuffers(1, depthRenderBuffer, 0);
+        GLES20.glGenTextures(1, renderTexture, 0);
+
+        //generate texutre
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, renderTexture[0]);
+
+
+        // parameters - we have to make sure we clamp the textures to the edges
+        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_S,
+                GLES20.GL_CLAMP_TO_EDGE);
+        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T,
+                GLES20.GL_CLAMP_TO_EDGE);
+        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER,
+                GLES20.GL_LINEAR);
+        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER,
+                GLES20.GL_LINEAR);
+
+        // create it
+        // create an empty intbuffer first
+        int texW = 100;
+        int texH = 100;
+        int[] buf = new int[texW * texH];
+        IntBuffer textureBuffer = ByteBuffer.allocateDirect(buf.length
+                * 4).order(ByteOrder.nativeOrder()).asIntBuffer();
+
+        GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES20.GL_RGB, texW, texH, 0,
+                GLES20.GL_RGB, GLES20.GL_UNSIGNED_SHORT_5_6_5, textureBuffer);
+
+        //create render buffer and bind to 16bit depth buffer
+        GLES20.glBindRenderbuffer(GLES20.GL_RENDERBUFFER, depthRenderBuffer[0]);
+        GLES20.glRenderbufferStorage(GLES20.GL_RENDERBUFFER, GLES20.GL_DEPTH_COMPONENT16, texW,
+                texH);
+
+        //draw texture
+        GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, frameBuffer[0]);
+
+        // specify texture as color attachment
+        GLES20.glFramebufferTexture2D(GLES20.GL_FRAMEBUFFER, GLES20.GL_COLOR_ATTACHMENT0,
+                GLES20.GL_TEXTURE_2D, renderTexture[0], 0);
+
+        // attach render buffer as depth buffer
+        GLES20.glFramebufferRenderbuffer(GLES20.GL_FRAMEBUFFER,
+                GLES20.GL_DEPTH_ATTACHMENT, GLES20.GL_RENDERBUFFER, depthRenderBuffer[0]);
+
+        // check status
+        int status = GLES20.glCheckFramebufferStatus(GLES20.GL_FRAMEBUFFER);
+        if (status != GLES20.GL_FRAMEBUFFER_COMPLETE) {
+            Log.e("FrameBuffer", "FrameBuffer Error: " + status);
         }
+        // Clear the texture (buffer) and then render as usual...
+        GLES20.glClearColor(.0f, .0f, .0f, 1.0f);
+        GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT | GLES20.GL_COLOR_BUFFER_BIT);
     }
 
     private void readOBJFile(int resource)
@@ -530,82 +608,6 @@ public class GraphicsUtilities
         }
 
         return textureHandle[0];
-    }
-
-    private static float[] interleaveData(HashMap<Short, Float[]> normalVertexMap,
-            HashMap<Short, Float[]> textureCoordsMap, ArrayList<Float> vertices)
-    {
-        ArrayList<Float> interleavedArrayList = new ArrayList<>();
-        float[] interleavedData = new float[2 * vertices.size() + 4 * vertices.size() / 3 + 2 * vertices.size() / 3];
-
-        for(short key=0; key < normalVertexMap.size(); key++)
-        {
-            Float[] normalVector = normalVertexMap.get(key);
-            Float[] textureCoord = textureCoordsMap.get(key);
-            //    Log.e("keys", String.valueOf(key));
-            //vertices
-            for(int i=0; i<3; i++)
-                interleavedArrayList.add(vertices.get(3*key+i));
-            //per-vertex normal vectors
-            for(int i=0; i<3; i++)
-                interleavedArrayList.add(normalVector[i]);
-            //color data
-            for (int i = 0; i < 4; i++)
-            {
-                if (i == 3)
-                    interleavedArrayList.add(1.0f);
-                else if (i == 2)
-                    interleavedArrayList.add(0.75f);
-                else
-                    interleavedArrayList.add(0.75f);
-//                    interleavedArrayList.add((float) (1.0 * (float) (i % 2)));
-            }
-            //texture coordinates
-
-            for (int i = 0; i < 2; i++) {
-                interleavedArrayList.add(textureCoord[i]);
-            }
-            /*
-            float xn = Math.abs(normalVector[0]);
-            float yn = Math.abs(normalVector[1]);
-            float zn = Math.abs(normalVector[2]);
-            if (xn > yn)
-            {
-                if (xn > zn)//y-z plane
-                {
-                    interleavedArrayList.add(vertices.get(3 * key + 2));
-                    interleavedArrayList.add(vertices.get(3 * key + 1));
-                }
-                else //x-y plane
-                {
-                    interleavedArrayList.add(vertices.get(3 * key));
-                    interleavedArrayList.add(vertices.get(3 * key + 1));
-                }
-            }
-            else
-            {
-                if (yn > zn) //x-z plane
-                {
-                    interleavedArrayList.add(vertices.get(3 * key));
-                    interleavedArrayList.add(vertices.get(3 * key + 2));
-                } else //x-y plane
-                {
-                    interleavedArrayList.add(vertices.get(3 * key));
-                    interleavedArrayList.add(vertices.get(3 * key + 1));
-                }
-            }
-            */
-        }
-        //copy arraylist to float array
-        for (int i=0; i<interleavedData.length; i++)
-        {
-            interleavedData[i] = interleavedArrayList.get(i);
-            //Log.e("interleaved", String.valueOf(interleavedData[i]));
-        }
-
-        //Log.e("interleave", String.valueOf(interleavedArrayList.size()));
-
-        return interleavedData;
     }
 
     /**

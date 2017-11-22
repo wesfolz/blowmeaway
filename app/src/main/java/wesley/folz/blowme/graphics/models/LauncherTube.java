@@ -61,13 +61,13 @@ public class LauncherTube extends RicochetObstacle {
     public void updatePosition(float x, float y) {
         super.updatePosition(x, y);
 
-        if (previousTime == 0) {
-            previousTime = System.nanoTime();
+        if (prevUpdateTime == 0) {
+            prevUpdateTime = System.nanoTime();
         }
 
         long time = System.nanoTime();
-        float deltaTime = (time - previousTime) / 1000000000.0f;
-        previousTime = time;//System.nanoTime();
+        float deltaTime = (time - prevUpdateTime) / 1000000000.0f;
+        prevUpdateTime = time;//System.nanoTime();
 
         if (Math.abs(xDirection) >= 0.5) {
             xMotion *= -1;
@@ -91,7 +91,4 @@ public class LauncherTube extends RicochetObstacle {
     private float yDirection;
     private float xMotion = 1;
     private float yMotion = 1;
-
-    private long previousTime;
-
 }

@@ -86,12 +86,12 @@ public class Dispenser extends Model
         if (initialTime == 0) {
             initRoutineDeltaX = targetX - xPos;
             initialTime = System.nanoTime();
-            prevTime = initialTime;
+            prevUpdateTime = initialTime;
         }
         long time = System.nanoTime();
         float deltaTime = (time - initialTime) / 1000000000.0f;
-        float littleDelta = (time - prevTime) / 1000000000.0f;
-        prevTime = time;
+        float littleDelta = (time - prevUpdateTime) / 1000000000.0f;
+        prevUpdateTime = time;
 
         //init time not yet expired
         if (deltaTime < GamePlayActivity.INITIALIZATION_TIME) {
@@ -128,13 +128,10 @@ public class Dispenser extends Model
         //       + xPos );
     }
 
-    private float deltaX;
-
     private int motionMultiplier;
 
     private float targetX = Border.XRIGHT;
 
-    private long prevTime;
     private long initialTime = 0;
     private float initRoutineDeltaX;
 

@@ -67,7 +67,6 @@ public abstract class Model
         GLES20.glUniform1i(textureUniformHandle, 0);
 
         int textureCoordinateHandle = GLES20.glGetAttribLocation(programHandle, "a_TexCoordinate");
-        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, dataVBO);
         GLES20.glEnableVertexAttribArray(textureCoordinateHandle);
         GLES20.glVertexAttribPointer(textureCoordinateHandle, COORDS_PER_TEX, GLES20.GL_FLOAT,
                 false, stride, (COORDS_PER_VERTEX) * BYTES_PER_FLOAT);
@@ -86,6 +85,7 @@ public abstract class Model
             Matrix.multiplyMM(mvpMatrix, 0, projectionMatrix, 0, mvMatrix, 0);
             //TODO: scaling mvMatrix messes up shader, so scaling must be done last, not sure why
             Matrix.scaleM(mvpMatrix, 0, scaleFactor, scaleFactor, scaleFactor);
+            //Matrix.scaleM(mvpMatrix, 0, 3, 3, 3);
 
         }
         else
@@ -106,9 +106,10 @@ public abstract class Model
         // Pass in the light position in eye space.
         GLES20.glUniform3f(mLightPosHandle, lightPosInEyeSpace[0], lightPosInEyeSpace[1], lightPosInEyeSpace[2]);
 
+        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, dataVBO);
         GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, orderVBO);
 
-        // Draw the triangle
+        // Draw the triangles
         GLES20.glDrawElements(GLES20.GL_TRIANGLES, numVertices, GLES20.GL_UNSIGNED_SHORT, 0);
 
         //unbind buffers
@@ -168,7 +169,8 @@ public abstract class Model
             //initialize model matrix
             Matrix.setIdentityM(modelMatrix, 0);
             //translate model to initial position
-            Matrix.translateM(modelMatrix, 0, initialXPos, initialYPos, 0);
+            //Matrix.scaleM(modelMatrix, 0, 3, 3, 3);
+            Matrix.translateM(modelMatrix, 0, initialXPos, initialYPos, initialZPos);
             xPos = initialXPos + visualXOffset;
             yPos = initialYPos + visualYOffset;
         }
@@ -268,9 +270,57 @@ public abstract class Model
         return offscreen;
     }
 
+    public float getDeltaX() {
+        return deltaX;
+    }
+
+    public void setDeltaX(float deltaX) {
+        this.deltaX = deltaX;
+    }
+
+    public float getDeltaY() {
+        return deltaY;
+    }
+
+    public void setDeltaY(float deltaY) {
+        this.deltaY = deltaY;
+    }
+
+    public float getDeltaZ() {
+        return deltaZ;
+    }
+
+    public void setDeltaZ(float deltaZ) {
+        this.deltaZ = deltaZ;
+    }
+
+    public long getPrevUpdateTime() {
+        return prevUpdateTime;
+    }
+
+    public void setPrevUpdateTime(long prevUpdateTime) {
+        this.prevUpdateTime = prevUpdateTime;
+    }
+
+    public void setxPos(float xPos) {
+        this.xPos = xPos;
+    }
+
+    public void setyPos(float yPos) {
+        this.yPos = yPos;
+    }
+
+    public float getzPos() {
+        return zPos;
+    }
+
+    public void setzPos(float zPos) {
+        this.zPos = zPos;
+    }
+
     protected boolean offscreen;
 
-    protected boolean initialized = false;
+    boolean initialized = false;
 
     public String fragmentShaderCode;
     public String vertexShaderCode;
@@ -285,13 +335,25 @@ public abstract class Model
      */
     protected float yPos;
 
-    protected float initialXPos;
+    float zPos;
 
-    protected float initialYPos;
+    protected float deltaX;
 
-    protected float visualXOffset = 0;
+    protected float deltaY;
 
-    protected float visualYOffset = 0;
+    float deltaZ;
+
+    protected float initialXPos = 0;
+
+    protected float initialYPos = 0;
+
+    float initialZPos = 0;
+
+    protected long prevUpdateTime = 0;
+
+    float visualXOffset = 0;
+
+    float visualYOffset = 0;
 
     protected float[] modelMatrix = new float[16];
 

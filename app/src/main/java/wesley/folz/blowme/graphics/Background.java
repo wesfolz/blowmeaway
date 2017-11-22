@@ -4,6 +4,7 @@ import android.opengl.Matrix;
 
 import wesley.folz.blowme.graphics.models.Model;
 import wesley.folz.blowme.util.GraphicsUtilities;
+import wesley.folz.blowme.util.Physics;
 
 /**
  * Created by Wesley on 9/10/2016.
@@ -13,17 +14,19 @@ public class Background extends Model
     public Background()
     {
         super();
+        float corner = 1.0f;
+        float length = 3.0f;
         interleavedData = new float[]{
-                -1.0f, 1.0f, -1.0f,    // top left
+                -corner, length * corner, -1.0f,    // top left
                 0.0f, 0.0f,            //texture
                 0.0f, 0.0f, 1.0f,      //normal
-                -1.0f, -3.0f, -1.0f,  // bottom left
+                -corner, -length * corner, -1.0f,  // bottom left
                 0.0f, 1.0f,           //texture
                 0.0f, 0.0f, 1.0f,       //normal
-                1.0f, -3.0f, -1.0f,    // bottom right
+                corner, -length * corner, -1.0f,    // bottom right
                 1.0f, 1.0f,                //texture
                 0.0f, 0.0f, 1.0f,       //normal
-                1.0f, 1.0f, -1.0f,      // top right
+                corner, length * corner, -1.0f,      // top right
                 1.0f, 0.0f,              //texture
                 0.0f, 0.0f, 1.0f      //normal
         };
@@ -64,13 +67,7 @@ public class Background extends Model
     @Override
     public void updatePosition(float x, float y)
     {
-        long time = System.nanoTime();
-        float deltaTime = (time - previousTime) / 1000000000.0f;
-        previousTime = time;
-
-        //deltaY = deltaTime * risingSpeed;
-        deltaY = 0.002f;
-        yPos += deltaY;
+        Physics.rise(this, RISING_SPEED);
 
         if (yPos >= 2)
         {
@@ -79,6 +76,9 @@ public class Background extends Model
         }
     }
 
-    private long previousTime;
-    private float deltaY;
+    public float getDeltaY() {
+        return deltaY;
+    }
+
+    private static final float RISING_SPEED = 0.1f;
 }

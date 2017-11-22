@@ -5,6 +5,7 @@ import android.opengl.Matrix;
 import wesley.folz.blowme.graphics.Border;
 import wesley.folz.blowme.util.Bounds;
 import wesley.folz.blowme.util.GraphicsUtilities;
+import wesley.folz.blowme.util.Physics;
 
 /**
  * Created by Wesley on 9/24/2016.
@@ -46,8 +47,8 @@ public class RicochetObstacle extends Model
     public void resumeGame()
     {
         super.resumeGame();
-        if (previousTime != 0) {
-            previousTime = System.nanoTime();
+        if (prevUpdateTime != 0) {
+            prevUpdateTime = System.nanoTime();
         }
     }
 
@@ -69,17 +70,7 @@ public class RicochetObstacle extends Model
     @Override
     public void updatePosition(float x, float y)
     {
-        if (previousTime == 0)
-        {
-            previousTime = System.nanoTime();
-        }
-        long time = System.nanoTime();
-        float deltaTime = (time - previousTime) / 1000000000.0f;
-        previousTime = time;
-
-        deltaY = deltaTime * RISING_SPEED;
-
-        yPos += deltaY;
+        Physics.rise(this, RISING_SPEED);
 
         getBounds().setBounds(xPos - scaleFactor, yPos - scaleFactor, xPos + scaleFactor, yPos + scaleFactor);
     }
@@ -97,16 +88,6 @@ public class RicochetObstacle extends Model
     {
         return this.getBounds().getyBottom() > Border.YTOP || offscreen;
     }
-
-    public float getDeltaY() {
-        return deltaY;
-    }
-
-    private float deltaY;
-
-    private float deltaX;
-
-    private long previousTime = 0;
 
     private static final float RISING_SPEED = 0.1f;
 

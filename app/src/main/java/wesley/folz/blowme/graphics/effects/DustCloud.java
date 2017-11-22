@@ -213,9 +213,7 @@ public class DustCloud extends ParticleSystem
             yUp += y;
             //time += 0.003f;
             time += 3.0f * y / 2.0f;
-
         }
-
     }
 
     private float yUp;

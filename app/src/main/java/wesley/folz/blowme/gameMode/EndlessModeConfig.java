@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Random;
 
 import wesley.folz.blowme.graphics.Border;
+import wesley.folz.blowme.graphics.Wormhole;
 import wesley.folz.blowme.graphics.effects.Explosion;
 import wesley.folz.blowme.graphics.models.DestructiveObstacle;
 import wesley.folz.blowme.graphics.models.FallingObject;
@@ -70,9 +71,6 @@ public class EndlessModeConfig extends ModeConfig implements
         vortexes = new ArrayList<>();
         hazards = new ArrayList<>();
         missileLaunchers = new ArrayList<>();
-
-        //fan = new Fan();
-        models.add(fan);
 
         for (int i = 0; i < numRings; i++) {
             FallingObject fo = new FallingObject("ring");
@@ -138,6 +136,14 @@ public class EndlessModeConfig extends ModeConfig implements
         //background = new Background();
         models.add(background);
 
+        wormhole = new Wormhole(0.2f, 0.5f, -0.2f, -0.5f);
+        wormhole.setBackground(background);
+
+        //fan = new Fan();
+        models.add(fan);
+        models.add(wormhole);
+
+
         positionsInitialized = false;
 
         //keeps object matrices from reinitializing
@@ -158,6 +164,8 @@ public class EndlessModeConfig extends ModeConfig implements
         background.updatePosition(0, 0);
 
         dispenser.updatePosition(0, 0);
+
+        wormhole.updatePosition(0, 0);
 
         updateMissileLaunchers();
 

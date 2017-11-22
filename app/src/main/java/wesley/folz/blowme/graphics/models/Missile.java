@@ -74,7 +74,7 @@ public class Missile extends Model {
     public void resumeGame() {
         super.resumeGame();
         trail.resumeGame();
-        previousTime = System.nanoTime();
+        prevUpdateTime = System.nanoTime();
     }
 
     @Override
@@ -107,13 +107,13 @@ public class Missile extends Model {
     @Override
     public void updatePosition(float x, float y) {
 
-        if (previousTime == 0) {
-            previousTime = System.nanoTime();
+        if (prevUpdateTime == 0) {
+            prevUpdateTime = System.nanoTime();
         }
 
         long time = System.nanoTime();
-        float deltaTime = (time - previousTime) / 1000000000.0f;
-        previousTime = time;//System.nanoTime();
+        float deltaTime = (time - prevUpdateTime) / 1000000000.0f;
+        prevUpdateTime = time;//System.nanoTime();
 
         if (flying) {
             xDirection -= x;
@@ -168,9 +168,6 @@ public class Missile extends Model {
         this.flying = flying;
     }
 
-    private float deltaX;
-    private float deltaY;
-
     private float xVelocity;
     private float yVelocity;
 
@@ -181,8 +178,6 @@ public class Missile extends Model {
     private float xDirection;
 
     private float yDirection = 0.0f;
-
-    private float previousTime = 0;
 
     private boolean flying = false;
 

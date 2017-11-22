@@ -27,11 +27,10 @@ void main()
         diffuse = max(dot(-v_Normal, lightVector), 0.0);
     }
 
-
     // Add attenuation.
     diffuse = diffuse * (1.0 / (1.0 + (0.10 * distance * distance)));// Add ambient lighting
     diffuse = diffuse + 0.4;
 
     // Multiply the color by the diffuse illumination level to get final output color.
-    gl_FragColor = v_Color * diffuse;
+    gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);//v_Color * diffuse;
 }

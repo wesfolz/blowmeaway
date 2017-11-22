@@ -80,14 +80,14 @@ public class Fan extends Model
             initRoutineDeltaX = targetX - initRoutineX;
             initRoutineDeltaY = targetY - initRoutineY;
             initialTime = System.nanoTime();
-            prevTime = initialTime;
+            prevUpdateTime = initialTime;
             Log.e("initRoutine", "deltaX " + initRoutineDeltaX + " deltaY " + initRoutineDeltaY);
         }
         long time = System.nanoTime();
         float deltaTime = (time - initialTime) / 1000000000.0f;
         //time = System.nanoTime();
-        float littleDelta = (time - prevTime) / 1000000000.0f;
-        prevTime = time;
+        float littleDelta = (time - prevUpdateTime) / 1000000000.0f;
+        prevUpdateTime = time;
 
         if (deltaTime < GamePlayActivity.INITIALIZATION_TIME) {
 
@@ -393,10 +393,6 @@ public class Fan extends Model
     public void setBlowing(boolean blowing) {
         this.blowing = blowing;
     }
-
-    private float deltaX;
-    private float deltaY;
-
     private float parametricX;
     private float parametricY;
     private float parametricAngle = (float) Math.PI;
@@ -410,8 +406,6 @@ public class Fan extends Model
     private boolean directions[] = new boolean[10];
 
     public boolean stop = true;
-
-    private float prevTime;
 
     private float fingerRotation = 0;
 

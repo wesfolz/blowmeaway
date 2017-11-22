@@ -29,7 +29,7 @@ public class OrbitingObject extends Model
         initialXPos = xPos;
         initialYPos = yPos;
 
-        previousTime = System.currentTimeMillis();
+        prevUpdateTime = System.currentTimeMillis();
     }
 
     @Override
@@ -79,8 +79,9 @@ public class OrbitingObject extends Model
     public void updatePosition(float x, float y)
     {
         long time = System.currentTimeMillis();// % 4000L;
-        float angle = (float) (Math.PI / 180.0f) * (time - previousTime) / 4.0f; //convert to radians
-        previousTime = time;
+        float angle =
+                (float) (Math.PI / 180.0f) * (time - prevUpdateTime) / 4.0f; //convert to radians
+        prevUpdateTime = time;
 
         float newX = 0.1f * (float) Math.cos(parametricAngle + initialAngle);
         float newZ = 0.35f * (float) Math.sin(parametricAngle + initialAngle);
@@ -97,16 +98,9 @@ public class OrbitingObject extends Model
         yPos = y;
     }
 
-    private long previousTime;
-
     private float parametricAngle = 0;
 
     private float initialAngle;
-
-    private float deltaX;
-    private float deltaY;
-    private float deltaZ;
-    private float zPos;
 
     private String type;
 }
