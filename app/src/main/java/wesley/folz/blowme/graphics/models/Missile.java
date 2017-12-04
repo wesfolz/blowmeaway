@@ -164,6 +164,31 @@ public class Missile extends Model {
         return flying;
     }
 
+
+    @Override
+    public void setDeltaX(float deltaX) {
+        this.deltaX = deltaX;
+        trail.setDeltaX(deltaX);
+    }
+
+    @Override
+    public void setDeltaY(float deltaY) {
+        this.deltaY = deltaY;
+        trail.setDeltaY(deltaY);
+    }
+
+    @Override
+    public void setxPos(float xPos) {
+        this.xPos = xPos;
+        trail.setxPos(xPos);
+    }
+
+    @Override
+    public void setyPos(float yPos) {
+        this.yPos = yPos;
+        trail.setyPos(yPos);
+    }
+
     public void setFlying(boolean flying) {
         this.flying = flying;
     }

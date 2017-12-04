@@ -5,6 +5,7 @@ import android.graphics.PointF;
 import wesley.folz.blowme.graphics.Border;
 import wesley.folz.blowme.graphics.effects.Wind;
 import wesley.folz.blowme.graphics.models.Model;
+import wesley.folz.blowme.graphics.models.WormholeDistortion;
 
 /**
  * Created by wesley on 7/3/2015.
@@ -156,6 +157,53 @@ public abstract class Physics
         m.setyPos(m.getyPos() + m.getDeltaY());
     }
 
+    public static void transport(WormholeDistortion wormhole, Model model) {
+        model.setDeltaY(wormhole.getyPos() - model.getyPos());
+        model.setDeltaX(wormhole.getxPos() - model.getxPos());
+        model.setyPos(wormhole.getyPos());
+        model.setxPos(wormhole.getxPos());
+        model.getBounds().setBounds(model.getxPos() - 0.03f, model.getyPos() - 0.03f,
+                model.getxPos() + 0.03f, model.getyPos() + 0.03f);
+    }
+
+    public static float[] calculateDistanceVector(float x1, float y1, float x2, float y2) {
+        float[] vector = new float[2];
+        float xDist = x1 - x2;
+        float yDist = y1 - y2;
+        vector[0] = xDist;// / (xDist + yDist);
+        vector[1] = yDist;// / (xDist + yDist);
+
+        return vector;
+    }
+
+    public static float[] travelOnVector(Model model, float xComponent, float yComponent,
+            float mass) {
+        float time = (System.nanoTime() - model.getPrevUpdateTime()) / 1000000000.0f;
+        model.setPrevUpdateTime(System.nanoTime());
+        float fallingTime = mass * time;
+//        model.setDeltaX(5*fallingTime*xComponent);
+        model.setDeltaX(fallingTime * xComponent);
+        //deltaY = 5 * fallingTime * yComponent;
+//        model.setDeltaY(-0.001f);//fallingTime * yComponent;
+        model.setDeltaY(fallingTime * yComponent);
+
+        model.setyPos(model.getyPos() + model.getDeltaY());
+        model.setxPos(model.getxPos() + model.getDeltaX());
+
+        float normalizedX = Math.abs(
+                xComponent / (Math.max(Math.abs(xComponent), Math.abs(yComponent))));
+
+        float normalizedY = Math.abs(
+                yComponent / (Math.max(Math.abs(xComponent), Math.abs(yComponent))));
+
+        float stretchFactor = 0.5f * (normalizedY - normalizedX);
+
+        float[] stretch = new float[2];
+        stretch[0] = 1.0f - stretchFactor;
+        stretch[1] = 1.0f + stretchFactor;
+
+        return stretch;
+    }
 
     public static float[] sumOfForces( float xForce, float yForce )
     {

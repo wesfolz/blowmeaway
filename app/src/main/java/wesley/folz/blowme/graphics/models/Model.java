@@ -24,6 +24,7 @@ public abstract class Model
         this.FRAGMENT_SHADER = R.raw.defaultfragmentshader;
         this.TEXTURE_RESOURCE = R.drawable.yellow_circle;
         GraphicsUtilities.readShader(this);
+        stretch = new float[]{1.0f, 1.0f};
     }
 
     public void draw()
@@ -318,6 +319,10 @@ public abstract class Model
         this.zPos = zPos;
     }
 
+    public void setStretch(float[] stretch) {
+        this.stretch = stretch;
+    }
+
     protected boolean offscreen;
 
     boolean initialized = false;
@@ -354,6 +359,8 @@ public abstract class Model
     float visualXOffset = 0;
 
     float visualYOffset = 0;
+
+    protected float[] stretch;
 
     protected float[] modelMatrix = new float[16];
 

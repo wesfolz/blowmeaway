@@ -64,7 +64,7 @@ public class Wormhole extends Model {
         if (prevUpdateTime == 0) {
             prevUpdateTime = System.nanoTime();
         }
-        if (remainingTime <= 0 && timeout > 0) {
+        if (remove) {
             removalRoutine();
         } else {
             distortion1.updatePosition(0, background.getyPos());
@@ -74,6 +74,14 @@ public class Wormhole extends Model {
             prevUpdateTime = time;
             remainingTime -= deltaTime;
         }
+    }
+
+    public boolean isRemove() {
+        return remove;
+    }
+
+    public void setRemove(boolean remove) {
+        this.remove = remove;
     }
 
     public void setBackground(Background background) {
@@ -98,7 +106,9 @@ public class Wormhole extends Model {
 
     private Background background;
 
-    private float timeout = 15.0f;
+    private float timeout = -1;//15.0f;
 
     private float remainingTime = 0;
+
+    private boolean remove = false;
 }

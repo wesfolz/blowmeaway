@@ -59,7 +59,7 @@ public class RicochetObstacle extends Model
         Matrix.setIdentityM(mvp, 0);
 
         //translate model matrix to new position
-        Matrix.translateM(modelMatrix, 0, 0, deltaY, 0);
+        Matrix.translateM(modelMatrix, 0, deltaX, deltaY, deltaZ);
 
         //copy modelMatrix to separate matrix for return, (returning modelMatrix doesn't work)
         Matrix.multiplyMM(mvp, 0, modelMatrix, 0, mvp, 0);
@@ -71,6 +71,7 @@ public class RicochetObstacle extends Model
     public void updatePosition(float x, float y)
     {
         Physics.rise(this, RISING_SPEED);
+        deltaX = 0;
 
         getBounds().setBounds(xPos - scaleFactor, yPos - scaleFactor, xPos + scaleFactor, yPos + scaleFactor);
     }

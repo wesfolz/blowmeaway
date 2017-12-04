@@ -340,29 +340,30 @@ public abstract class ModeConfig
     }
 
     boolean wormholeInteraction(Model model) {
-        if (!model.isOffscreen() && !wormhole.isOffscreen()) {
+        if (!model.isOffscreen() && !wormhole.isOffscreen() && !wormhole.isRemove()) {
             if (Physics.isCollision(wormhole.getDistortion1().getBounds(), model.getBounds())) {
-                Log.e("wormhole collision",
-                        "distortion 1 collision " + wormhole.getDistortion2().getyPos());
-                model.setDeltaY(wormhole.getDistortion2().getyPos() - model.getyPos());
-                model.setDeltaX(wormhole.getDistortion2().getxPos() - model.getxPos());
-                model.setyPos(wormhole.getDistortion2().getyPos());
-                model.setxPos(wormhole.getDistortion2().getxPos());
-                model.getBounds().setBounds(model.getxPos() - 0.03f, model.getyPos() - 0.03f,
-                        model.getxPos() + 0.03f, model.getyPos() + 0.03f);
-
+                float[] vector = Physics.calculateDistanceVector(
+                        wormhole.getDistortion1().getxPos(),
+                        wormhole.getDistortion1().getyPos(), model.getxPos(), model.getyPos());
+                if (Math.abs(vector[0]) > 0.01f || Math.abs(vector[1]) > 0.01f) {
+                    model.setStretch(Physics.travelOnVector(model, vector[0], vector[1], 8.0f));
+                } else {
+                    Physics.transport(wormhole.getDistortion2(), model);
+                    wormhole.setRemove(true);
+                }
                 return true;
             } else if (Physics.isCollision(wormhole.getDistortion2().getBounds(),
                     model.getBounds())) {
-                Log.e("wormhole collision", "distortion 2 collision");
-                /*
-                model.setDeltaY(wormhole.getDistortion1().getyPos() - model.getyPos());
-                model.setDeltaX(wormhole.getDistortion1().getxPos() - model.getxPos());
-                model.setyPos(wormhole.getDistortion1().getyPos());
-                model.setxPos(wormhole.getDistortion1().getxPos());
-                model.getBounds().setBounds(model.getxPos() - 0.03f, model.getyPos() - 0.03f,
-                        model.getxPos() + 0.03f, model.getyPos() + 0.03f);
-                        */
+                float[] vector = Physics.calculateDistanceVector(
+                        wormhole.getDistortion2().getxPos(),
+                        wormhole.getDistortion2().getyPos(), model.getxPos(), model.getyPos());
+                if (Math.abs(vector[0]) > 0.01f || Math.abs(vector[1]) > 0.01f) {
+                    model.setStretch(Physics.travelOnVector(model, vector[0], vector[1], 8.0f));
+                } else {
+                    Physics.transport(wormhole.getDistortion1(), model);
+                    wormhole.setRemove(true);
+                }
+                return true;
             }
         }
         return false;

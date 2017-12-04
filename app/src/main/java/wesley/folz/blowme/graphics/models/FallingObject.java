@@ -77,12 +77,12 @@ public class FallingObject extends Model
         float angle = 0.1f * ((int) time);
         long deltaT = time - prevRenderTime;
 
-        if (deltaT > 50 && collected)
-        {
+        //if (deltaT > 50 && collected)
+        //{
             //Matrix.translateM(modelMatrix, 0, deltaX, 0, deltaZ);
-            Matrix.scaleM(modelMatrix, 0, stretchX, stretchY, 1);
+        Matrix.scaleM(modelMatrix, 0, stretch[0], stretch[1], 1);
             prevRenderTime = time;
-        }
+        //}
         Matrix.translateM(modelMatrix, 0, deltaX, deltaY, deltaZ);
         Matrix.setRotateM(transformation, 0, angle, 1, 1, 1);
         //Matrix.translateM(transformation, 0, xPos, yPos, zPos);
@@ -168,12 +168,10 @@ public class FallingObject extends Model
             if (initialAngle == 0)
             {
                 xVelocity -= spiralIncrement;
-                //xPos -= spiralIncrement;
             }
             else
             {
                 xVelocity += spiralIncrement;
-                //xPos += spiralIncrement;
             }
         }
         else
@@ -181,13 +179,8 @@ public class FallingObject extends Model
             if (spiralFactor >= initialRadius)
             {
                 spiralFactor = initialRadius;
-                //deltaX += vortexX - xPos;
-                //xPos = vortexX;
-                //deltaZ = -zPos;
                 deltaZ = 0;
                 zPos = 0;
-                //deltaY = 0;
-                //yPos = spiralY;
                 spiralY = 0;
                 spiraling = false;
                 spiralOut = false;
@@ -197,7 +190,6 @@ public class FallingObject extends Model
                 yVelocity = 0;
                 xVelocity = 0;
                 prevUpdateTime = System.nanoTime();
-                //travelOnVector(0, 0.001f);
             }
         }
         //updatePosition(deltaX, deltaY);
@@ -252,12 +244,10 @@ public class FallingObject extends Model
             if (initialAngle == 0)
             {
                 xVelocity -= spiralIncrement;
-                //xPos -= spiralIncrement;
             }
             else
             {
                 xVelocity += spiralIncrement;
-                //xPos += spiralIncrement;
             }
         }
         else
@@ -273,39 +263,18 @@ public class FallingObject extends Model
                 prevUpdateTime = System.nanoTime();
                 //spiralIn = false;
                 //spiraling = false;
-                travelOnVector(0, 0.001f);
+                //travelOnVector(0, 0.001f);
+                this.stretch = Physics.travelOnVector(this, 0, 0.001f, MASS);
+
+                if (collectedCount == 0) {
+                    collected = true;
+                }
+                collectedCount++;
+
+                if (collectedCount >= 10) {
+                    spiralVortex.setNumCollected();
+                }
             }
-        }
-    }
-
-    private void travelOnVector(float xComponent, float yComponent)
-    {
-        float time = (System.nanoTime() - prevUpdateTime) / 1000000000.0f;
-        prevUpdateTime = System.nanoTime();
-        float fallingTime = MASS * time;
-        deltaX = 5 * fallingTime * xComponent;
-        //deltaY = 5 * fallingTime * yComponent;
-        deltaY = -0.001f;//fallingTime * yComponent;
-
-        xPos += deltaX;
-        yPos += deltaY;
-
-        float normalizedX = Math.abs(xComponent / (Math.max(Math.abs(xComponent), Math.abs(yComponent))));
-
-        float normalizedY = Math.abs(yComponent / (Math.max(Math.abs(xComponent), Math.abs(yComponent))));
-
-        float stretchFactor = 0.5f * (normalizedY - normalizedX);
-
-        stretchX = 1.0f - stretchFactor;
-        stretchY = 1.0f + stretchFactor;
-        if (collectedCount == 0)
-        {
-            collected = true;
-        }
-        collectedCount++;
-
-        if (collectedCount >= 10) {
-            spiralVortex.setNumCollected();
         }
     }
 
@@ -464,10 +433,6 @@ public class FallingObject extends Model
     private float yVelocity;
 
     private static final float MASS = 1.5f;
-
-    private float stretchX = 1.0f;
-
-    private float stretchY = 1.0f;
 
     private Physics.COLLISION collision;
 

@@ -204,7 +204,7 @@ public class EndlessModeConfig extends ModeConfig implements
                 o.enableGraphics(graphicsData);
                 o.initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
                 models.add(o);
-            } else {
+            } else if (!wormholeInteraction(o)) {
                 o.updatePosition(0, 0);
             }
             modelCount++;
@@ -243,7 +243,6 @@ public class EndlessModeConfig extends ModeConfig implements
         for (MissileLauncher ml : missileLaunchers) {
             xForce = 0;
             yForce = 0;
-
             Missile m = ml.getMissile();
             if (ml.isOffscreen()) {
                 float pos[] = generateRandomLocation();
@@ -260,13 +259,14 @@ public class EndlessModeConfig extends ModeConfig implements
                 models.add(ml);
                 modelCount++;
             }
-
             if (!m.isOffscreen()) {
-                if (windInteraction(m)) {
-                    xForce = fan.getWind().getxForce();
-                    yForce = fan.getWind().getyForce();
+                if (!wormholeInteraction(m)) {
+                    if (windInteraction(m)) {
+                        xForce = fan.getWind().getxForce();
+                        yForce = fan.getWind().getyForce();
+                    }
+                    ml.updatePosition(xForce, yForce);
                 }
-                ml.updatePosition(xForce, yForce);
             }
         }
     }
