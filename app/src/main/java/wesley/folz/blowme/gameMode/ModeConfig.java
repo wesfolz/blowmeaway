@@ -196,6 +196,8 @@ public abstract class ModeConfig
 
     private void exitRoutine() {
         boolean exited = true;
+        fan.setTargets(MenuModeConfig.FAN_TARGET_X, MenuModeConfig.FAN_TARGET_Y,
+                MenuModeConfig.FAN_TARGET_Y_ANGLE, MenuModeConfig.FAN_TARGET_Z_ANGLE);
         for (Model m : models) {
             exited &= m.removalRoutine();
         }
@@ -340,30 +342,36 @@ public abstract class ModeConfig
     }
 
     boolean wormholeInteraction(Model model) {
-        if (!model.isOffscreen() && !wormhole.isOffscreen() && !wormhole.isRemove()) {
-            if (Physics.isCollision(wormhole.getDistortion1().getBounds(), model.getBounds())) {
-                float[] vector = Physics.calculateDistanceVector(
-                        wormhole.getDistortion1().getxPos(),
-                        wormhole.getDistortion1().getyPos(), model.getxPos(), model.getyPos());
-                if (Math.abs(vector[0]) > 0.01f || Math.abs(vector[1]) > 0.01f) {
-                    model.setStretch(Physics.travelOnVector(model, vector[0], vector[1], 8.0f));
-                } else {
-                    Physics.transport(wormhole.getDistortion2(), model);
-                    wormhole.setRemove(true);
+        if (wormhole != null) {
+            if (!model.isOffscreen() && !wormhole.isOffscreen() && !wormhole.isRemove()) {
+                if (Physics.isCollision(wormhole.getDistortion1().getBounds(), model.getBounds())) {
+                    float[] vector = Physics.calculateDistanceVector(
+                            wormhole.getDistortion1().getxPos(),
+                            wormhole.getDistortion1().getyPos(), model.getxPos(), model.getyPos());
+                    if (Math.abs(vector[0]) > 0.01f || Math.abs(vector[1]) > 0.01f) {
+                        Physics.travelOnVector(model, vector[0], vector[1], 8.0f);
+                        //model.setStretch(Physics.travelOnVector(model, vector[0], vector[1],
+                        // 8.0f));
+                    } else {
+                        Physics.transport(wormhole.getDistortion2(), model);
+                        wormhole.setRemove(true);
+                    }
+                    return true;
+                } else if (Physics.isCollision(wormhole.getDistortion2().getBounds(),
+                        model.getBounds())) {
+                    float[] vector = Physics.calculateDistanceVector(
+                            wormhole.getDistortion2().getxPos(),
+                            wormhole.getDistortion2().getyPos(), model.getxPos(), model.getyPos());
+                    if (Math.abs(vector[0]) > 0.01f || Math.abs(vector[1]) > 0.01f) {
+                        Physics.travelOnVector(model, vector[0], vector[1], 8.0f);
+                        //model.setStretch(Physics.travelOnVector(model, vector[0], vector[1],
+                        // 8.0f));
+                    } else {
+                        Physics.transport(wormhole.getDistortion1(), model);
+                        wormhole.setRemove(true);
+                    }
+                    return true;
                 }
-                return true;
-            } else if (Physics.isCollision(wormhole.getDistortion2().getBounds(),
-                    model.getBounds())) {
-                float[] vector = Physics.calculateDistanceVector(
-                        wormhole.getDistortion2().getxPos(),
-                        wormhole.getDistortion2().getyPos(), model.getxPos(), model.getyPos());
-                if (Math.abs(vector[0]) > 0.01f || Math.abs(vector[1]) > 0.01f) {
-                    model.setStretch(Physics.travelOnVector(model, vector[0], vector[1], 8.0f));
-                } else {
-                    Physics.transport(wormhole.getDistortion1(), model);
-                    wormhole.setRemove(true);
-                }
-                return true;
             }
         }
         return false;
@@ -430,7 +438,9 @@ public abstract class ModeConfig
     protected void drawModels()
     {
         background.draw();
-        wormhole.draw();
+        if (wormhole != null) {
+            wormhole.draw();
+        }
         fan.draw();
 
         dispenser.draw();

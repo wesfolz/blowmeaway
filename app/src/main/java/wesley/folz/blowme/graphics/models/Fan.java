@@ -63,6 +63,7 @@ public class Fan extends Model
     {
         super.initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
         getWind().initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
+        Log.e("initMatrix", "init matrices, resuming: " + this.resuming);
     }
 
     @Override
@@ -131,6 +132,12 @@ public class Fan extends Model
     }
 
     @Override
+    public boolean removalRoutine() {
+        initialized = false;
+        return initializationRoutine();
+    }
+
+    @Override
     public void draw()
     {
         super.draw();
@@ -144,7 +151,6 @@ public class Fan extends Model
         super.pauseGame();
         getWind().pauseGame();
     }
-
 
     @Override
     public void resumeGame() {
@@ -347,8 +353,6 @@ public class Fan extends Model
         updateCount++;
 
         moveParametric();
-
-
     }
 
     public void touch(float x)

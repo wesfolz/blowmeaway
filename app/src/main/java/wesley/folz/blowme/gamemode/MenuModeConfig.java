@@ -144,4 +144,6 @@ public class MenuModeConfig extends ModeConfig
 
     public static final float FAN_TARGET_X = 0;
     public static final float FAN_TARGET_Y = GamePlayActivity.Y_EDGE_POSITION;
+    public static final float FAN_TARGET_Y_ANGLE = 0;
+    public static final float FAN_TARGET_Z_ANGLE = 0;
 }
