@@ -74,7 +74,9 @@ public class Missile extends Model {
     public void resumeGame() {
         super.resumeGame();
         trail.resumeGame();
-        prevUpdateTime = System.nanoTime();
+        if (prevUpdateTime != 0) {
+            prevUpdateTime = System.nanoTime();
+        }
     }
 
     @Override
