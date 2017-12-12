@@ -109,34 +109,36 @@ public abstract class ModeConfig
 
     public void surfaceGraphicsChanged(int width, int height)
     {
-        float ratio = (float) width / height;
+        if (!resuming) {
+            float ratio = (float) width / height;
 
-        // Set the camera position (View matrix)
-        Matrix.setLookAtM(viewMatrix, 0, 0, 0, 5.0f, 0, 0, -1.0f, 0, 1.0f, 0);
+            // Set the camera position (View matrix)
+            Matrix.setLookAtM(viewMatrix, 0, 0, 0, 5.0f, 0, 0, -1.0f, 0, 1.0f, 0);
 
-        // this projection matrix is applied to object coordinates
-        // in the onDrawFrame() method
-        //Matrix.frustumM( projectionMatrix, 0, - ratio, ratio, - 1, 1, 1, 10 );
-        Matrix.orthoM(projectionMatrix, 0, -ratio, ratio, -1, 1, 1, 10);
+            // this projection matrix is applied to object coordinates
+            // in the onDrawFrame() method
+            //Matrix.frustumM( projectionMatrix, 0, - ratio, ratio, - 1, 1, 1, 10 );
+            Matrix.orthoM(projectionMatrix, 0, -ratio, ratio, -1, 1, 1, 10);
 
-        float[] mLightPosInWorldSpace = new float[4];
-        float[] mLightPosInModelSpace = new float[]{0.0f, 0.0f, 0.0f, 1.0f};
-        float[] mLightModelMatrix = new float[16];
+            float[] mLightPosInWorldSpace = new float[4];
+            float[] mLightPosInModelSpace = new float[]{0.0f, 0.0f, 0.0f, 1.0f};
+            float[] mLightModelMatrix = new float[16];
 
-        // Calculate position of the light. Push into the distance.
-        Matrix.setIdentityM(mLightModelMatrix, 0);
-        Matrix.translateM(mLightModelMatrix, 0, 0.0f, 0.0f, 3.0f);
+            // Calculate position of the light. Push into the distance.
+            Matrix.setIdentityM(mLightModelMatrix, 0);
+            Matrix.translateM(mLightModelMatrix, 0, 0.0f, 0.0f, 3.0f);
 
-        Matrix.multiplyMV(mLightPosInWorldSpace, 0, mLightModelMatrix, 0, mLightPosInModelSpace, 0);
-        Matrix.multiplyMV(lightPosInEyeSpace, 0, viewMatrix, 0, mLightPosInWorldSpace, 0);
-        //Matrix.multiplyMV(lightPosInEyeSpace, 0, projectionMatrix, 0, lightPosInEyeSpace, 0);
+            Matrix.multiplyMV(mLightPosInWorldSpace, 0, mLightModelMatrix, 0, mLightPosInModelSpace,
+                    0);
+            Matrix.multiplyMV(lightPosInEyeSpace, 0, viewMatrix, 0, mLightPosInWorldSpace, 0);
+            //Matrix.multiplyMV(lightPosInEyeSpace, 0, projectionMatrix, 0, lightPosInEyeSpace, 0);
 
-        for (Model m : models)
-        {
-            m.initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
+            for (Model m : models) {
+                m.initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
+            }
+
+            Log.e("pause", "surface changed mode");
         }
-
-        Log.e("pause", "surface changed mode");
     }
 
     protected abstract void initializeGameObjects();
@@ -568,6 +570,7 @@ public abstract class ModeConfig
     {
         Log.e("pause", "resume mode");
         fanReadyToMove = true;
+        resuming = true;
         for (Model m : models)
         {
             m.resumeGame();
@@ -674,4 +677,6 @@ public abstract class ModeConfig
     private boolean modeComplete = false;
 
     private boolean exiting = false;
+
+    private boolean resuming = false;
 }
