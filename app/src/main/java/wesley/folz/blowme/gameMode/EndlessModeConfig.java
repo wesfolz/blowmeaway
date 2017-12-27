@@ -55,9 +55,9 @@ public class EndlessModeConfig extends ModeConfig implements
     protected void initializeGameObjects() {
         int numRicochetObstacles = 2;
         int numDestructiveObstacles = 2;
-        int numFallingObjects = 2;
         int numRings = 1;
         int numCubes = 1;
+        int numFallingObjects = numCubes + numRings;
         int numRingVortexes = 1;
         int numCubeVortexes = 1;
         numVortexes = numRingVortexes + numCubeVortexes;

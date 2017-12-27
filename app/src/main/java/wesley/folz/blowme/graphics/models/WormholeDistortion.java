@@ -134,7 +134,7 @@ public class WormholeDistortion extends Model {
         orderVBO = graphicsData.orderVBOMap.get("wormhole");
         numVertices = graphicsData.numVerticesMap.get("wormhole");
         programHandle = graphicsData.shaderProgramIdMap.get("distortion");
-        textureDataHandle = graphicsData.textureIdMap.get("sky");
+        textureDataHandle = graphicsData.textureIdMap.get("planet");
     }
 
     @Override

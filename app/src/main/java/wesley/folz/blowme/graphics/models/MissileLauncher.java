@@ -69,7 +69,6 @@ public class MissileLauncher extends Model {
         return missile;
     }
 
-    ;;//;/;/
     private Missile missile;
 
     private LauncherStand stand;

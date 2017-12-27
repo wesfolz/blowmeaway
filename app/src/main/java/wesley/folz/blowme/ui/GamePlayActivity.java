@@ -82,7 +82,7 @@ public class GamePlayActivity extends Activity
 
         transitionAnimation =
                 TransitionInflater.from(this).
-                        inflateTransition(R.transition.fade_transition);
+                        inflateTransition(R.transition.slide_transition);
 
         surfaceView = (GamePlaySurfaceView) findViewById(R.id.surfaceView);
 
@@ -267,11 +267,17 @@ public class GamePlayActivity extends Activity
         surfaceView.resumeGame();
         TransitionManager.go(mainMenuScene, transitionAnimation);
 
-        while (!gameMode.isModeComplete()) {
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+        long initTime = System.currentTimeMillis() / 100000;
+        long currTime = System.currentTimeMillis() / 100000;
+
+        if (gameMode != null) {
+            while (!gameMode.isModeComplete() && (currTime - initTime) <= INITIALIZATION_TIME) {
+                try {
+                    Thread.sleep(100);
+                    currTime = System.currentTimeMillis() / 100000;
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         }
         initializeMenuMode();

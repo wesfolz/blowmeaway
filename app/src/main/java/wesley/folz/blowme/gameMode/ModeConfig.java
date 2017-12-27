@@ -202,6 +202,7 @@ public abstract class ModeConfig
                 MenuModeConfig.FAN_TARGET_Y_ANGLE, MenuModeConfig.FAN_TARGET_Z_ANGLE);
         for (Model m : models) {
             exited &= m.removalRoutine();
+            Log.e("exitRoutine", m.getClass().getName() + " " + exited);
         }
 
         exiting = !exited;
@@ -351,11 +352,12 @@ public abstract class ModeConfig
                             wormhole.getDistortion1().getxPos(),
                             wormhole.getDistortion1().getyPos(), model.getxPos(), model.getyPos());
                     if (Math.abs(vector[0]) > 0.01f || Math.abs(vector[1]) > 0.01f) {
-                        Physics.travelOnVector(model, vector[0], vector[1], 8.0f);
-                        //model.setStretch(Physics.travelOnVector(model, vector[0], vector[1],
-                        // 8.0f));
+                        //Physics.travelOnVector(model, vector[0], vector[1], 1.0f);
+                        model.setStretch(Physics.travelOnVector(model, vector[0], vector[1],
+                                4.0f));
                     } else {
                         Physics.transport(wormhole.getDistortion2(), model);
+                        model.setStretch(new float[]{1, 1});
                         wormhole.setRemove(true);
                     }
                     return true;
@@ -365,11 +367,12 @@ public abstract class ModeConfig
                             wormhole.getDistortion2().getxPos(),
                             wormhole.getDistortion2().getyPos(), model.getxPos(), model.getyPos());
                     if (Math.abs(vector[0]) > 0.01f || Math.abs(vector[1]) > 0.01f) {
-                        Physics.travelOnVector(model, vector[0], vector[1], 8.0f);
-                        //model.setStretch(Physics.travelOnVector(model, vector[0], vector[1],
-                        // 8.0f));
+                        //Physics.travelOnVector(model, vector[0], vector[1], 1.0f);
+                        model.setStretch(Physics.travelOnVector(model, vector[0], vector[1],
+                                4.0f));
                     } else {
                         Physics.transport(wormhole.getDistortion1(), model);
+                        model.setStretch(new float[]{1, 1});
                         wormhole.setRemove(true);
                     }
                     return true;

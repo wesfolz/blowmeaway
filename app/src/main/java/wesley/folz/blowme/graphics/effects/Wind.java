@@ -2,8 +2,9 @@ package wesley.folz.blowme.graphics.effects;
 
 import android.opengl.GLES20;
 import android.opengl.Matrix;
-import android.os.SystemClock;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.Random;
 
 import wesley.folz.blowme.R;
@@ -16,8 +17,7 @@ import wesley.folz.blowme.util.GraphicsUtilities;
  */
 public class Wind extends ParticleSystem
 {
-    public Wind()
-    {
+    public Wind() {
         super();
 
         xPos = -GamePlayActivity.X_EDGE_POSITION;//+.01f;
@@ -39,91 +39,54 @@ public class Wind extends ParticleSystem
     }
 
     @Override
-    protected void generateParticles()
-    {
-        int numParticles = 5000;
-        vertexOrder = new short[numParticles];
-        int numAttributes = 4;
+    protected void generateParticles() {
+        vertexOrder = new short[NUM_PARTICLES];
 
-        interleavedData = new float[numAttributes * numParticles];
+        interleavedData = new float[NUM_ATTRIBUTES * NUM_PARTICLES];
+        Random rand = new Random();
 
-        for (int i = 0; i < numParticles; i++)
-        {
-            Random rand = new Random();
+        float[] identity = new float[16];
+        Matrix.setIdentityM(identity, 0);
+
+        for (int i = 0; i < NUM_PARTICLES; i++) {
             //direction vectors
-            // [-0.3, 0.3]
-//            interleavedData[numAttributes * i] = 1.0f - 1.3f * rand.nextFloat();//direction[0];
-// x direction
-            // [-0.1, 0.1]
-            interleavedData[numAttributes * i + 1] =
-                    getSize()[1] / 2.0f
-                            - getSize()[1] * rand.nextFloat();//direction[1]; //y direction
-//            interleavedData[numAttributes * i + 2] = 0;// 1 - 2 * rand.nextFloat();
-// direction[2]; //y direction
+            //x direction
+            interleavedData[NUM_ATTRIBUTES * i] = 0;//2.0f*rand.nextFloat();//0;
 
-            interleavedData[numAttributes * i] = 0;
-//            interleavedData[numAttributes * i] = 1.0f - 1.3f * rand.nextFloat();//direction[0];
-// x direction
-            // [-0.1, 0.1]
-/*
-            float yFloat = rand.nextFloat();
-            if(yFloat <= 0.25) {
-                interleavedData[numAttributes * i + 1] = -0.1f;//
-                interleavedData[numAttributes * i + 2] = 0.0f;
-            }
-            else if(yFloat <= 0.5) {
-                interleavedData[numAttributes * i + 1] = -0.033f;//-0.033f;
-                interleavedData[numAttributes * i + 2] = -0.1f;
-            }
-            else if(yFloat <= 0.75) {
-                interleavedData[numAttributes * i + 1] = 0.033f;//0.033f;
-                interleavedData[numAttributes * i + 2] = 0.1f;
-            }
-            else {
-                interleavedData[numAttributes * i + 1] = 0.1f;//0.1f;
-                interleavedData[numAttributes * i + 2] = 0.1f;
-            }
-*/
-            interleavedData[numAttributes * i + 2] =
-                    0;// 1 - 2 * rand.nextFloat();//direction[2]; //z direction
+            //y direction [-size/2, size/2]
+            interleavedData[NUM_ATTRIBUTES * i + 1] =
+                    getSize()[1] / 2.0f - getSize()[1] * rand.nextFloat();
 
-            //speed
-            // [0, 0.5]
-            interleavedData[numAttributes * i + 3] = rand.nextFloat() / 2.0f;//currentParticle.getSpeed();
-            //interleavedData[10*i+9] = 1.0f;//(float)Math.random();
+            //z direction
+            interleavedData[NUM_ATTRIBUTES * i + 2] = 0;
+
+            //speed [0.5, 1.0]
+            interleavedData[NUM_ATTRIBUTES * i + 3] =
+                    1.0f - rand.nextFloat() / 2.0f;//currentParticle.getSpeed();
+
+            //add 4x4 matrix
+            for (int j = 0; j < 16; j++) {
+                interleavedData[NUM_ATTRIBUTES * i + 4 + j] = identity[j];
+            }
+
             vertexOrder[i] = (short) i;
         }
     }
 
+    //must be called after glBindBuffer(GLES20.GL_ARRAY_BUFFER, dataVBO);
+    private void updateDataBuffer() {
+        dataBuffer = ByteBuffer.allocateDirect(interleavedData.length * 4)
+                .order(ByteOrder.nativeOrder()).asFloatBuffer();
+        dataBuffer.put(interleavedData).position(0);
+
+        GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, dataBuffer.capacity() * 4,
+                dataBuffer, GLES20.GL_STATIC_DRAW);
+    }
 
     @Override
-    public void draw()
-    {
-        //wBounds.draw();
-        // Add program to OpenGL ES environment
-        GLES20.glUseProgram(programHandle);
-
-        //3 coords per vertex, 3 coords per normal, 4 coords per color, 2 coords per texture, 4 bytes per float
-        final int stride = (4) * BYTES_PER_FLOAT;
-
-        //pass in direction vector to shader
-        int directionHandle = GLES20.glGetAttribLocation(programHandle, "direction");
-        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, dataVBO);
-        GLES20.glEnableVertexAttribArray(directionHandle);
-        GLES20.glVertexAttribPointer(directionHandle, 3, GLES20.GL_FLOAT, false, stride, 0);
-
-        //pass in speed to shader
-        int speedHandle = GLES20.glGetAttribLocation(programHandle, "speed");
-        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, dataVBO);
-        GLES20.glEnableVertexAttribArray(speedHandle);
-        GLES20.glVertexAttribPointer(speedHandle, 1, GLES20.GL_FLOAT, false, stride, 3 * BYTES_PER_FLOAT);
-
-        // get handle to shape's transformation matrix
-        int mvpMatrixHandle = GLES20.glGetUniformLocation(programHandle, "u_MVPMatrix");
-
+    public void draw() {
         //if resuming from a pause state, load previous matrix
-        if (!resuming)
-        {
+        if (!resuming) {
             mvpMatrix = createTransformationMatrix();
             mvMatrix = new float[16];
             //creating model-view matrix
@@ -132,44 +95,57 @@ public class Wind extends ParticleSystem
             Matrix.multiplyMM(mvpMatrix, 0, projectionMatrix, 0, mvMatrix, 0);
             //TODO: scaling mvMatrix messes up shader, so scaling must be done last, not sure why
             Matrix.scaleM(mvpMatrix, 0, scaleFactor, scaleFactor, scaleFactor);
-        }
-        else
-        {
+        } else {
             this.resuming = false;
         }
 
-        // Pass the projection and view transformation to the vertexshader
-        GLES20.glUniformMatrix4fv(mvpMatrixHandle, 1, false, mvpMatrix, 0);
+        //wBounds.draw();
+        // Add program to OpenGL ES environment
+        GLES20.glUseProgram(programHandle);
+        //bind buffers
+        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, dataVBO);
+        GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, orderVBO);
 
-        mLightPosHandle = GLES20.glGetUniformLocation(programHandle, "u_LightPos");
+        updateDataBuffer();
+
+        //3 coords per vertex, 3 coords per normal, 4 coords per color, 2 coords per texture, 4
+        // bytes per float
+        final int stride = (20) * BYTES_PER_FLOAT;
+
+        //pass in direction vector to shader
+        int directionHandle = GLES20.glGetAttribLocation(programHandle, "direction");
+        //GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, dataVBO);
+        GLES20.glEnableVertexAttribArray(directionHandle);
+        GLES20.glVertexAttribPointer(directionHandle, 3, GLES20.GL_FLOAT, false, stride, 0);
+
+        //pass in speed to shader
+        int speedHandle = GLES20.glGetAttribLocation(programHandle, "speed");
+        //GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, dataVBO);
+        GLES20.glEnableVertexAttribArray(speedHandle);
+        GLES20.glVertexAttribPointer(speedHandle, 1, GLES20.GL_FLOAT, false, stride,
+                3 * BYTES_PER_FLOAT);
+
+        //pass in per-vertex transformation matrix to shader
+        int matrixHandle = GLES20.glGetAttribLocation(programHandle, "transMatrix");
+        int pos2 = matrixHandle + 1;
+        int pos3 = matrixHandle + 2;
+        int pos4 = matrixHandle + 3;
+        GLES20.glEnableVertexAttribArray(matrixHandle);
+        GLES20.glEnableVertexAttribArray(pos2);
+        GLES20.glEnableVertexAttribArray(pos3);
+        GLES20.glEnableVertexAttribArray(pos4);
+        GLES20.glVertexAttribPointer(matrixHandle, 4, GLES20.GL_FLOAT, false, stride,
+                BYTES_PER_FLOAT * 4);
+        GLES20.glVertexAttribPointer(pos2, 4, GLES20.GL_FLOAT, false, stride, BYTES_PER_FLOAT * 8);
+        GLES20.glVertexAttribPointer(pos3, 4, GLES20.GL_FLOAT, false, stride, BYTES_PER_FLOAT * 12);
+        GLES20.glVertexAttribPointer(pos4, 4, GLES20.GL_FLOAT, false, stride, BYTES_PER_FLOAT * 16);
 
         int mMVMatrixHandle = GLES20.glGetUniformLocation(programHandle, "u_MVMatrix");
         GLES20.glUniformMatrix4fv(mMVMatrixHandle, 1, false, mvMatrix, 0);
 
         mLightPosHandle = GLES20.glGetUniformLocation(programHandle, "u_LightPos");
-
         // Pass in the light position in eye space.
         GLES20.glUniform3f(mLightPosHandle, lightPosInEyeSpace[0], lightPosInEyeSpace[1], lightPosInEyeSpace[2]);
-
-        int timeHandle = GLES20.glGetUniformLocation(programHandle, "deltaT");
-        GLES20.glUniform1f(timeHandle, time);
-
-        int positionHandle = GLES20.glGetUniformLocation(programHandle, "position");
-        GLES20.glUniform4f(positionHandle, xPos, yPos, 0, 1);
-
-        int normalHandle = GLES20.glGetUniformLocation(programHandle, "normalVector");
-        GLES20.glUniform3f(normalHandle, 0, 0, 1);
-
-        int deltaYHandle = GLES20.glGetUniformLocation(programHandle, "totalDelta");
-        GLES20.glUniform1f(deltaYHandle, totalDelta);
-
-//        int deltaYHandle = GLES20.glGetUniformLocation(programHandle, "deltaY");
-//        GLES20.glUniform1f(deltaYHandle, deltaY);
-
-        int movedDeltaHandle = GLES20.glGetUniformLocation(programHandle, "movedDelta");
-        GLES20.glUniform1f(movedDeltaHandle, movedDelta);
-
-        GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, orderVBO);
 
         //blend particles
         GLES20.glEnable(GLES20.GL_BLEND);
@@ -188,78 +164,40 @@ public class Wind extends ParticleSystem
         GLES20.glDisable(GLES20.GL_BLEND);
     }
 
-
-    public float getxForce()
-    {
+    public float getxForce() {
         return xForce;
     }
 
-    public void setxForce( float xForce )
-    {
+    public void setxForce( float xForce ) {
         this.xForce = xForce;
     }
 
-    public float getyForce()
-    {
+    public float getyForce() {
         return yForce;
     }
 
-    public void setyForce( float yForce )
-    {
+    public void setyForce( float yForce ) {
         this.yForce = yForce;
     }
 
-    public float getMaxWindForce()
-    {
+    public float getMaxWindForce() {
         return maxWindForce;
     }
 
-    public void setMaxWindForce(float maxWindForce)
-    {
+    public void setMaxWindForce(float maxWindForce) {
         this.maxWindForce = maxWindForce;
     }
 
 
     @Override
-    public float[] createTransformationMatrix()
-    {
+    public float[] createTransformationMatrix() {
         float[] transformation = new float[16];
 
-        // Create a rotation transformation for the triangle
-        long time = SystemClock.uptimeMillis() % 3600L; //modulo makes rotation look smooth
-        float angle = 0.6f * (float) time;
-
-        movedDelta += totalDelta / 50.0f;
-        //if(deltaY != 0)
-        //movedDelta += (deltaY/deltaY)*totalDelta/50.0f;
-        //if(deltaY == 0) {
-        //    totalDelta = 0;
-        //    movedDelta = totalDelta;
-        //}
-
-        //if((deltaY > 0 && Math.abs(movedDelta) > Math.abs(totalDelta)) ||(deltaY < 0 && Math
-        // .abs(movedDelta) < Math.abs(totalDelta)))
-        if (Math.abs(movedDelta) > Math.abs(totalDelta)) {
-            movedDelta = totalDelta;
-        }
-
-
-        //Matrix.setIdentityM(modelMatrix, 0);
         Matrix.setIdentityM(transformation, 0);
 
-//        Matrix.translateM(modelMatrix, 0, 0, deltaY / 2, 0);
         Matrix.translateM(modelMatrix, 0, deltaX, deltaY, 0);
 
         Matrix.multiplyMM(transformation, 0, modelMatrix, 0, rotationMatrix, 0);
-        //  Matrix.rotateM(transformation, 0, -80, 0, 1, 0);
-        //       Matrix.rotateM(transformation, 0, angle, 1, 0, 0);
-
-        //Matrix.translateM(transformation, 0, deltaX, deltaY, 0);
-
-        //Log.e( "blowme", "xmin " + transformation[0] + " ymin " + transformation[1] + " xmax "
-        // + transformation[4] + " ymax " + transformation[5]);
-
-        //Matrix.multiplyMM(transformation, 0, modelMatrix, 0, transformation, 0);
 
         getBounds().calculateBounds(transformation);
 
@@ -267,28 +205,50 @@ public class Wind extends ParticleSystem
     }
 
     @Override
-    public void updatePosition(float x, float y)
-    {
-        //time = (System.nanoTime() - initialTime) / 1000000000.0f;
-        //time = (System.nanoTime()) / 1000000000.0f;
-        //movedDelta = 0;
-
-        //time = 0;
-        time += 0.01f;
-
+    public void updatePosition(float x, float y) {
         deltaX = x;
         deltaY = y;
 
         xPos += deltaX;
         yPos += deltaY;
-        totalDelta += deltaY + deltaX;
+
+        if (firstUpdate) {
+            setPrevUpdateTime(System.nanoTime());
+            firstUpdate = false;
+        }
+
+        long currTime = System.nanoTime();
+        time = (currTime - getPrevUpdateTime()) / 1000000000.0f;// += 0.01f;
+        setPrevUpdateTime(currTime);
+
+        float speedMultiplier = 2.0f;
+        float windLength = 2.0f;
+        //float lagPosition = mod((direction.x + lagTime*speedMultiplier*speed), windLength);
+        for (int i = 0; i < NUM_PARTICLES; i++) {
+            float speed = interleavedData[NUM_ATTRIBUTES * i + 3];
+
+            float particleXpos = (speedMultiplier * speed * time) + interleavedData[NUM_ATTRIBUTES
+                    * i];//particle moves laterally
+            if (particleXpos >= windLength) { //if particle has reached the end of the wind stream
+                interleavedData[NUM_ATTRIBUTES * i] =
+                        particleXpos - windLength;//put particle back at start of wind stream
+                //update the particles mvp matrix
+                for (int j = 0; j < 16; j++) {
+                    interleavedData[NUM_ATTRIBUTES * i + 4 + j] =
+                            mvpMatrix[j];//displacementHistory.get(matrixIndex)[j];
+                }
+            } else {
+                interleavedData[NUM_ATTRIBUTES * i] =
+                        particleXpos; //update particle position in VBO
+            }
+        }
     }
 
-    public void setRotationMatrix(float rotation)
-    {
+    public void setRotationMatrix(float rotation) {
         inwardRotation = rotation;
         Matrix.setIdentityM(rotationMatrix, 0);
         Matrix.setRotateM(rotationMatrix, 0, rotation, 0, 0, 1);
+
         //getBounds().calculateBounds(rotationMatrix);
     }
 
@@ -299,9 +259,7 @@ public class Wind extends ParticleSystem
     private float deltaX;
     private float deltaY;
 
-    private float totalDelta = 0;
-
-    private float movedDelta = 0;
+    private float[] lagMatrix = new float[16];
 
     private float xForce;
 
@@ -313,4 +271,9 @@ public class Wind extends ParticleSystem
 
     private float inwardRotation = 0;
 
+    private boolean firstUpdate = true;
+
+    private static final int NUM_PARTICLES = 5000;
+
+    private static final int NUM_ATTRIBUTES = 20;
 }

@@ -118,8 +118,8 @@ public class Missile extends Model {
         prevUpdateTime = time;//System.nanoTime();
 
         if (flying) {
-            xDirection -= x;
-            yDirection -= y;
+            xDirection -= x * KINETIC_FRICTION;
+            yDirection -= y * KINETIC_FRICTION;
             xVelocity = -INITIAL_VELOCITY * xDirection;
             yVelocity = -INITIAL_VELOCITY * yDirection;
             float velocity = (float) Math.sqrt(xVelocity * xVelocity + yVelocity * yVelocity);
@@ -211,7 +211,7 @@ public class Missile extends Model {
     private static final float RISING_SPEED = 0.1f;
     private static final float INITIAL_VELOCITY = 0.1f;
     private static final float INITIAL_ACCELERATION = 80.0f;
-    private static final float KINETIC_FRICTION = 8.0f;
+    private static final float KINETIC_FRICTION = 0.25f;
 
     private MissileTrail trail;
 }

@@ -33,24 +33,24 @@ public abstract class ParticleSystem extends Model
     {
         // Add program to OpenGL ES environment
         GLES20.glUseProgram(programHandle);
+        //bind buffers
+        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, dataVBO);
+        GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, orderVBO);
 
         //3 coords per vertex, 3 coords per normal, 4 coords per color, 2 coords per texture, 4 bytes per float
         final int stride = (COORDS_PER_COLOR + 4) * BYTES_PER_FLOAT;
 
         int colorHandle = GLES20.glGetAttribLocation(programHandle, "color");
-        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, dataVBO);
         GLES20.glEnableVertexAttribArray(colorHandle);
         GLES20.glVertexAttribPointer(colorHandle, COORDS_PER_COLOR, GLES20.GL_FLOAT, false, stride, 0);
 
         //pass in direction vector to shader
         int directionHandle = GLES20.glGetAttribLocation(programHandle, "direction");
-        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, dataVBO);
         GLES20.glEnableVertexAttribArray(directionHandle);
         GLES20.glVertexAttribPointer(directionHandle, 3, GLES20.GL_FLOAT, false, stride, (COORDS_PER_COLOR) * BYTES_PER_FLOAT);
 
         //pass in speed to shader
         int speedHandle = GLES20.glGetAttribLocation(programHandle, "speed");
-        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, dataVBO);
         GLES20.glEnableVertexAttribArray(speedHandle);
         GLES20.glVertexAttribPointer(speedHandle, 1, GLES20.GL_FLOAT, false, stride, (COORDS_PER_COLOR + 3) * BYTES_PER_FLOAT);
 
@@ -111,8 +111,6 @@ public abstract class ParticleSystem extends Model
 
         int normalHandle = GLES20.glGetUniformLocation(programHandle, "normalVector");
         GLES20.glUniform3f(normalHandle, 0, 0, 1);
-
-        GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, orderVBO);
 
         //blend particles
         GLES20.glEnable(GLES20.GL_BLEND);

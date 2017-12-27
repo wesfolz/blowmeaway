@@ -80,13 +80,14 @@ public class FallingObject extends Model
         //if (deltaT > 50 && collected)
         //{
             //Matrix.translateM(modelMatrix, 0, deltaX, 0, deltaZ);
-        Matrix.scaleM(modelMatrix, 0, stretch[0], stretch[1], 1);
-            prevRenderTime = time;
+        //Matrix.scaleM(modelMatrix, 0, stretch[0], stretch[1], 1);
+        prevRenderTime = time;
         //}
         Matrix.translateM(modelMatrix, 0, deltaX, deltaY, deltaZ);
         Matrix.setRotateM(transformation, 0, angle, 1, 1, 1);
         //Matrix.translateM(transformation, 0, xPos, yPos, zPos);
         Matrix.multiplyMM(transformation, 0, modelMatrix, 0, transformation, 0);
+        Matrix.scaleM(transformation, 0, stretch[0], stretch[1], 1);
 
         return transformation;
     }
@@ -362,8 +363,9 @@ public class FallingObject extends Model
         }
 
         if (!spiralIn) {
-            xVelocity += force[0] * fallingTime;
-            yVelocity += force[1] * fallingTime;
+            float friction = spiralOut ? SPIRAL_FRICTION : 1.0f;
+            xVelocity += force[0] * fallingTime * friction;
+            yVelocity += force[1] * fallingTime * friction;
             calculateCollisionVelocity();
         }
 
@@ -461,4 +463,6 @@ public class FallingObject extends Model
     private float spiralY = 0;
 
     private boolean firstUpdate = true;
+
+    private static final float SPIRAL_FRICTION = 0.5f;
 }

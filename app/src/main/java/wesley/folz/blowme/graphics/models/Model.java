@@ -31,6 +31,9 @@ public abstract class Model
     {
         // Add program to OpenGL ES environment
         GLES20.glUseProgram(programHandle);
+        //bind buffers
+        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, dataVBO);
+        GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, orderVBO);
 
         //3 coords per vertex, 3 coords per normal, 4 coords per color, 2 coords per texture, 4 bytes per float
         final int stride =
@@ -38,13 +41,11 @@ public abstract class Model
 
         //vertices
         int vertexPositionHandle = GLES20.glGetAttribLocation(programHandle, "position");
-        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, dataVBO);
         GLES20.glEnableVertexAttribArray(vertexPositionHandle);
         GLES20.glVertexAttribPointer(vertexPositionHandle, COORDS_PER_VERTEX, GLES20.GL_FLOAT, false, stride, 0);
 
         //normal vectors
         int normalVectorHandle = GLES20.glGetAttribLocation(programHandle, "normalVector");
-        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, dataVBO);
         GLES20.glEnableVertexAttribArray(normalVectorHandle);
         GLES20.glVertexAttribPointer(normalVectorHandle, COORDS_PER_NORMAL, GLES20.GL_FLOAT, false,
                 stride, (COORDS_PER_VERTEX + COORDS_PER_TEX) * BYTES_PER_FLOAT);
@@ -106,9 +107,6 @@ public abstract class Model
 
         // Pass in the light position in eye space.
         GLES20.glUniform3f(mLightPosHandle, lightPosInEyeSpace[0], lightPosInEyeSpace[1], lightPosInEyeSpace[2]);
-
-        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, dataVBO);
-        GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, orderVBO);
 
         // Draw the triangles
         GLES20.glDrawElements(GLES20.GL_TRIANGLES, numVertices, GLES20.GL_UNSIGNED_SHORT, 0);
@@ -317,6 +315,10 @@ public abstract class Model
 
     public void setzPos(float zPos) {
         this.zPos = zPos;
+    }
+
+    public float[] getStretch() {
+        return stretch;
     }
 
     public void setStretch(float[] stretch) {

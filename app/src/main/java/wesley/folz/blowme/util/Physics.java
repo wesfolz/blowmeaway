@@ -1,6 +1,7 @@
 package wesley.folz.blowme.util;
 
 import android.graphics.PointF;
+import android.util.Log;
 
 import wesley.folz.blowme.graphics.Border;
 import wesley.folz.blowme.graphics.effects.Wind;
@@ -180,6 +181,9 @@ public abstract class Physics
             float mass) {
         float time = (System.nanoTime() - model.getPrevUpdateTime()) / 1000000000.0f;
         model.setPrevUpdateTime(System.nanoTime());
+
+        float distance = (float) Math.sqrt(xComponent * xComponent + yComponent * yComponent);
+
         float fallingTime = mass * time;
 //        model.setDeltaX(5*fallingTime*xComponent);
         model.setDeltaX(fallingTime * xComponent);
@@ -198,10 +202,12 @@ public abstract class Physics
 
         float stretchFactor = 0.5f * (normalizedY - normalizedX);
 
+        float[] modelStretch = model.getStretch();
         float[] stretch = new float[2];
-        stretch[0] = 1.0f - stretchFactor;
-        stretch[1] = 1.0f + stretchFactor;
+        stretch[0] = modelStretch[0] * 0.5f;//1.0f - stretchFactor;
+        stretch[1] = modelStretch[1] * 0.5f;//1.0f + stretchFactor;
 
+        Log.e("travelOnVector", "stretch " + stretch[0] + " " + stretch[1]);
         return stretch;
     }
 
