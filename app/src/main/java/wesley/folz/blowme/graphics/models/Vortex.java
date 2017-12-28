@@ -45,7 +45,9 @@ public class Vortex extends Model
         for (int i = 0; i < capacity; i++)
         {
             orbitingObjects.add(new OrbitingObject(type, xPos, -1.0f,
-                    (float) Math.PI + i * (float) Math.PI / 2));
+                    (float) i * 2.0f * (float) Math.PI / (float) capacity));
+            //orbitingObjects.add(new OrbitingObject(type, xPos, -1.0f,
+            //        (float) Math.PI + i * (float) Math.PI / 2));
         }
     }
 
@@ -94,6 +96,7 @@ public class Vortex extends Model
         //Matrix.translateM(modelMatrix, 0, deltaX, 0, 0);
 
         //copy modelMatrix to separate matrix for return, (returning modelMatrix doesn't work)
+        //Matrix.translateM(modelMatrix, 0, 0.0f, deltaY, 0.0f);
         Matrix.multiplyMM(mvp, 0, modelMatrix, 0, mvp, 0);
         Matrix.scaleM(mvp, 0, 1.0f, scaleCount, 1.0f);
         Matrix.translateM(mvp, 0, 0.0f, deltaY, 0.0f);
@@ -145,18 +148,22 @@ public class Vortex extends Model
 
         deltaY = scaleCount / 5.0f;
         //updatePosition(0, 0);
-        dustCloud.updatePosition(0, deltaY / 30);
+        dustCloud.updatePosition(0, deltaY);
         for (OrbitingObject orbitingObject : orbitingObjects) {
             orbitingObject.updatePosition(0, deltaY);
         }
         getBounds().setBounds(xPos - getSize()[0] / 2.0f, yPos - 0.21f, xPos + getSize()[0] / 2.0f,
                 yPos - 0.1f);
 
-        return deltaTime >= GamePlayActivity.INITIALIZATION_TIME;
+        return initialized;
     }
 
     @Override
     public boolean removalRoutine() {
+        if (offscreen) {
+            return true;
+        }
+
         if (initialTime == 0) {
             initialTime = System.currentTimeMillis();
         }
@@ -174,14 +181,14 @@ public class Vortex extends Model
 
         deltaY = scaleCount / 5.0f;
 
-        dustCloud.updatePosition(0, -deltaY / 30);
+        dustCloud.updatePosition(0, deltaY);
         for (OrbitingObject orbitingObject : orbitingObjects) {
             orbitingObject.updatePosition(0, deltaY);
         }
         getBounds().setBounds(xPos - getSize()[0] / 2.0f, yPos - 0.21f,
                 xPos + getSize()[0] / 2.0f, yPos - 0.1f);
 
-        return deltaTime >= GamePlayActivity.INITIALIZATION_TIME;
+        return offscreen;
     }
 
     @Override
@@ -192,7 +199,7 @@ public class Vortex extends Model
         } else if (numCollected >= capacity) {
             removalRoutine();
         } else {
-            dustCloud.updatePosition(0, deltaY / 30);
+            dustCloud.updatePosition(0, 0);
             for (OrbitingObject orbitingObject : orbitingObjects) {
                 orbitingObject.updatePosition(0, deltaY);
             }

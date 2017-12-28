@@ -9,10 +9,15 @@ import wesley.folz.blowme.util.GraphicsUtilities;
 public class MissileLauncher extends Model {
 
     public MissileLauncher(float x, float y) {
+        this(x, y, 5);
+    }
+
+    public MissileLauncher(float x, float y, float time) {
         super();
         missile = new Missile(x, y);
         stand = new LauncherStand(x, y);
         tube = new LauncherTube(x, y);
+        timeToFire = time;
     }
 
     @Override
@@ -58,10 +63,15 @@ public class MissileLauncher extends Model {
 
     @Override
     public void updatePosition(float x, float y) {
+        if (getPrevUpdateTime() == 0) {
+            setPrevUpdateTime(System.nanoTime());
+        }
+        long time = System.nanoTime();
+        float deltaTime = (time - getPrevUpdateTime()) / 1000000000.0f;
+
         stand.updatePosition(x, y);
         tube.updatePosition(x, y);
-        fireTimer++;
-        if (fireTimer >= 150) missile.setFlying(true);
+        if (deltaTime >= timeToFire) missile.setFlying(true);
         missile.updatePosition(x, y);
     }
 
@@ -74,5 +84,5 @@ public class MissileLauncher extends Model {
     private LauncherStand stand;
     private LauncherTube tube;
 
-    private int fireTimer = 0;
+    private float timeToFire;
 }

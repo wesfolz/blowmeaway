@@ -53,7 +53,6 @@ public class Explosion extends ParticleSystem
         }
     }
 
-
     @Override
     protected void generateParticles()
     {
@@ -109,7 +108,10 @@ public class Explosion extends ParticleSystem
     @Override
     public void updatePosition(float x, float y)
     {
-        //time = (System.nanoTime() - initialTime) / 1000000000.0f;
+        //if (prevUpdateTime == 0) {
+        //    setPrevUpdateTime(System.nanoTime());
+        //}
+        //time = (System.nanoTime() - getPrevUpdateTime()) / 1000000000.0f;
         //time = (System.nanoTime()) / 1000000000.0f;
 
         //time = 0;

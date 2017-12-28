@@ -23,7 +23,7 @@ void main()
     vec4 newPos = vec4(xPos, yPos, zPos, 1.0);
     //vec4 newPos = vec4(position[0] + direction[0]*speed*deltaT, position[1] + direction[1]*speed*deltaT, 0.0, 1);
 
-    gl_PointSize = 50.0;// * sin(4.0*deltaT);
+    gl_PointSize = 40.0;// * sin(4.0*deltaT);
     //gl_PointSize = 20.0 * sin(4.0*speed*deltaT);
 
     // Transform the vertex into eye space.

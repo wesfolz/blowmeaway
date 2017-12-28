@@ -84,6 +84,12 @@ public class Wind extends ParticleSystem
     }
 
     @Override
+    public void resumeGame() {
+        super.resumeGame();
+        setPrevUpdateTime(System.nanoTime());
+    }
+
+    @Override
     public void draw() {
         //if resuming from a pause state, load previous matrix
         if (!resuming) {
@@ -110,7 +116,7 @@ public class Wind extends ParticleSystem
 
         //3 coords per vertex, 3 coords per normal, 4 coords per color, 2 coords per texture, 4
         // bytes per float
-        final int stride = (20) * BYTES_PER_FLOAT;
+        final int stride = NUM_ATTRIBUTES * BYTES_PER_FLOAT;
 
         //pass in direction vector to shader
         int directionHandle = GLES20.glGetAttribLocation(programHandle, "direction");
@@ -212,9 +218,8 @@ public class Wind extends ParticleSystem
         xPos += deltaX;
         yPos += deltaY;
 
-        if (firstUpdate) {
+        if (prevUpdateTime == 0) {
             setPrevUpdateTime(System.nanoTime());
-            firstUpdate = false;
         }
 
         long currTime = System.nanoTime();
@@ -226,7 +231,6 @@ public class Wind extends ParticleSystem
         //float lagPosition = mod((direction.x + lagTime*speedMultiplier*speed), windLength);
         for (int i = 0; i < NUM_PARTICLES; i++) {
             float speed = interleavedData[NUM_ATTRIBUTES * i + 3];
-
             float particleXpos = (speedMultiplier * speed * time) + interleavedData[NUM_ATTRIBUTES
                     * i];//particle moves laterally
             if (particleXpos >= windLength) { //if particle has reached the end of the wind stream
@@ -259,8 +263,6 @@ public class Wind extends ParticleSystem
     private float deltaX;
     private float deltaY;
 
-    private float[] lagMatrix = new float[16];
-
     private float xForce;
 
     private float yForce;
@@ -270,8 +272,6 @@ public class Wind extends ParticleSystem
     private float[] rotationMatrix;
 
     private float inwardRotation = 0;
-
-    private boolean firstUpdate = true;
 
     private static final int NUM_PARTICLES = 5000;
 

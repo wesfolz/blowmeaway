@@ -27,7 +27,7 @@ public class DustCloud extends ParticleSystem
         yPos = 0;//GamePlayActivity.Y_EDGE_POSITION;
 
         initialXPos = x;
-        initialYPos = -y;
+        initialYPos = -y;// + 0.06f;
 
         xRadius = 0.1f;
         yRadius = 0.01f;
@@ -145,8 +145,8 @@ public class DustCloud extends ParticleSystem
         // Pass in the light position in eye space.
         GLES20.glUniform3f(mLightPosHandle, lightPosInEyeSpace[0], lightPosInEyeSpace[1], lightPosInEyeSpace[2]);
 
-        int timeHandle = GLES20.glGetUniformLocation(programHandle, "deltaT");
-        GLES20.glUniform1f(timeHandle, time);
+        int timeHandle = GLES20.glGetUniformLocation(programHandle, "spread");
+        GLES20.glUniform1f(timeHandle, spread);
 
         int positionHandle = GLES20.glGetUniformLocation(programHandle, "deltaT");
         GLES20.glUniform4f(positionHandle, xPos, yPos, 0, 1);
@@ -173,7 +173,6 @@ public class DustCloud extends ParticleSystem
         GLES20.glDisable(GLES20.GL_BLEND);
         GLES20.glDisable(GLES20.GL_TEXTURE_2D);
     }
-
 
     @Override
     public float[] createTransformationMatrix()
@@ -207,14 +206,16 @@ public class DustCloud extends ParticleSystem
     @Override
     public void updatePosition(float x, float y)
     {
-        if (yUp <= 0.25f || y < 0)
+        if (y != 0)
         {
-            //yUp += 0.002f;
-            yUp += y;
-            //time += 0.003f;
-            time += 3.0f * y / 2.0f;
+            yUp = y;
+            spread = 2 * yUp;
+        } else if (yUp < 0.25f) {
+            yUp += 0.01;//0.25f;
         }
     }
+
+    private float spread;
 
     private float yUp;
 

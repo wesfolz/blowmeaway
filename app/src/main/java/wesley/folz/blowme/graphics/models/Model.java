@@ -185,6 +185,9 @@ public abstract class Model
         //Log.e("blowme", String.valueOf(paused));
         resuming = paused;
         paused = false;
+        if (prevUpdateTime != 0) {
+            prevUpdateTime = System.nanoTime();
+        }
     }
 
     public Bounds getBounds()
@@ -393,7 +396,7 @@ public abstract class Model
     protected int dataVBO;
     protected int orderVBO;
 
-    private boolean paused = false;
+    protected boolean paused = false;
 
     protected boolean resuming = false;
 

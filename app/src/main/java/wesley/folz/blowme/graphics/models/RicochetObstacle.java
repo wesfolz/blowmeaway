@@ -44,15 +44,6 @@ public class RicochetObstacle extends Model
     }
 
     @Override
-    public void resumeGame()
-    {
-        super.resumeGame();
-        if (prevUpdateTime != 0) {
-            prevUpdateTime = System.nanoTime();
-        }
-    }
-
-    @Override
     public float[] createTransformationMatrix()
     {
         float[] mvp = new float[16];
@@ -72,6 +63,7 @@ public class RicochetObstacle extends Model
     {
         Physics.rise(this, RISING_SPEED);
         deltaX = 0;
+        deltaZ = 0;
 
         getBounds().setBounds(xPos - scaleFactor, yPos - scaleFactor, xPos + scaleFactor, yPos + scaleFactor);
     }

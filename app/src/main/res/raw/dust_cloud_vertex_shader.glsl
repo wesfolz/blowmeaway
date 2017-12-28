@@ -1,7 +1,7 @@
 uniform mat4 u_MVPMatrix; // A constant representing the combined model/view/projection matrix.
 uniform mat4 u_MVMatrix;
 
-uniform float deltaT;
+uniform float spread;
 uniform vec3 normalVector;
 uniform vec4 position;
 
@@ -18,7 +18,7 @@ varying vec4 v_Color;
 // The entry point for our vertex shader.
 void main()
 {
-    vec4 newDir = vec4(direction*(deltaT*speed), 1.0);
+    vec4 newDir = vec4(direction*(spread*speed), 1.0);
     //vec4 newPos = vec4(position[0] + direction[0]*speed*deltaT, position[1] + direction[1]*speed*deltaT, 0.0, 1);
     vec4 newPos = position + newDir;
 

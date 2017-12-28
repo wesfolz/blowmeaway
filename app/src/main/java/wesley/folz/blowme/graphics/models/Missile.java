@@ -211,7 +211,7 @@ public class Missile extends Model {
     private static final float RISING_SPEED = 0.1f;
     private static final float INITIAL_VELOCITY = 0.1f;
     private static final float INITIAL_ACCELERATION = 80.0f;
-    private static final float KINETIC_FRICTION = 0.25f;
+    private static final float KINETIC_FRICTION = 0.1f;
 
     private MissileTrail trail;
 }

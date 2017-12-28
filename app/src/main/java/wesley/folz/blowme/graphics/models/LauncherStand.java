@@ -31,7 +31,7 @@ public class LauncherStand extends RicochetObstacle {
         if (!this.resuming) {
             //rotate 130 degrees about x-axis
             Matrix.rotateM(modelMatrix, 0, 90, 0, 1, 0);
-            Matrix.rotateM(modelMatrix, 0, 10, 0, 0, 1);
+            //Matrix.rotateM(modelMatrix, 0, 10, 0, 0, 1);
             //Matrix.scaleM(modelMatrix, 0, 1.0f, 0.01f, 1.0f);
         }
     }

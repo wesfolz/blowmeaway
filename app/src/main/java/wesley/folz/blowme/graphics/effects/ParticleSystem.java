@@ -130,9 +130,15 @@ public abstract class ParticleSystem extends Model
         GLES20.glDisable(GLES20.GL_TEXTURE_2D);
     }
 
+    /*
+        public void resumeGame()
+        {
+            resuming = paused;
+            paused = false;
+        }
+    */
     @Override
-    public void enableGraphics(GraphicsUtilities graphicsData)
-    {
+    public void enableGraphics(GraphicsUtilities graphicsData) {
         dataBuffer = ByteBuffer.allocateDirect(interleavedData.length * 4)
                 .order(ByteOrder.nativeOrder()).asFloatBuffer();
         dataBuffer.put(interleavedData).position(0);

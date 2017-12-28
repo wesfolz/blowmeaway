@@ -45,6 +45,7 @@ public class Fan extends Model
         this.targetZAngle = targetZAngle;
         this.targetX = targetX;
         this.targetY = targetY;
+        initialized = false;
     }
 
     @Override
@@ -128,12 +129,11 @@ public class Fan extends Model
         getWind().updatePosition(parametricX, parametricY);
         getWind().setRotationMatrix(inwardRotation);
 
-        return deltaTime >= GamePlayActivity.INITIALIZATION_TIME;
+        return initialized;
     }
 
     @Override
     public boolean removalRoutine() {
-        initialized = false;
         return initializationRoutine();
     }
 
