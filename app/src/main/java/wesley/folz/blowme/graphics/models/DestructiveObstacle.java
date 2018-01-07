@@ -35,15 +35,6 @@ public class DestructiveObstacle extends Model
     }
 
     @Override
-    public void resumeGame()
-    {
-        super.resumeGame();
-        if (prevUpdateTime != 0) {
-            prevUpdateTime = System.currentTimeMillis();
-        }
-    }
-
-    @Override
     public void enableGraphics(GraphicsUtilities graphicsData)
     {
         //get dataVBO, orderVBO, program, texture handles
@@ -71,11 +62,10 @@ public class DestructiveObstacle extends Model
         return mvp;
     }
 
-
     @Override
     public void updatePosition(float x, float y)
     {
-        Physics.rise(this, RISING_SPEED);
+        Physics.rise(this);
 
         getBounds().setBounds(xPos - xRadius, yPos - 4 * scaleFactor, xPos + xRadius, yPos + 4 * scaleFactor);
     }

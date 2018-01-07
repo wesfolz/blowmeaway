@@ -45,7 +45,7 @@ public class ActionModeConfig extends ModeConfig
             m.initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
         }
 
-        surfaceView.queueEvent(new Runnable() {
+        surfaceView.queueEvent(new Runnable() { //run on glthread
             @Override
             public void run() {
                 for (Model m : models) {
@@ -98,15 +98,15 @@ public class ActionModeConfig extends ModeConfig
                         models.add(destructiveObstacle);
                         break;
 
-                    case "Vortex":
-                        generateVortex(jso.getString("type"), jso.getInt("index"),
-                                jso.getInt("capacity"), false);
-                        break;
-
                     case "FallingObject":
                         FallingObject fo = new FallingObject(jso.getString("type"));
                         models.add(fo);
                         fallingObjects.add(fo);
+                        break;
+
+                    case "Vortex":
+                        generateVortex(jso.getString("type"), jso.getInt("index"),
+                                jso.getInt("capacity"), false);
                         break;
 
                     case "Dispenser":
@@ -145,9 +145,6 @@ public class ActionModeConfig extends ModeConfig
         this.dispenser.resumeGame();
         this.background.pauseGame();
         this.background.resumeGame();
-
-        //line =  new Line();
-        //models.add(line);
     }
 
     @Override

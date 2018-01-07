@@ -10,9 +10,9 @@ import java.util.Iterator;
 
 import wesley.folz.blowme.R;
 import wesley.folz.blowme.graphics.Background;
-import wesley.folz.blowme.graphics.Line;
 import wesley.folz.blowme.graphics.Wormhole;
 import wesley.folz.blowme.graphics.effects.Explosion;
+import wesley.folz.blowme.graphics.effects.Sparkler;
 import wesley.folz.blowme.graphics.models.DestructiveObstacle;
 import wesley.folz.blowme.graphics.models.Dispenser;
 import wesley.folz.blowme.graphics.models.FallingObject;
@@ -59,6 +59,7 @@ public abstract class ModeConfig
         graphicsData.storeModelData("fan", R.raw.fan_orig);
         graphicsData.storeModelData("vortex", R.raw.uv_vortex);
         graphicsData.storeModelData("missile", R.raw.missile);
+        graphicsData.storeModelData("fuse", R.raw.fuse);
         graphicsData.storeModelData("launcher_stand", R.raw.launcher_stand);
         graphicsData.storeModelData("launcher_tube", R.raw.launcher_tube);
         graphicsData.storeModelData("wormhole", R.raw.wormhole);
@@ -84,6 +85,8 @@ public abstract class ModeConfig
 
         graphicsData.storeShader("dust_cloud", R.raw.dust_cloud_vertex_shader, R.raw.dust_cloud_fragment_shader, particleAttributes);
         graphicsData.storeShader("explosion", R.raw.particle_vertex_shader, R.raw.particle_fragment_shader, particleAttributes);
+        graphicsData.storeShader("sparkler", R.raw.sparkler_vertex_shader,
+                R.raw.sparkler_fragment_shader, particleAttributes);
         graphicsData.storeShader("wind", R.raw.wind_vertex_shader, R.raw.wind_fragment_shader, particleAttributes);
         graphicsData.storeShader("texture", R.raw.texture_vertex_shader, R.raw.texture_fragment_shader, modelAttributes);
         graphicsData.storeShader("lighting", R.raw.lighting_vertex_shader, R.raw.lighting_fragment_shader, modelAttributes);
@@ -92,6 +95,11 @@ public abstract class ModeConfig
         graphicsData.storeShader("distortion", R.raw.distortion_vertex_shader,
                 R.raw.texture_fragment_shader, modelAttributes);
 
+
+        for (Model m : models) {
+            m.enableGraphics(graphicsData);
+        }
+        /*
         for (FallingObject fo : fallingObjects) {
             fo.enableGraphics(graphicsData);
         }
@@ -105,6 +113,7 @@ public abstract class ModeConfig
         if (wormhole != null) {
             wormhole.enableGraphics(graphicsData);
         }
+        */
     }
 
     public void surfaceGraphicsChanged(int width, int height)
@@ -245,7 +254,8 @@ public abstract class ModeConfig
         if (falObj.isOffscreen()) {
             Log.e("collision", "offscreen " + falObj.getType());
             try {
-                models.remove(falObj);
+                int index = models.indexOf(falObj);
+                //models.remove(falObj);
                 //falObj = falObj.getClass().getConstructor(float.class).newInstance
                 // (dispenser.getxPos());
                 String type = falObj.getType();
@@ -253,7 +263,7 @@ public abstract class ModeConfig
                 fallingObjects.set(modelCount, falObj);
                 falObj.enableGraphics(graphicsData);
                 falObj.initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
-                models.add(falObj);
+                models.set(index, falObj);
             } catch (Exception e) {
                 Log.e("error", e.getMessage());
             }
@@ -344,7 +354,7 @@ public abstract class ModeConfig
         }
     }
 
-    boolean wormholeInteraction(Model model) {
+    boolean wormholeInteraction(Wormhole wormhole, Model model) {
         if (wormhole != null) {
             if (!model.isOffscreen() && !wormhole.isOffscreen() && !wormhole.isRemove()) {
                 if (Physics.isCollision(wormhole.getDistortion1().getBounds(), model.getBounds())) {
@@ -401,7 +411,7 @@ public abstract class ModeConfig
             yForce = fan.getWind().getyForce();
         }
 
-        if (!wormholeInteraction(falObj)) {
+        if (!wormholeInteraction(wormhole, falObj)) {
             falObj.updatePosition(xForce, yForce);
         }
 
@@ -442,6 +452,12 @@ public abstract class ModeConfig
 
     protected void drawModels()
     {
+
+        for (Model m : models) {
+            m.draw();
+        }
+
+        /*
         background.draw();
         if (wormhole != null) {
             wormhole.draw();
@@ -481,6 +497,7 @@ public abstract class ModeConfig
                 e.draw();
             }
         }
+        */
     }
 
     public void handleTouch(int action, float x, float y)
@@ -635,10 +652,11 @@ public abstract class ModeConfig
 
     Wormhole wormhole;
 
+    Sparkler sparkler;
+
     protected Fan fan;
     protected Background background;
     Dispenser dispenser;
-    protected Line line;
 
     protected float[] viewMatrix = new float[16];
     protected float[] projectionMatrix = new float[16];

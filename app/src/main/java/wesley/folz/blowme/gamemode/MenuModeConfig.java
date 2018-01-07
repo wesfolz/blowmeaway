@@ -44,6 +44,9 @@ public class MenuModeConfig extends ModeConfig
         vortexes = new ArrayList<>();
         hazards = new ArrayList<>();
 
+        background = new Background();
+
+        models.add(background);
         fan = new Fan();
         models.add(fan);
 
@@ -67,9 +70,6 @@ public class MenuModeConfig extends ModeConfig
 
         dispenser = new Dispenser();
         models.add(dispenser);
-
-        background = new Background();
-        models.add(background);
 
         positionsInitialized = false;
 

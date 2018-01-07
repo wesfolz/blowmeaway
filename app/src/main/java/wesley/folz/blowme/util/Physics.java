@@ -145,7 +145,7 @@ public abstract class Physics
         return a.x * b.x + a.y * b.y;
     }
 
-    public static void rise(Model m, float risingSpeed) {
+    public static float rise(Model m) {
         if (m.getPrevUpdateTime() == 0) {
             m.setPrevUpdateTime(System.nanoTime());
         }
@@ -153,9 +153,30 @@ public abstract class Physics
         float deltaTime = (time - m.getPrevUpdateTime()) / 1000000000.0f;
         m.setPrevUpdateTime(time);
 
-        m.setDeltaY(deltaTime * risingSpeed);
+        m.setDeltaY(deltaTime * RISING_SPEED);
 
         m.setyPos(m.getyPos() + m.getDeltaY());
+        return deltaTime;
+    }
+
+    public static void panUpDown(Model m, float deltaTime) {
+        if (m.getClass().toString().equals("class wesley.folz.blowme.graphics.models.Missile")) {
+            Log.e("motion",
+                    m.getClass() + " ydir " + m.getyDirection() + " xdir " + m.getxDirection());
+        }
+
+        if (Math.abs(m.getxDirection()) >= 0.5) {
+            //m.setxMotion(-m.getxMotion());
+            //m.setxMotion(-m.getxDirection()/Math.abs(m.getxDirection()));
+        }
+        //m.setxDirection(m.getxDirection() + m.getxMotion() * 0.01f);//deltaTime);
+
+        if (Math.abs(m.getyDirection()) >= 0.5) {// || Math.abs(m.getyDirection()) >= 1.5) {
+            //m.setyMotion(-m.getyMotion());
+            m.setyMotion(-m.getyDirection() / Math.abs(m.getyDirection()));
+            //m.setyMotion(Math.abs(m.getyDirection()) <= 0.5 ? -1 : 1);
+        }
+        m.setyDirection(m.getyDirection() + m.getyMotion() * deltaTime);
     }
 
     public static void transport(WormholeDistortion wormhole, Model model) {
@@ -234,4 +255,6 @@ public abstract class Physics
     public static final float GRAVITY = 9.8f;
 
     public static final float KINETIC_FRICTION = 9.75f;
+
+    private static final float RISING_SPEED = 0.1f;
 }

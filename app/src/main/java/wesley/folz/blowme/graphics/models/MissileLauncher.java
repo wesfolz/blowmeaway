@@ -14,9 +14,11 @@ public class MissileLauncher extends Model {
 
     public MissileLauncher(float x, float y, float time) {
         super();
+        x *= 0.465f;
         missile = new Missile(x, y);
         stand = new LauncherStand(x, y);
         tube = new LauncherTube(x, y);
+        fuse = new Fuse(x, y);
         timeToFire = time;
     }
 
@@ -25,6 +27,7 @@ public class MissileLauncher extends Model {
         missile.enableGraphics(graphicsData);
         stand.enableGraphics(graphicsData);
         tube.enableGraphics(graphicsData);
+        fuse.enableGraphics(graphicsData);
     }
 
     @Override
@@ -33,6 +36,7 @@ public class MissileLauncher extends Model {
         missile.initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
         stand.initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
         tube.initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
+        fuse.initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
     }
 
     @Override
@@ -40,20 +44,25 @@ public class MissileLauncher extends Model {
         missile.draw();
         stand.draw();
         tube.draw();
+        fuse.draw();
     }
 
     @Override
     public void pauseGame() {
+        super.pauseGame();
         missile.pauseGame();
         stand.pauseGame();
         tube.pauseGame();
+        fuse.pauseGame();
     }
 
     @Override
     public void resumeGame() {
+        super.resumeGame();
         missile.resumeGame();
         stand.resumeGame();
         tube.resumeGame();
+        fuse.resumeGame();
     }
 
     @Override
@@ -66,11 +75,11 @@ public class MissileLauncher extends Model {
         if (getPrevUpdateTime() == 0) {
             setPrevUpdateTime(System.nanoTime());
         }
-        long time = System.nanoTime();
-        float deltaTime = (time - getPrevUpdateTime()) / 1000000000.0f;
+        float deltaTime = (System.nanoTime() - getPrevUpdateTime()) / 1000000000.0f;
 
         stand.updatePosition(x, y);
         tube.updatePosition(x, y);
+        fuse.updatePosition(x, y);
         if (deltaTime >= timeToFire) missile.setFlying(true);
         missile.updatePosition(x, y);
     }
@@ -83,6 +92,7 @@ public class MissileLauncher extends Model {
 
     private LauncherStand stand;
     private LauncherTube tube;
+    private Fuse fuse;
 
     private float timeToFire;
 }

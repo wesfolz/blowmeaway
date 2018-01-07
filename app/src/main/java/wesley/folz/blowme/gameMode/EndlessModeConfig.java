@@ -72,23 +72,18 @@ public class EndlessModeConfig extends ModeConfig implements
         hazards = new ArrayList<>();
         missileLaunchers = new ArrayList<>();
 
-        for (int i = 0; i < numRings; i++) {
-            FallingObject fo = new FallingObject("ring");
-            models.add(fo);
-            fallingObjects.add(fo);
-        }
+        //background = new Background();
+        models.add(background);
 
-        for (int i = 0; i < numCubes; i++) {
-            FallingObject fo = new FallingObject("cube");
-            models.add(fo);
-            fallingObjects.add(fo);
-        }
+        wormhole = new Wormhole(0.2f, 0.5f, -0.2f, -0.5f);
+        wormhole.setBackground(background);
+        models.add(wormhole);
 
-        for (int i = 0; i < numFallingObjects + numMissileLaunchers; i++) {
-            Explosion explosion = new Explosion();
-            models.add(explosion);
-            explosions.add(explosion);
-        }
+        //fan = new Fan();
+        models.add(fan);
+
+        //dispenser = new Dispenser();
+        models.add(dispenser);
 
         for (int i = 0; i < numRicochetObstacles; i++) {
             float pos[] = generateRandomLocation();
@@ -111,9 +106,21 @@ public class EndlessModeConfig extends ModeConfig implements
         }
 
         for (int i = 0; i < numMissileLaunchers; i++) {
-            MissileLauncher ml = new MissileLauncher(-0.44f, -0.5f);
+            MissileLauncher ml = new MissileLauncher(-1, -0.5f);
             models.add(ml);
             missileLaunchers.add(ml);
+        }
+
+        for (int i = 0; i < numRings; i++) {
+            FallingObject fo = new FallingObject("ring");
+            models.add(fo);
+            fallingObjects.add(fo);
+        }
+
+        for (int i = 0; i < numCubes; i++) {
+            FallingObject fo = new FallingObject("cube");
+            models.add(fo);
+            fallingObjects.add(fo);
         }
 
         //create array list of different vortex type strings
@@ -130,19 +137,14 @@ public class EndlessModeConfig extends ModeConfig implements
             generateVortex(vortexTypes.get(i), i, 3, false);
         }
 
-        //dispenser = new Dispenser();
-        models.add(dispenser);
+        for (int i = 0; i < numFallingObjects + numMissileLaunchers; i++) {
+            Explosion explosion = new Explosion();
+            models.add(explosion);
+            explosions.add(explosion);
+        }
 
-        //background = new Background();
-        models.add(background);
-
-        wormhole = new Wormhole(0.2f, 0.5f, -0.2f, -0.5f);
-        wormhole.setBackground(background);
-
-        //fan = new Fan();
-        models.add(fan);
-        models.add(wormhole);
-
+        //sparkler = new Sparkler();
+        //models.add(sparkler);
 
         positionsInitialized = false;
 
@@ -204,7 +206,7 @@ public class EndlessModeConfig extends ModeConfig implements
                 o.enableGraphics(graphicsData);
                 o.initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
                 models.add(o);
-            } else if (!wormholeInteraction(o)) {
+            } else if (!wormholeInteraction(wormhole, o)) {
                 o.updatePosition(0, 0);
             }
             modelCount++;
@@ -260,7 +262,7 @@ public class EndlessModeConfig extends ModeConfig implements
                 modelCount++;
             }
             if (!m.isOffscreen()) {
-                if (!wormholeInteraction(m)) {
+                if (!wormholeInteraction(wormhole, m)) {
                     if (windInteraction(m)) {
                         xForce = fan.getWind().getxForce();
                         yForce = fan.getWind().getyForce();
@@ -368,7 +370,6 @@ public class EndlessModeConfig extends ModeConfig implements
 
     private int numLives = 3;
     private int score = 0;
-
 
     @Override
     public boolean OnRotation(RotationGestureDetector rotationDetector) {

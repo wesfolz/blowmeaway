@@ -206,7 +206,7 @@ public class MissileTrail extends ParticleSystem {
 
 //        Matrix.multiplyMM(transformation, 0, modelMatrix, 0, rotationMatrix, 0);
 
-        Matrix.rotateM(transformation, 0, -90, 0, 0, 1);
+        Matrix.rotateM(transformation, 0, 180, 0, 0, 1);
         Matrix.translateM(transformation, 0, rocketOffset, 0, 0);
 
         getBounds().calculateBounds(transformation);

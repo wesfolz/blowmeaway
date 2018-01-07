@@ -61,7 +61,7 @@ public class RicochetObstacle extends Model
     @Override
     public void updatePosition(float x, float y)
     {
-        Physics.rise(this, RISING_SPEED);
+        Physics.rise(this);
         deltaX = 0;
         deltaZ = 0;
 

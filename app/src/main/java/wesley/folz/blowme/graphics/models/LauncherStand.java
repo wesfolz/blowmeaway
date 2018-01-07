@@ -28,11 +28,23 @@ public class LauncherStand extends RicochetObstacle {
     public void initializeMatrices(float[] viewMatrix, float[] projectionMatrix,
             float[] lightPositionInEyeSpace) {
         super.initializeMatrices(viewMatrix, projectionMatrix, lightPositionInEyeSpace);
-        if (!this.resuming) {
-            //rotate 130 degrees about x-axis
-            Matrix.rotateM(modelMatrix, 0, 90, 0, 1, 0);
-            //Matrix.rotateM(modelMatrix, 0, 10, 0, 0, 1);
-            //Matrix.scaleM(modelMatrix, 0, 1.0f, 0.01f, 1.0f);
+    }
+
+    @Override
+    public float[] createTransformationMatrix() {
+        float[] mvp = new float[16];
+        Matrix.setIdentityM(mvp, 0);
+
+        //translate model matrix to new position
+        Matrix.translateM(modelMatrix, 0, deltaX, deltaY, deltaZ);
+
+        //copy modelMatrix to separate matrix for return, (returning modelMatrix doesn't work)
+        Matrix.multiplyMM(mvp, 0, modelMatrix, 0, mvp, 0);
+
+        if (initialXPos > 0) {
+            Matrix.rotateM(mvp, 0, 180, 0, 1, 0);
         }
+
+        return mvp;
     }
 }

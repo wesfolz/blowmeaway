@@ -1,11 +1,11 @@
 package wesley.folz.blowme.graphics.models;
 
 import android.opengl.Matrix;
-import android.os.SystemClock;
 
 import wesley.folz.blowme.graphics.effects.MissileTrail;
 import wesley.folz.blowme.util.Bounds;
 import wesley.folz.blowme.util.GraphicsUtilities;
+import wesley.folz.blowme.util.Physics;
 
 /**
  * Created by Wesley on 7/1/2017.
@@ -26,8 +26,8 @@ public class Missile extends Model {
 
         setBounds(new Bounds());
 
-        getBounds().setBounds(xPos - 2.5f * scaleFactor, yPos - scaleFactor,
-                xPos + 2.5f * scaleFactor,
+        getBounds().setBounds(xPos - 2.0f * scaleFactor, yPos - scaleFactor,
+                xPos + 2.0f * scaleFactor,
                 yPos + scaleFactor);
 
         trail = new MissileTrail(xPos, yPos, xPos - getBounds().getxLeft());
@@ -85,23 +85,25 @@ public class Missile extends Model {
 
         Matrix.setIdentityM(rotation, 0);
 
-        long time = SystemClock.uptimeMillis() % 36000L; //modulo makes rotation look smooth
-        float angle = 0.2f * (float) time;
-
         Matrix.translateM(modelMatrix, 0, deltaX, deltaY, 0); //translate missile
 
         Matrix.multiplyMM(rotation, 0, modelMatrix, 0, rotation, 0);
 
-        float rotationAngle = -90.0f;
+        float rotationAngle = 0;//-90.0f;
+        if (initialXPos > 0) {
+            rotationAngle = 180.0f;
+        }
         if (yDirection != 0) {
-            rotationAngle = 90.0f + (float) (180.0 * Math.atan2(yDirection, xDirection) / Math.PI);
+            rotationAngle = 180.0f - (float) (180.0 * Math.atan2(yDirection, xDirection) / Math.PI);
         }
 
         trail.setRotationMatrix(rotationAngle);
 
         Matrix.rotateM(rotation, 0, rotationAngle, 0, 0, 1);
 
-        Matrix.rotateM(rotation, 0, angle, 0, -1, 0); //spin missile
+        if (initialXPos > 0) {
+            Matrix.rotateM(rotation, 0, 180, 1, 0, 0);
+        }
 
         return rotation;
     }
@@ -119,9 +121,9 @@ public class Missile extends Model {
 
         if (flying) {
             xDirection -= x * KINETIC_FRICTION;
-            yDirection -= y * KINETIC_FRICTION;
-            xVelocity = -INITIAL_VELOCITY * xDirection;
-            yVelocity = -INITIAL_VELOCITY * yDirection;
+            yDirection += y * KINETIC_FRICTION;
+            float xVelocity = -INITIAL_VELOCITY * xDirection;
+            float yVelocity = INITIAL_VELOCITY * yDirection;
             float velocity = (float) Math.sqrt(xVelocity * xVelocity + yVelocity * yVelocity);
             float acceleration =
                     INITIAL_ACCELERATION;//1aqMath.max(0, INITIAL_ACCELERATION -
@@ -135,14 +137,7 @@ public class Missile extends Model {
         } else { //if not flying just move up
             deltaX = 0;
             deltaY = deltaTime * RISING_SPEED;
-            if (Math.abs(xDirection) >= 0.5) {
-                xMotion *= -1;
-            }
-            xDirection += xMotion * 0.01;//deltaTime;
-            if (Math.abs(yDirection) >= 0.5) {
-                yMotion *= -1;
-            }
-            yDirection += yMotion * 0.01;//deltaTime;
+            Physics.panUpDown(this, deltaTime);
         }
 
         xPos += deltaX;
@@ -194,17 +189,6 @@ public class Missile extends Model {
     public void setFlying(boolean flying) {
         this.flying = flying;
     }
-
-    private float xVelocity;
-    private float yVelocity;
-
-    private float xMotion = 1;
-
-    private float yMotion = 1;
-
-    private float xDirection;
-
-    private float yDirection = 0.0f;
 
     private boolean flying = false;
 

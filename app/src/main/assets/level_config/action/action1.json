@@ -17,6 +17,16 @@
       "xPos": 0
     },
     {
+      "model": "FallingObject",
+      "index": 0,
+      "type": "cube"
+    },
+    {
+      "model": "FallingObject",
+      "index": 1,
+      "type": "ring"
+    },
+    {
       "model": "Vortex",
       "index": 0,
       "capacity": 2,
@@ -30,16 +40,6 @@
     },
     {
       "model": "Background"
-    },
-    {
-      "model": "FallingObject",
-      "index": 0,
-      "type": "cube"
-    },
-    {
-      "model": "FallingObject",
-      "index": 1,
-      "type": "ring"
     },
     {
       "model": "RicochetObstacle",

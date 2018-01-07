@@ -178,16 +178,15 @@ public abstract class Model
     public void pauseGame()
     {
         paused = true;
+        pauseStartTime = System.nanoTime();
     }
 
     public void resumeGame()
     {
-        //Log.e("blowme", String.valueOf(paused));
+        long pauseDuration = System.nanoTime() - pauseStartTime;
         resuming = paused;
         paused = false;
-        if (prevUpdateTime != 0) {
-            prevUpdateTime = System.nanoTime();
-        }
+        prevUpdateTime += pauseDuration;
     }
 
     public Bounds getBounds()
@@ -328,6 +327,38 @@ public abstract class Model
         this.stretch = stretch;
     }
 
+    public float getxDirection() {
+        return xDirection;
+    }
+
+    public void setxDirection(float xDirection) {
+        this.xDirection = xDirection;
+    }
+
+    public float getyDirection() {
+        return yDirection;
+    }
+
+    public void setyDirection(float yDirection) {
+        this.yDirection = yDirection;
+    }
+
+    public float getxMotion() {
+        return xMotion;
+    }
+
+    public void setxMotion(float xMotion) {
+        this.xMotion = xMotion;
+    }
+
+    public float getyMotion() {
+        return yMotion;
+    }
+
+    public void setyMotion(float yMotion) {
+        this.yMotion = yMotion;
+    }
+
     protected boolean offscreen;
 
     boolean initialized = false;
@@ -365,6 +396,11 @@ public abstract class Model
 
     float visualYOffset = 0;
 
+    float xDirection;
+    float yDirection;
+    private float xMotion = 1;
+    private float yMotion = -1;
+
     protected float[] stretch;
 
     protected float[] modelMatrix = new float[16];
@@ -399,6 +435,8 @@ public abstract class Model
     protected boolean paused = false;
 
     protected boolean resuming = false;
+
+    private long pauseStartTime;
 
     protected float[] mvMatrix = new float[16];
 

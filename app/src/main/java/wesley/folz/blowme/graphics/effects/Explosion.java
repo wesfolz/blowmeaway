@@ -13,8 +13,7 @@ import wesley.folz.blowme.util.GraphicsUtilities;
 
 public class Explosion extends ParticleSystem
 {
-    public Explosion()
-    {
+    public Explosion() {
         super();
         this.VERTEX_SHADER = R.raw.particle_vertex_shader;
         this.FRAGMENT_SHADER = R.raw.particle_fragment_shader;
@@ -28,25 +27,24 @@ public class Explosion extends ParticleSystem
     }
 
     //TODO: Add reinitialize method so that new particle systems can be created efficiently?
-    public void reinitialize(float x, float y)
-    {
+    public void reinitialize(float x, float y) {
         this.time = 0;
         //don't know why we have to multiply by 2
         xPos = 2.0f * x;
         yPos = 2.0f * y;
         exploding = true;
+        explosionComplete = false;
+        setPrevUpdateTime(0);
     }
 
     @Override
-    public void initializeMatrices(float[] viewMatrix, float[] projectionMatrix, float[] lightPosInEyeSpace)
-    {
+    public void initializeMatrices(float[] viewMatrix, float[] projectionMatrix, float[] lightPosInEyeSpace) {
         this.setViewMatrix(viewMatrix);
         this.setProjectionMatrix(projectionMatrix);
         this.setLightPosInEyeSpace(lightPosInEyeSpace);
 
         //only call if resuming from pause state
-        if (!resuming)
-        {
+        if (!resuming) {
             //initialize model matrix
             Matrix.setIdentityM(modelMatrix, 0);
             //translate model to initial position
@@ -54,16 +52,14 @@ public class Explosion extends ParticleSystem
     }
 
     @Override
-    protected void generateParticles()
-    {
+    protected void generateParticles() {
         int numParticles = 1000;
         vertexOrder = new short[numParticles];
         int numAttributes = 8;
 
         interleavedData = new float[numAttributes * numParticles];
 
-        for (int i = 0; i < numParticles; i++)
-        {
+        for (int i = 0; i < numParticles; i++) {
             //color
             interleavedData[numAttributes * i] = 1.0f;//color[0];//(float)Math.random();
             interleavedData[numAttributes * i + 1] = 1.0f;//color[1];//(float)Math.random();
@@ -84,7 +80,6 @@ public class Explosion extends ParticleSystem
             interleavedData[numAttributes * i + 5] = direction[1] / magnitude;
             interleavedData[numAttributes * i + 6] = direction[2] / magnitude;
 
-
             //speed
             interleavedData[numAttributes * i + 7] = rand.nextFloat() / 2.0f;//currentParticle.getSpeed();
             //interleavedData[10*i+9] = 1.0f;//(float)Math.random();
@@ -93,8 +88,7 @@ public class Explosion extends ParticleSystem
     }
 
     @Override
-    public float[] createTransformationMatrix()
-    {
+    public float[] createTransformationMatrix() {
         float[] mvp = new float[16];
         Matrix.setIdentityM(mvp, 0);
 
@@ -104,26 +98,36 @@ public class Explosion extends ParticleSystem
         return mvp;
     }
 
+    @Override
+    public void draw() {
+        if (isExploding()) {
+            updatePosition(0, 0);
+            super.draw();
+        }
+    }
 
     @Override
-    public void updatePosition(float x, float y)
-    {
-        //if (prevUpdateTime == 0) {
-        //    setPrevUpdateTime(System.nanoTime());
-        //}
-        //time = (System.nanoTime() - getPrevUpdateTime()) / 1000000000.0f;
-        //time = (System.nanoTime()) / 1000000000.0f;
+    public void updatePosition(float x, float y) {
+        if (prevUpdateTime == 0) {
+            setPrevUpdateTime(System.nanoTime());
+        }
+        time = (System.nanoTime() - getPrevUpdateTime()) / 1000000000.0f;
 
         //time = 0;
-        time += 0.01f;
+        //time += 0.01f;
 
-        exploding = time < 1.0f;
+        if (!explosionComplete) {
+            exploding = time < 1.0f;
+            explosionComplete = !exploding;
+        }
     }
-    public boolean isExploding()
-    {
+
+    public boolean isExploding() {
         return exploding;
     }
 
     private boolean exploding = false;
+
+    private boolean explosionComplete = false;
 
 }
