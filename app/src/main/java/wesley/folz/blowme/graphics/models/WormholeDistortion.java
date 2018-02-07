@@ -27,7 +27,7 @@ public class WormholeDistortion extends Model {
         setBounds(new Bounds());
         getBounds().setBounds(initialXPos - scaleFactor, initialYPos - scaleFactor,
                 initialXPos + scaleFactor, initialYPos + scaleFactor);
-        scaleFactor = 0.05f;
+        scaleFactor = 0.3f;
     }
 
     @Override
@@ -118,12 +118,42 @@ public class WormholeDistortion extends Model {
         GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
     }
 
-    private float[] calculateTextureMatrix() {
+    protected float[] calculateTextureMatrix() {
         float[] texMat = new float[16];
         Matrix.setIdentityM(texMat, 0);
-        Matrix.scaleM(texMat, 0, scaleFactor * 5.0f, scaleFactor * 5.0f, 1.0f);
-        Matrix.translateM(texMat, 0, (1 / (scaleFactor * 10.0f) - 0.5f) + initialXPos,
-                -(1 / (scaleFactor * 10.0f) - 0.5f) - 2.0f * initialYPos + 2 * texYPos, 0);
+        //scale factor = 0.05, 0.05*5=0.25, wormhole is about 1/4 the size of the background
+        //Matrix.scaleM(texMat, 0, 0.0125f/scaleFactor, 0.0125f/scaleFactor, 1.0f);
+
+        //x = initialXPos + 1.5, y = -1.5 - 2*ini + 2*tex
+        //texture coordinates are inverted from screen coordinates that's why initalYPos is
+        // multiplied by -1
+        //y dimension is approximately twice the size of the x dimension, but the texture
+        // coordinates are equal in both directions
+        //that's why initialYPos and texYPos are multiplied by 2
+        //Matrix.translateM(texMat, 0, initialXPos + (1 / (scaleFactor * 10.0f) - 0.5f),
+        //       -(1 / (scaleFactor * 10.0f) - 0.5f) - 2.0f * initialYPos + 2 * texYPos, 0);
+
+        //Matrix.translateM(texMat, 0, initialXPos + 1.5f,
+        //        -2.0f * initialYPos + 2 * texYPos - 1.5f, 0);
+        Matrix.scaleM(texMat, 0, scaleFactor, scaleFactor, 1.0f);
+        //If the texture coordinates are scaled, only [0,1] is mapped so the center needs to be
+        // shifted over, see 2 examples below:
+        //scaleFactor = 0.5 -> scale = 1/scaleFactor = 2 -> center needs to shift from 0.5 to 1
+        // -> add 0.5
+        //scaleFactor = 0.25 -> scale = 1/scaleFactor = 4 -> center needs to shift from 0.5 to 2
+        // -> add 1.5
+        //When the wormhole and background texture are the same size (i.e. scaleFactor = 1),
+        //but background coords are in [-1,1] and tex coords are in [0,1], so tex coords =
+        // 0.5*background coords
+        //When the tex coords are scaled, then the ratio between tex coords and background coords
+        // changes by 1/scaleFactor
+        //texture coordinates are inverted from screen coordinates that's why initalYPos is
+        // multiplied by -1
+        Matrix.translateM(texMat, 0,
+                0.5f * initialXPos / scaleFactor + (1 / (2.0f * scaleFactor) - 0.5f),
+                -0.5f * initialYPos / scaleFactor + 0.5f * texYPos / scaleFactor - (
+                        1 / (2.0f * scaleFactor) - 0.5f), 0);
+
         //Matrix.multiplyMM(texMat, 0, background.modelMatrix, 0, texMat, 0);
         return texMat;
     }
@@ -135,16 +165,6 @@ public class WormholeDistortion extends Model {
         numVertices = graphicsData.numVerticesMap.get("wormhole");
         programHandle = graphicsData.shaderProgramIdMap.get("distortion");
         textureDataHandle = graphicsData.textureIdMap.get("planet");
-    }
-
-    @Override
-    public void initializeMatrices(float[] viewMatrix, float[] projectionMatrix,
-            float[] lightPositionInEyeSpace) {
-        super.initializeMatrices(viewMatrix, projectionMatrix, lightPositionInEyeSpace);
-        if (!this.resuming) {
-            //rotate 130 degrees about x-axis
-            Matrix.rotateM(modelMatrix, 0, 90, 1, 0, 0);
-        }
     }
 
     @Override
@@ -203,10 +223,10 @@ public class WormholeDistortion extends Model {
     @Override
     public void updatePosition(float x, float y) {
         texYPos = y;
-        //Physics.rise(this, 0.1f);
     }
 
-    private float texYPos = 0;
+    //the y position of the texture should be the y position of background
+    protected float texYPos = 0;
 
     private long initialTime = 0;
 

@@ -15,7 +15,7 @@ public class Background extends Model
     {
         super();
         float corner = 1.0f;
-        float length = 3.0f;
+        float length = 1.0f;
         interleavedData = new float[]{
                 -corner, length * corner, -1.0f,    // top left
                 0.0f, 0.0f,            //texture
@@ -39,7 +39,7 @@ public class Background extends Model
     {
         super.enableGraphics(graphicsData);
         programHandle = graphicsData.shaderProgramIdMap.get("texture");
-        textureDataHandle = graphicsData.textureIdMap.get("sky");
+        textureDataHandle = graphicsData.textureIdMap.get("planet");
     }
 
     @Override

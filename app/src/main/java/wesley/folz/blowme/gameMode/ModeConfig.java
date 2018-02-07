@@ -63,6 +63,7 @@ public abstract class ModeConfig
         graphicsData.storeModelData("launcher_stand", R.raw.launcher_stand);
         graphicsData.storeModelData("launcher_tube", R.raw.launcher_tube);
         graphicsData.storeModelData("wormhole", R.raw.wormhole);
+        graphicsData.storeModelData("wormhole_core", R.raw.wormhole_core);
 
         graphicsData.storeTexture("missile_tex", R.drawable.colored_missile_texture);
         graphicsData.storeTexture("yellow_circle", R.drawable.yellow_circle);
@@ -92,6 +93,8 @@ public abstract class ModeConfig
         graphicsData.storeShader("lighting", R.raw.lighting_vertex_shader, R.raw.lighting_fragment_shader, modelAttributes);
         graphicsData.storeShader("default", R.raw.defaultvertexshader, R.raw.defaultfragmentshader,
                 modelAttributes);
+        graphicsData.storeShader("specular", R.raw.specular_vertex_shader,
+                R.raw.specular_fragment_shader, modelAttributes);
         graphicsData.storeShader("distortion", R.raw.distortion_vertex_shader,
                 R.raw.texture_fragment_shader, modelAttributes);
 

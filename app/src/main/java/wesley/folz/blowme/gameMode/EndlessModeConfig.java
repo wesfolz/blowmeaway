@@ -75,7 +75,7 @@ public class EndlessModeConfig extends ModeConfig implements
         //background = new Background();
         models.add(background);
 
-        wormhole = new Wormhole(0.2f, 0.5f, -0.2f, -0.5f);
+        wormhole = new Wormhole(0.2f, 0.2f, -0.2f, -0.5f);
         wormhole.setBackground(background);
         models.add(wormhole);
 
