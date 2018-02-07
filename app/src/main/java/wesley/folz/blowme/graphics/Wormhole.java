@@ -80,11 +80,7 @@ public class Wormhole extends Model {
             prevUpdateTime = System.nanoTime();
         }
         if (remove) {
-            //removalRoutine();
-            distortion1.updatePosition(0, background.getyPos());
-            distortion2.updatePosition(0, background.getyPos());
-            core1.updatePosition(0, background.getyPos());
-            core2.updatePosition(0, background.getyPos());
+            removalRoutine();
         } else {
             distortion1.updatePosition(0, background.getyPos());
             distortion2.updatePosition(0, background.getyPos());
