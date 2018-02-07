@@ -19,6 +19,7 @@ import wesley.folz.blowme.graphics.models.FallingObject;
 import wesley.folz.blowme.graphics.models.Fan;
 import wesley.folz.blowme.graphics.models.Model;
 import wesley.folz.blowme.graphics.models.RicochetObstacle;
+import wesley.folz.blowme.graphics.models.SpikeStrip;
 import wesley.folz.blowme.graphics.models.Vortex;
 import wesley.folz.blowme.ui.GamePlaySurfaceView;
 import wesley.folz.blowme.ui.RotationGestureDetector;
@@ -86,7 +87,7 @@ public class PuzzleModeConfig extends ModeConfig implements
                     case "DestructiveObstacle":
                         float desPos[] = generateObstacleLocation(0, jso.getInt("yPos"));
                         desPos[0] = (float) jso.getInt("xPos") * 0.56f;
-                        DestructiveObstacle destructiveObstacle = new DestructiveObstacle(desPos[0],
+                        DestructiveObstacle destructiveObstacle = new SpikeStrip(desPos[0],
                                 desPos[1]);
                         models.add(destructiveObstacle);
                         hazards.add(destructiveObstacle);

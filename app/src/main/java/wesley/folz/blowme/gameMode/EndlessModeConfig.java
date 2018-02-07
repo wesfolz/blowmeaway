@@ -16,6 +16,7 @@ import wesley.folz.blowme.graphics.models.Missile;
 import wesley.folz.blowme.graphics.models.MissileLauncher;
 import wesley.folz.blowme.graphics.models.Model;
 import wesley.folz.blowme.graphics.models.RicochetObstacle;
+import wesley.folz.blowme.graphics.models.SpikeStrip;
 import wesley.folz.blowme.graphics.models.Vortex;
 import wesley.folz.blowme.ui.GamePlaySurfaceView;
 import wesley.folz.blowme.ui.RotationGestureDetector;
@@ -100,7 +101,7 @@ public class EndlessModeConfig extends ModeConfig implements
             } else {
                 xLoc = 0.56f;//Border.XRIGHT;
             }
-            DestructiveObstacle destObj = new DestructiveObstacle(xLoc, pos[1]);
+            DestructiveObstacle destObj = new SpikeStrip(xLoc, pos[1]);
             models.add(destObj);
             hazards.add(destObj);
         }
@@ -226,7 +227,7 @@ public class EndlessModeConfig extends ModeConfig implements
                 } else {
                     x = 0.56f;//Border.XRIGHT;
                 }
-                h = new DestructiveObstacle(x, pos[1]);
+                h = new SpikeStrip(x, pos[1]);
                 hazards.set(modelCount, h);
                 h.enableGraphics(graphicsData);
                 h.initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);

@@ -51,7 +51,7 @@ public abstract class ModeConfig
 
         //initialize data
         graphicsData.storeModelData("dispenser", R.raw.uv_dispenser);
-        //graphicsData.storeModelData("short_spikes", R.raw.uv_spikes);
+        graphicsData.storeModelData("spike", R.raw.spike);
         graphicsData.storeModelData("ring", R.raw.uv_ring);
 
         graphicsData.storeModelData("cube", R.raw.uv_cube);
@@ -74,7 +74,7 @@ public abstract class ModeConfig
         graphicsData.storeTexture("brick", R.drawable.cube_brick_tex);
         graphicsData.storeTexture("launcher_stand_tex", R.drawable.launcher_stand_texture);
         graphicsData.storeTexture("launcher_tube_tex", R.drawable.launcher_tube_texture);
-
+        graphicsData.storeTexture("spike_tex", R.drawable.spike);
         graphicsData.storeTexture("fan_test", R.drawable.fan_orig_tex);
         graphicsData.storeTexture("vortex_tex", R.drawable.vortex_tex);
 

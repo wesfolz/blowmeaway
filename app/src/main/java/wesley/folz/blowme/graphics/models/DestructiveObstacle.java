@@ -11,7 +11,7 @@ import wesley.folz.blowme.util.Physics;
  * Created by Wesley on 9/25/2016.
  */
 
-public class DestructiveObstacle extends Model
+public abstract class DestructiveObstacle extends Model
 {
     public DestructiveObstacle(float x, float y)
     {
@@ -25,24 +25,12 @@ public class DestructiveObstacle extends Model
 
         setBounds(new Bounds());
 
-        scaleFactor = 0.025f;
-
         initialXPos = xPos;
         initialYPos = yPos;
-
-        getBounds().setBounds(xPos - xRadius, yPos - 4 * scaleFactor, xPos + xRadius,
-                yPos + 4 * scaleFactor);
     }
 
     @Override
-    public void enableGraphics(GraphicsUtilities graphicsData)
-    {
-        //get dataVBO, orderVBO, program, texture handles
-        dataVBO = graphicsData.modelVBOMap.get("cube");
-        orderVBO = graphicsData.orderVBOMap.get("cube");
-        numVertices = graphicsData.numVerticesMap.get("cube");
-        programHandle = graphicsData.shaderProgramIdMap.get("lighting");
-    }
+    public abstract void enableGraphics(GraphicsUtilities graphicsData);
 
     @Override
     public float[] createTransformationMatrix()
@@ -67,7 +55,6 @@ public class DestructiveObstacle extends Model
     {
         Physics.rise(this);
 
-        getBounds().setBounds(xPos - xRadius, yPos - 4 * scaleFactor, xPos + xRadius, yPos + 4 * scaleFactor);
     }
 
     public int getTime() {
@@ -88,6 +75,5 @@ public class DestructiveObstacle extends Model
 
     private static final float RISING_SPEED = 0.1f;
 
-    private static final float xRadius = 0.06f;
-
+    protected float xRadius;
 }

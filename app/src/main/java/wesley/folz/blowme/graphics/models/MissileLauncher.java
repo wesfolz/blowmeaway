@@ -42,9 +42,11 @@ public class MissileLauncher extends Model {
     @Override
     public void draw() {
         missile.draw();
-        stand.draw();
-        tube.draw();
-        fuse.draw();
+        if (!missile.isFlying()) {
+            stand.draw();
+            tube.draw();
+            fuse.draw();
+        }
     }
 
     @Override

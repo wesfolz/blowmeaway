@@ -14,6 +14,7 @@ import wesley.folz.blowme.graphics.models.FallingObject;
 import wesley.folz.blowme.graphics.models.Fan;
 import wesley.folz.blowme.graphics.models.Model;
 import wesley.folz.blowme.graphics.models.RicochetObstacle;
+import wesley.folz.blowme.graphics.models.SpikeStrip;
 import wesley.folz.blowme.graphics.models.Vortex;
 import wesley.folz.blowme.ui.GamePlaySurfaceView;
 import wesley.folz.blowme.util.Physics;
@@ -107,7 +108,7 @@ public class TapMode extends ModeConfig {
             } else {
                 xLoc = 0.56f;//Border.XRIGHT;
             }
-            DestructiveObstacle destObj = new DestructiveObstacle(xLoc, pos[1]);
+            DestructiveObstacle destObj = new SpikeStrip(xLoc, pos[1]);
             models.add(destObj);
             hazards.add(destObj);
         }
@@ -213,7 +214,7 @@ public class TapMode extends ModeConfig {
                 } else {
                     x = 0.56f;//Border.XRIGHT;
                 }
-                h = new DestructiveObstacle(x, pos[1]);
+                h = new SpikeStrip(x, pos[1]);
                 hazards.set(modelCount, h);
                 h.enableGraphics(graphicsData);
                 h.initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
