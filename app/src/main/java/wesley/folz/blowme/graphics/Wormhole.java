@@ -51,14 +51,18 @@ public class Wormhole extends Model {
     @Override
     public boolean initializationRoutine() {
         remainingTime = timeout;
+        //need to call update position so that the background texture moves up during initialization
         distortion1.updatePosition(0, background.getyPos());
         distortion2.updatePosition(0, background.getyPos());
+        core1.updatePosition(0, background.getyPos());
+        core2.updatePosition(0, background.getyPos());
         return distortion1.initializationRoutine() & distortion2.initializationRoutine()
                 & core1.initializationRoutine() & core2.initializationRoutine();
     }
 
     @Override
     public boolean removalRoutine() {
+        //need to call update position so that the background texture moves up during removal
         distortion1.updatePosition(0, background.getyPos());
         distortion2.updatePosition(0, background.getyPos());
         core1.updatePosition(0, background.getyPos());

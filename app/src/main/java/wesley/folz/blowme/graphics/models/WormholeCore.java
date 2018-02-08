@@ -27,9 +27,6 @@ public class WormholeCore extends WormholeDistortion {
 
         initialXPos = xPos;
         initialYPos = yPos;
-
-        getBounds().setBounds(xPos - scaleFactor, yPos - scaleFactor, xPos + scaleFactor,
-                yPos + scaleFactor);
     }
 
     @Override
@@ -41,7 +38,6 @@ public class WormholeCore extends WormholeDistortion {
         programHandle = graphicsData.shaderProgramIdMap.get("distortion");
         textureDataHandle = graphicsData.textureIdMap.get("planet");
     }
-
 
     @Override
     protected float[] calculateTextureMatrix() {

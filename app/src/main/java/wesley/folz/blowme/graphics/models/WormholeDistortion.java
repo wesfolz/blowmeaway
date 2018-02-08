@@ -226,7 +226,7 @@ public class WormholeDistortion extends Model {
     }
 
     //the y position of the texture should be the y position of background
-    protected float texYPos = 0;
+    float texYPos = 0;
 
     private long initialTime = 0;
 
