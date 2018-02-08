@@ -54,7 +54,6 @@ public abstract class DestructiveObstacle extends Model
     public void updatePosition(float x, float y)
     {
         Physics.rise(this);
-
     }
 
     public int getTime() {

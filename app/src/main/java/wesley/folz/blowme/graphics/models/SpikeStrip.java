@@ -1,5 +1,7 @@
 package wesley.folz.blowme.graphics.models;
 
+import android.util.Log;
+
 import wesley.folz.blowme.util.GraphicsUtilities;
 
 /**
@@ -55,11 +57,28 @@ public class SpikeStrip extends DestructiveObstacle {
     }
 
     @Override
+    public void pauseGame() {
+        super.pauseGame();
+        for (Spike s : spikes) {
+            s.pauseGame();
+        }
+    }
+
+    @Override
+    public void resumeGame() {
+        super.resumeGame();
+        for (Spike s : spikes) {
+            s.resumeGame();
+        }
+    }
+
+    @Override
     public void updatePosition(float x, float y) {
         super.updatePosition(x, y);
         for (Spike s : spikes) {
             s.updatePosition(x, y);
         }
+        Log.e("updatePosition", "y " + yPos);
         getBounds().setBounds(xPos - xRadius,
                 yPos - Spike.WIDTH * spikes.length / 2.0f - Spike.WIDTH / 2,
                 xPos + xRadius, yPos + Spike.WIDTH * spikes.length / 2.0f - Spike.WIDTH / 2);
