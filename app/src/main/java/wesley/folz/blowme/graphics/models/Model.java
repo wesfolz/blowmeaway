@@ -396,8 +396,8 @@ public abstract class Model
 
     float visualYOffset = 0;
 
-    float xDirection;
-    float yDirection;
+    protected float xDirection;
+    protected float yDirection;
     private float xMotion = 1;
     private float yMotion = -1;
 

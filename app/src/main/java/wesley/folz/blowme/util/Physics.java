@@ -164,13 +164,6 @@ public abstract class Physics
             Log.e("motion",
                     m.getClass() + " ydir " + m.getyDirection() + " xdir " + m.getxDirection());
         }
-
-        if (Math.abs(m.getxDirection()) >= 0.5) {
-            //m.setxMotion(-m.getxMotion());
-            //m.setxMotion(-m.getxDirection()/Math.abs(m.getxDirection()));
-        }
-        //m.setxDirection(m.getxDirection() + m.getxMotion() * 0.01f);//deltaTime);
-
         if (Math.abs(m.getyDirection()) >= 0.5) {// || Math.abs(m.getyDirection()) >= 1.5) {
             //m.setyMotion(-m.getyMotion());
             m.setyMotion(-m.getyDirection() / Math.abs(m.getyDirection()));

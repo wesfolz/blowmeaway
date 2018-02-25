@@ -3,8 +3,6 @@ package wesley.folz.blowme.graphics.effects;
 import android.opengl.GLES20;
 import android.opengl.Matrix;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.util.Random;
 
 import wesley.folz.blowme.R;
@@ -71,16 +69,6 @@ public class Wind extends ParticleSystem
 
             vertexOrder[i] = (short) i;
         }
-    }
-
-    //must be called after glBindBuffer(GLES20.GL_ARRAY_BUFFER, dataVBO);
-    private void updateDataBuffer() {
-        dataBuffer = ByteBuffer.allocateDirect(interleavedData.length * 4)
-                .order(ByteOrder.nativeOrder()).asFloatBuffer();
-        dataBuffer.put(interleavedData).position(0);
-
-        GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, dataBuffer.capacity() * 4,
-                dataBuffer, GLES20.GL_STATIC_DRAW);
     }
 
     @Override

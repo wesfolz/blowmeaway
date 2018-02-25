@@ -4,7 +4,6 @@ import android.opengl.Matrix;
 
 import wesley.folz.blowme.graphics.models.Model;
 import wesley.folz.blowme.util.GraphicsUtilities;
-import wesley.folz.blowme.util.Physics;
 
 /**
  * Created by Wesley on 9/10/2016.
@@ -67,7 +66,7 @@ public class Background extends Model
     @Override
     public void updatePosition(float x, float y)
     {
-        Physics.rise(this);
+        //Physics.rise(this);
 
         if (yPos >= 2)
         {

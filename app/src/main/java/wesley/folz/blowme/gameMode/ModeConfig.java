@@ -12,7 +12,6 @@ import wesley.folz.blowme.R;
 import wesley.folz.blowme.graphics.Background;
 import wesley.folz.blowme.graphics.Wormhole;
 import wesley.folz.blowme.graphics.effects.Explosion;
-import wesley.folz.blowme.graphics.effects.Sparkler;
 import wesley.folz.blowme.graphics.models.DestructiveObstacle;
 import wesley.folz.blowme.graphics.models.Dispenser;
 import wesley.folz.blowme.graphics.models.FallingObject;
@@ -55,7 +54,6 @@ public abstract class ModeConfig
         graphicsData.storeModelData("ring", R.raw.uv_ring);
 
         graphicsData.storeModelData("cube", R.raw.uv_cube);
-        //graphicsData.storeModelData("fan", R.raw.uv_fan);
         graphicsData.storeModelData("fan", R.raw.fan_orig);
         graphicsData.storeModelData("vortex", R.raw.uv_vortex);
         graphicsData.storeModelData("missile", R.raw.missile);
@@ -284,6 +282,7 @@ public abstract class ModeConfig
                 if (Physics.isCollision(m.getBounds(), model.getBounds()) && !m.isOffscreen()) {
                     objectExplosion.reinitialize(model.getxPos(), model.getyPos());
                     model.setOffscreen(true);
+                    //ml.getMissile().setOffscreen(true);
                     m.setOffscreen(true);
                     didExplode = true;
                     //rotate through all explosions
@@ -654,8 +653,6 @@ public abstract class ModeConfig
     ArrayList<MissileLauncher> missileLaunchers;
 
     Wormhole wormhole;
-
-    Sparkler sparkler;
 
     protected Fan fan;
     protected Background background;

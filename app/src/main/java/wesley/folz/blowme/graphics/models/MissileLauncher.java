@@ -1,5 +1,6 @@
 package wesley.folz.blowme.graphics.models;
 
+import wesley.folz.blowme.graphics.effects.Explosion;
 import wesley.folz.blowme.util.GraphicsUtilities;
 
 /**
@@ -18,8 +19,8 @@ public class MissileLauncher extends Model {
         missile = new Missile(x, y);
         stand = new LauncherStand(x, y);
         tube = new LauncherTube(x, y);
-        fuse = new Fuse(x, y);
-        timeToFire = time;
+        fuse = new Fuse(x, y, time);
+        explosion = new Explosion();
     }
 
     @Override
@@ -28,6 +29,7 @@ public class MissileLauncher extends Model {
         stand.enableGraphics(graphicsData);
         tube.enableGraphics(graphicsData);
         fuse.enableGraphics(graphicsData);
+        explosion.enableGraphics(graphicsData);
     }
 
     @Override
@@ -37,15 +39,19 @@ public class MissileLauncher extends Model {
         stand.initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
         tube.initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
         fuse.initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
+        explosion.initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
     }
 
     @Override
     public void draw() {
         missile.draw();
-        if (!missile.isFlying()) {
-            stand.draw();
-            tube.draw();
+        if (!missile.isFlying() && !missile.isOffscreen()) {
             fuse.draw();
+            tube.draw();
+            stand.draw();
+        }
+        if (exploding) {
+            explosion.draw();
         }
     }
 
@@ -74,15 +80,21 @@ public class MissileLauncher extends Model {
 
     @Override
     public void updatePosition(float x, float y) {
-        if (getPrevUpdateTime() == 0) {
-            setPrevUpdateTime(System.nanoTime());
-        }
-        float deltaTime = (System.nanoTime() - getPrevUpdateTime()) / 1000000000.0f;
-
         stand.updatePosition(x, y);
         tube.updatePosition(x, y);
         fuse.updatePosition(x, y);
-        if (deltaTime >= timeToFire) missile.setFlying(true);
+
+        if (fuse.isBurnedOut() && !exploding) {
+            missile.setFlying(true);
+            explosion.reinitialize(stand.getxPos(), stand.getyPos());
+            exploding = true;
+        }
+
+        if (missile.isOffscreen() && !exploding) {
+            explosion.reinitialize(stand.getxPos(), stand.getyPos());
+            exploding = true;
+        }
+
         missile.updatePosition(x, y);
     }
 
@@ -96,5 +108,7 @@ public class MissileLauncher extends Model {
     private LauncherTube tube;
     private Fuse fuse;
 
-    private float timeToFire;
+    private Explosion explosion;
+
+    private boolean exploding = false;
 }

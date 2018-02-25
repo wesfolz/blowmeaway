@@ -28,6 +28,16 @@ public abstract class ParticleSystem extends Model
 
     protected abstract void generateParticles();
 
+    //must be called after glBindBuffer(GLES20.GL_ARRAY_BUFFER, dataVBO);
+    protected void updateDataBuffer() {
+        dataBuffer = ByteBuffer.allocateDirect(interleavedData.length * 4)
+                .order(ByteOrder.nativeOrder()).asFloatBuffer();
+        dataBuffer.put(interleavedData).position(0);
+
+        GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, dataBuffer.capacity() * 4,
+                dataBuffer, GLES20.GL_STATIC_DRAW);
+    }
+
     @Override
     public void draw()
     {
@@ -214,5 +224,5 @@ public abstract class ParticleSystem extends Model
 
     protected float time;
 
-    private int secondTexture;
+    int secondTexture;
 }

@@ -107,7 +107,8 @@ public class EndlessModeConfig extends ModeConfig implements
         }
 
         for (int i = 0; i < numMissileLaunchers; i++) {
-            MissileLauncher ml = new MissileLauncher(-1, -0.5f);
+            MissileLauncher ml = new MissileLauncher(
+                    -1, -0.5f);
             models.add(ml);
             missileLaunchers.add(ml);
         }
@@ -143,9 +144,6 @@ public class EndlessModeConfig extends ModeConfig implements
             models.add(explosion);
             explosions.add(explosion);
         }
-
-        //sparkler = new Sparkler();
-        //models.add(sparkler);
 
         positionsInitialized = false;
 
@@ -268,9 +266,9 @@ public class EndlessModeConfig extends ModeConfig implements
                         xForce = fan.getWind().getxForce();
                         yForce = fan.getWind().getyForce();
                     }
-                    ml.updatePosition(xForce, yForce);
                 }
             }
+            ml.updatePosition(xForce, yForce);
         }
     }
 

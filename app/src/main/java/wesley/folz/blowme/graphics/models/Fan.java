@@ -27,12 +27,9 @@ public class Fan extends Model
         scaleFactor = 0.03f;
         yAngle = -65;
 
-        //    scaleFactor = 0.1f;
-
         initialXPos = xPos;
         initialYPos = yPos;
         this.setTargets(targetX, targetY, targetYAngle, targetZAngle);
-
     }
 
     public Fan() {
@@ -359,7 +356,6 @@ public class Fan extends Model
     {
         clockwise = x < 1;
     }
-
 
     public Wind getWind()
     {
