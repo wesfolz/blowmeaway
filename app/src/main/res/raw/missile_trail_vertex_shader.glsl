@@ -4,7 +4,7 @@ uniform mat4 u_MVMatrix;
 uniform float deltaT;
 uniform vec3 normalVector;
 uniform float movedDelta;
-uniform float totalDelta;
+uniform float stretch;
 
 //attribute vec4 position; // Per-vertex position information we will pass in.
 attribute vec3 direction; // Per-vertex color information we will pass in.
@@ -30,7 +30,7 @@ void main()
     vec4 newPos = vec4(xPos, yPos, zPos, 1.0);
     //vec4 newPos = vec4(position[0] + direction[0]*speed*deltaT, position[1] + direction[1]*speed*deltaT, 0.0, 1);
 
-    gl_PointSize = 30.0;// * sin(4.0*deltaT);
+    gl_PointSize = 30.0 * stretch;// * sin(4.0*deltaT);
     //gl_PointSize = 20.0 * sin(4.0*speed*deltaT);
 
     // Transform the vertex into eye space.

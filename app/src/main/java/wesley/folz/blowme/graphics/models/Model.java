@@ -359,6 +359,14 @@ public abstract class Model
         this.yMotion = yMotion;
     }
 
+    public boolean isTransporting() {
+        return transporting;
+    }
+
+    public void setTransporting(boolean transporting) {
+        this.transporting = transporting;
+    }
+
     protected boolean offscreen;
 
     boolean initialized = false;
@@ -435,6 +443,9 @@ public abstract class Model
     protected boolean paused = false;
 
     protected boolean resuming = false;
+
+    //if true model is being transported through wormhole
+    private boolean transporting = false;
 
     private long pauseStartTime;
 

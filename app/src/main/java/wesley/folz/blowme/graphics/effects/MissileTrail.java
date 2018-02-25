@@ -158,14 +158,12 @@ public class MissileTrail extends ParticleSystem {
         int normalHandle = GLES20.glGetUniformLocation(programHandle, "normalVector");
         GLES20.glUniform3f(normalHandle, 0, 0, 1);
 
-        int deltaYHandle = GLES20.glGetUniformLocation(programHandle, "totalDelta");
-        GLES20.glUniform1f(deltaYHandle, totalDelta);
+        int deltaYHandle = GLES20.glGetUniformLocation(programHandle, "stretch");
+        GLES20.glUniform1f(deltaYHandle, stretch[0]);
 
 //        int deltaYHandle = GLES20.glGetUniformLocation(programHandle, "deltaY");
 //        GLES20.glUniform1f(deltaYHandle, deltaY);
 
-        int movedDeltaHandle = GLES20.glGetUniformLocation(programHandle, "movedDelta");
-        GLES20.glUniform1f(movedDeltaHandle, movedDelta);
 
         GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, orderVBO);
 
@@ -190,12 +188,6 @@ public class MissileTrail extends ParticleSystem {
     public float[] createTransformationMatrix() {
         float[] transformation = new float[16];
 
-        movedDelta += totalDelta / 50.0f;
-
-        if (Math.abs(movedDelta) > Math.abs(totalDelta)) {
-            movedDelta = totalDelta;
-        }
-
         //Matrix.setIdentityM(modelMatrix, 0);
         Matrix.setIdentityM(transformation, 0);
 
@@ -209,6 +201,8 @@ public class MissileTrail extends ParticleSystem {
         Matrix.rotateM(transformation, 0, 180, 0, 0, 1);
         Matrix.translateM(transformation, 0, rocketOffset, 0, 0);
 
+        Matrix.scaleM(transformation, 0, stretch[0], stretch[1], 1);
+
         getBounds().calculateBounds(transformation);
 
         return transformation;
@@ -218,8 +212,6 @@ public class MissileTrail extends ParticleSystem {
     public void updatePosition(float x, float y) {
         //time = (System.nanoTime() - initialTime) / 1000000000.0f;
         //time = (System.nanoTime()) / 1000000000.0f;
-        //movedDelta = 0;
-
         //time = 0;
         time += 0.01f;
 
@@ -228,7 +220,6 @@ public class MissileTrail extends ParticleSystem {
 
         xPos += deltaX;
         yPos += deltaY;
-        totalDelta += deltaY + deltaX;
     }
 
     public void setRotationMatrix(float rotation) {
@@ -239,10 +230,6 @@ public class MissileTrail extends ParticleSystem {
 
     private float deltaX;
     private float deltaY;
-
-    private float totalDelta = 0;
-
-    private float movedDelta = 0;
 
     private float[] rotationMatrix;
 

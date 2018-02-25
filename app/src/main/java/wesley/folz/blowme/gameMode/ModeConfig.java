@@ -21,6 +21,7 @@ import wesley.folz.blowme.graphics.models.MissileLauncher;
 import wesley.folz.blowme.graphics.models.Model;
 import wesley.folz.blowme.graphics.models.RicochetObstacle;
 import wesley.folz.blowme.graphics.models.Vortex;
+import wesley.folz.blowme.graphics.models.WormholeDistortion;
 import wesley.folz.blowme.ui.GamePlayActivity;
 import wesley.folz.blowme.ui.GamePlaySurfaceView;
 import wesley.folz.blowme.util.GraphicsUtilities;
@@ -282,7 +283,6 @@ public abstract class ModeConfig
                 if (Physics.isCollision(m.getBounds(), model.getBounds()) && !m.isOffscreen()) {
                     objectExplosion.reinitialize(model.getxPos(), model.getyPos());
                     model.setOffscreen(true);
-                    //ml.getMissile().setOffscreen(true);
                     m.setOffscreen(true);
                     didExplode = true;
                     //rotate through all explosions
@@ -356,37 +356,46 @@ public abstract class ModeConfig
         }
     }
 
+    private boolean wormholeCollision(Wormhole wormhole, Model model, boolean first) {
+        WormholeDistortion d1;
+        WormholeDistortion d2;
+
+        if (first) {
+            d1 = wormhole.getDistortion1();
+            d2 = wormhole.getDistortion2();
+        } else {
+            d1 = wormhole.getDistortion2();
+            d2 = wormhole.getDistortion1();
+        }
+
+        if (Physics.isCollision(d1.getBounds(), model.getBounds())) {
+            float[] vector = Physics.calculateDistanceVector(
+                    d1.getxPos(),
+                    d1.getyPos(), model.getxPos(), model.getyPos());
+            model.setTransporting(true);
+            if (Math.abs(vector[0]) > 0.01f || Math.abs(vector[1]) > 0.01f) {
+                //Physics.travelOnVector(model, vector[0], vector[1], 1.0f);
+                model.setStretch(Physics.travelOnVector(model, vector[0], vector[1],
+                        5.0f));
+            } else {
+                Physics.transport(d2, model);
+                model.setStretch(new float[]{1, 1});
+                wormhole.setRemove(true);
+                model.setTransporting(false);
+            }
+            return true;
+        }
+        return false;
+    }
+
     boolean wormholeInteraction(Wormhole wormhole, Model model) {
         if (wormhole != null) {
-            if (!model.isOffscreen() && !wormhole.isOffscreen() && !wormhole.isRemove()) {
-                if (Physics.isCollision(wormhole.getDistortion1().getBounds(), model.getBounds())) {
-                    float[] vector = Physics.calculateDistanceVector(
-                            wormhole.getDistortion1().getxPos(),
-                            wormhole.getDistortion1().getyPos(), model.getxPos(), model.getyPos());
-                    if (Math.abs(vector[0]) > 0.01f || Math.abs(vector[1]) > 0.01f) {
-                        //Physics.travelOnVector(model, vector[0], vector[1], 1.0f);
-                        model.setStretch(Physics.travelOnVector(model, vector[0], vector[1],
-                                4.0f));
-                    } else {
-                        Physics.transport(wormhole.getDistortion2(), model);
-                        model.setStretch(new float[]{1, 1});
-                        wormhole.setRemove(true);
-                    }
+            if (!model.isOffscreen() && !wormhole.isOffscreen() && (model.isTransporting()
+                    || !wormhole.isRemove())) {
+                if (wormholeCollision(wormhole, model, true)) {
                     return true;
-                } else if (Physics.isCollision(wormhole.getDistortion2().getBounds(),
-                        model.getBounds())) {
-                    float[] vector = Physics.calculateDistanceVector(
-                            wormhole.getDistortion2().getxPos(),
-                            wormhole.getDistortion2().getyPos(), model.getxPos(), model.getyPos());
-                    if (Math.abs(vector[0]) > 0.01f || Math.abs(vector[1]) > 0.01f) {
-                        //Physics.travelOnVector(model, vector[0], vector[1], 1.0f);
-                        model.setStretch(Physics.travelOnVector(model, vector[0], vector[1],
-                                4.0f));
-                    } else {
-                        Physics.transport(wormhole.getDistortion1(), model);
-                        model.setStretch(new float[]{1, 1});
-                        wormhole.setRemove(true);
-                    }
+                }
+                if (wormholeCollision(wormhole, model, false)) {
                     return true;
                 }
             }

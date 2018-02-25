@@ -2,7 +2,6 @@ package wesley.folz.blowme.graphics.models;
 
 import android.opengl.Matrix;
 import android.os.SystemClock;
-import android.util.Log;
 
 import wesley.folz.blowme.graphics.effects.Wind;
 import wesley.folz.blowme.ui.GamePlayActivity;
@@ -61,7 +60,6 @@ public class Fan extends Model
     {
         super.initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
         getWind().initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
-        Log.e("initMatrix", "init matrices, resuming: " + this.resuming);
     }
 
     @Override
@@ -80,7 +78,6 @@ public class Fan extends Model
             initRoutineDeltaY = targetY - initRoutineY;
             initialTime = System.nanoTime();
             prevUpdateTime = initialTime;
-            Log.e("initRoutine", "deltaX " + initRoutineDeltaX + " deltaY " + initRoutineDeltaY);
         }
         long time = System.nanoTime();
         float deltaTime = (time - initialTime) / 1000000000.0f;
@@ -117,14 +114,7 @@ public class Fan extends Model
             parametricAngle = (float) Math.PI;
             fingerRotation = 0;
             initialized = true;
-
-            //Matrix.setIdentityM(modelMatrix, 0);
-            //Matrix.translateM(modelMatrix, 0, xPos, yPos, 0);
-            //Matrix.setIdentityM(getWind().modelMatrix, 0);
-            //Matrix.translateM(getWind().modelMatrix, 0, xPos, yPos, 0);
         }
-        getWind().updatePosition(parametricX, parametricY);
-        getWind().setRotationMatrix(inwardRotation);
 
         return initialized;
     }
@@ -164,8 +154,6 @@ public class Fan extends Model
 
         inwardRotation =
                 180 * (parametricAngle - (float) Math.PI) / (float) Math.PI + fingerRotation;
-
-        getWind().setRotationMatrix(inwardRotation);
     }
 
     @Override
@@ -180,17 +168,6 @@ public class Fan extends Model
         long time = SystemClock.uptimeMillis() % 36000L; //modulo makes rotation look smooth
         float angle = 0.6f * (float) time;
 
-        getWind().updatePosition(parametricX, parametricY);
-
-        xPos += parametricX; //newX;
-        yPos += parametricY; //newY;
-
-        getWind().xPos = xPos;
-        getWind().yPos = yPos;
-
-        getBounds().setBounds(xPos - getSize()[0] / 2, yPos - getSize()[1] / 2, xPos + getSize()
-                [0] / 2, yPos + getSize()[1] / 2);
-
         //don't use deltaX, otherwise it can be updated between the moveParametric
         //call and the translateM call
         Matrix.translateM(modelMatrix, 0, parametricX, parametricY, 0);
@@ -198,31 +175,22 @@ public class Fan extends Model
         //xPos = modelMatrix[12]; //+= parametricX; //newX;
         //yPos = modelMatrix[13]; //+= parametricY; //newY;
 
-        //Matrix.setIdentityM(modelMatrix, 0);
-        //Matrix.translateM(modelMatrix, 0, xPos, yPos, 0);
-        //Matrix.setIdentityM(getWind().modelMatrix, 0);
-        //Matrix.translateM(getWind().modelMatrix, 0, xPos, yPos, 0);
+        //Matrix.multiplyMM(bladeRotation, 0, translationMatrix, 0, rotationMatrix, 0);
+        Matrix.multiplyMM(bladeRotation, 0, modelMatrix, 0, rotationMatrix, 0);
 
-//        Matrix.translateM(rotationMatrix, 0, xPos, yPos, 0);
-
-
-        //Matrix.scaleM( translationMatrix, 0, 0.05f, 0.05f, 0.05f );
-        //Log.e( "blowme", "DeltaX " + deltaX + "DeltaY " + deltaY );
+        xPos += parametricX;
+        yPos += parametricY;
+        syncWind(bladeRotation);
 
         parametricX = 0;
         parametricY = 0;
         deltaX = 0;
         deltaY = 0;
 
-        //Matrix.multiplyMM(bladeRotation, 0, translationMatrix, 0, rotationMatrix, 0);
-        Matrix.multiplyMM(bladeRotation, 0, modelMatrix, 0, rotationMatrix, 0);
-
         //rotate -65 degrees about y-axis
         Matrix.rotateM(bladeRotation, 0, yAngle, 0, 1, 0);
         //rotate 90 degrees about x-axis
         Matrix.rotateM(bladeRotation, 0, 90, 1, 0, 0);
-
-        //Log.e("rotation", "fan angle " + fingerRotation);
 
         //Matrix.rotateM(bladeRotation, 0, fingerRotation, 1, 0, 0);
 
@@ -273,19 +241,13 @@ public class Fan extends Model
         parametricX = newX - xPos;
         parametricY = newY - yPos;
 
-        /*
-        xPos += parametricX; //newX;
-        yPos += parametricY; //newY;
+        //xPos = newX; //newX;
+        //yPos = newY; //newY;
 
-        getWind().xPos = xPos;
-        getWind().yPos = yPos;
 
         getBounds().setBounds(xPos - getSize()[0] / 2, yPos - getSize()[1] / 2, xPos + getSize()
                 [0] / 2, yPos + getSize()[1] / 2);
-         */
-        //getWind().setBounds( new float[]{-0.4f, -0.25f, 0.4f, 0.25f} );
-        //getWind().getBounds().calculateBounds(calculateInwardParametricRotation());
-        //getWind().updatePosition(parametricX,parametricY);
+
         calculateInwardParametricRotation();
     }
 
@@ -312,36 +274,7 @@ public class Fan extends Model
         //directions[updateCount % 10] = (((initialX - 1.0f) * (y - 1.0f)) - ((initialY - 1.0f) * (x - 1.0f))) > 0;
 
         clockwise = (((initialX - 1.0f) * (y - 1.0f)) - ((initialY - 1.0f) * (x - 1.0f))) > 0;
-/*
-        if (Math.abs(deltaY) > Math.abs(deltaX))
-        {
-            if (!(x < 1.1 && x > 0.9))
-            {
-                if (x < 1)
-                {
-                    clockwise = deltaY > 0;
-                }
-                else
-                {
-                    clockwise = deltaY < 0;
-                }
-            }
-        }
-        else
-        {
-            if (!(y < 1.1 && y > 0.9))
-            {
-                if (y < 1)
-                {
-                    clockwise = deltaX > 0;
-                }
-                else
-                {
-                    clockwise = deltaX < 0;
-                }
-            }
-        }
-*/
+
         stop = false;
         //update initial position
         initialX = x;
@@ -350,6 +283,14 @@ public class Fan extends Model
         updateCount++;
 
         moveParametric();
+    }
+
+    private void syncWind(float[] transformationMatrix) {
+        getWind().updatePosition(0, 0);
+        getWind().setInwardRotation(inwardRotation);
+        getWind().xPos = xPos;
+        getWind().yPos = yPos;
+        getWind().setTransformationMatrix(transformationMatrix);
     }
 
     public void touch(float x)

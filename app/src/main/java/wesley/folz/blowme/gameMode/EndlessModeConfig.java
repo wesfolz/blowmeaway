@@ -266,9 +266,10 @@ public class EndlessModeConfig extends ModeConfig implements
                         xForce = fan.getWind().getxForce();
                         yForce = fan.getWind().getyForce();
                     }
+                    ml.updatePosition(xForce,
+                            yForce); //this must not be called if there's a wormhole interaction
                 }
             }
-            ml.updatePosition(xForce, yForce);
         }
     }
 

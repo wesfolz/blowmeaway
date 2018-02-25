@@ -105,6 +105,8 @@ public class Missile extends Model {
             Matrix.rotateM(rotation, 0, 180, 1, 0, 0);
         }
 
+        Matrix.scaleM(rotation, 0, stretch[0], stretch[1], 1);
+
         return rotation;
     }
 
@@ -184,6 +186,11 @@ public class Missile extends Model {
     public void setyPos(float yPos) {
         this.yPos = yPos;
         trail.setyPos(yPos);
+    }
+
+    public void setStretch(float[] stretch) {
+        super.setStretch(stretch);
+        trail.setStretch(stretch);
     }
 
     public void setFlying(boolean flying) {

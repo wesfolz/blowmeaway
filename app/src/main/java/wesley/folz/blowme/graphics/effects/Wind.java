@@ -21,8 +21,8 @@ public class Wind extends ParticleSystem
         xPos = -GamePlayActivity.X_EDGE_POSITION;//+.01f;
         yPos = 0;
 
-        initialXPos = xPos;
-        initialYPos = yPos;
+        initialXPos = 0;//xPos;
+        initialYPos = 0;//yPos;
 
         this.VERTEX_SHADER = R.raw.wind_vertex_shader;
         this.FRAGMENT_SHADER = R.raw.wind_fragment_shader;
@@ -31,8 +31,8 @@ public class Wind extends ParticleSystem
         setSize(new float[]{3.0f, 0.3f});
         setBounds(new Bounds(-1.5f, -0.15f, 1.5f, 0.15f));
 
-        rotationMatrix = new float[16];
-        Matrix.setIdentityM( rotationMatrix, 0 );
+        transformationMatrix = new float[16];
+        Matrix.setIdentityM(transformationMatrix, 0);
         generateParticles();
     }
 
@@ -189,23 +189,14 @@ public class Wind extends ParticleSystem
 
         Matrix.setIdentityM(transformation, 0);
 
-        Matrix.translateM(modelMatrix, 0, deltaX, deltaY, 0);
-
-        Matrix.multiplyMM(transformation, 0, modelMatrix, 0, rotationMatrix, 0);
+        Matrix.multiplyMM(transformation, 0, modelMatrix, 0, transformationMatrix, 0);
 
         getBounds().calculateBounds(transformation);
-
         return transformation;
     }
 
     @Override
     public void updatePosition(float x, float y) {
-        deltaX = x;
-        deltaY = y;
-
-        xPos += deltaX;
-        yPos += deltaY;
-
         if (prevUpdateTime == 0) {
             setPrevUpdateTime(System.nanoTime());
         }
@@ -236,28 +227,25 @@ public class Wind extends ParticleSystem
         }
     }
 
-    public void setRotationMatrix(float rotation) {
+    public void setInwardRotation(float rotation) {
         inwardRotation = rotation;
-        Matrix.setIdentityM(rotationMatrix, 0);
-        Matrix.setRotateM(rotationMatrix, 0, rotation, 0, 0, 1);
-
-        //getBounds().calculateBounds(rotationMatrix);
     }
+
+    public void setTransformationMatrix(float[] transformationMatrix) {
+        System.arraycopy(transformationMatrix, 0, this.transformationMatrix, 0, 16);
+    }
+
+    private float[] transformationMatrix;
 
     public float getInwardRotation() {
         return inwardRotation;
     }
-
-    private float deltaX;
-    private float deltaY;
 
     private float xForce;
 
     private float yForce;
 
     private float maxWindForce = 2.0f;
-
-    private float[] rotationMatrix;
 
     private float inwardRotation = 0;
 

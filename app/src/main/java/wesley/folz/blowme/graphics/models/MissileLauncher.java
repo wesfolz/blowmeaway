@@ -10,7 +10,7 @@ import wesley.folz.blowme.util.GraphicsUtilities;
 public class MissileLauncher extends Model {
 
     public MissileLauncher(float x, float y) {
-        this(x, y, 5);
+        this(x, y, 2);
     }
 
     public MissileLauncher(float x, float y, float time) {

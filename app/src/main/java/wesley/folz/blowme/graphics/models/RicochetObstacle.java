@@ -55,6 +55,8 @@ public class RicochetObstacle extends Model
         //copy modelMatrix to separate matrix for return, (returning modelMatrix doesn't work)
         Matrix.multiplyMM(mvp, 0, modelMatrix, 0, mvp, 0);
 
+        Matrix.scaleM(mvp, 0, stretch[0], stretch[1], 1);
+
         return mvp;
     }
 

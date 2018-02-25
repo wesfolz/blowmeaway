@@ -218,8 +218,8 @@ public abstract class Physics
 
         float[] modelStretch = model.getStretch();
         float[] stretch = new float[2];
-        stretch[0] = modelStretch[0] * 0.5f;//1.0f - stretchFactor;
-        stretch[1] = modelStretch[1] * 0.5f;//1.0f + stretchFactor;
+        stretch[0] = modelStretch[0] * 0.9f;//1.0f - stretchFactor;
+        stretch[1] = modelStretch[1] * 0.9f;//1.0f + stretchFactor;
 
         Log.e("travelOnVector", "stretch " + stretch[0] + " " + stretch[1]);
         return stretch;
