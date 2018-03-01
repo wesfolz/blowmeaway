@@ -100,7 +100,8 @@ public class MenuModeConfig extends ModeConfig
                     falObj = new FallingObject(type, dispenser.getxPos());
                     fallingObjects.set(modelCount, falObj);
                     falObj.enableGraphics(graphicsData);
-                    falObj.initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
+                    falObj.initializeMatrices(viewMatrix, perspectiveMatrix, orthographicMatrix,
+                            lightPosInEyeSpace);
                     models.add(falObj);
                 }
                 catch (Exception e)

@@ -33,13 +33,18 @@ public class MissileLauncher extends Model {
     }
 
     @Override
-    public void initializeMatrices(float[] viewMatrix, float[] projectionMatrix,
-            float[] lightPosInEyeSpace) {
-        missile.initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
-        stand.initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
-        tube.initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
-        fuse.initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
-        explosion.initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
+    public void initializeMatrices(float[] viewMatrix, float[] perspectiveMatrix,
+            float[] orthographicMatrix, float[] lightPosInEyeSpace) {
+        missile.initializeMatrices(viewMatrix, perspectiveMatrix, orthographicMatrix,
+                lightPosInEyeSpace);
+        stand.initializeMatrices(viewMatrix, perspectiveMatrix, orthographicMatrix,
+                lightPosInEyeSpace);
+        tube.initializeMatrices(viewMatrix, perspectiveMatrix, orthographicMatrix,
+                lightPosInEyeSpace);
+        fuse.initializeMatrices(viewMatrix, perspectiveMatrix, orthographicMatrix,
+                lightPosInEyeSpace);
+        explosion.initializeMatrices(viewMatrix, perspectiveMatrix, orthographicMatrix,
+                lightPosInEyeSpace);
     }
 
     @Override

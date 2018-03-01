@@ -52,9 +52,11 @@ public class Dispenser extends Model
     }
 
     @Override
-    public void initializeMatrices(float[] viewMatrix, float[] projectionMatrix, float[] lightPositionInEyeSpace)
+    public void initializeMatrices(float[] viewMatrix, float[] perspectiveMatrix,
+            float[] orthographicMatrix, float[] lightPosInEyeSpace)
     {
-        super.initializeMatrices(viewMatrix, projectionMatrix, lightPositionInEyeSpace);
+        super.initializeMatrices(viewMatrix, perspectiveMatrix, orthographicMatrix,
+                lightPosInEyeSpace);
 
         if (!this.resuming)
         {

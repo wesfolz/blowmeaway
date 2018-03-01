@@ -40,7 +40,8 @@ public class TapMode extends ModeConfig {
         initializeGameObjects();
 
         for (Model m : models) {
-            m.initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
+            m.initializeMatrices(viewMatrix, perspectiveMatrix, orthographicMatrix,
+                    lightPosInEyeSpace);
         }
 
         surfaceView.queueEvent(new Runnable() {
@@ -195,7 +196,8 @@ public class TapMode extends ModeConfig {
                 o = new RicochetObstacle(pos[0], pos[1]);
                 obstacles.set(modelCount, o);
                 o.enableGraphics(graphicsData);
-                o.initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
+                o.initializeMatrices(viewMatrix, perspectiveMatrix, orthographicMatrix,
+                        lightPosInEyeSpace);
                 models.add(o);
             } else {
                 o.updatePosition(0, 0);
@@ -217,7 +219,8 @@ public class TapMode extends ModeConfig {
                 h = new SpikeStrip(x, pos[1]);
                 hazards.set(modelCount, h);
                 h.enableGraphics(graphicsData);
-                h.initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
+                h.initializeMatrices(viewMatrix, perspectiveMatrix, orthographicMatrix,
+                        lightPosInEyeSpace);
                 models.add(h);
             } else {
                 h.updatePosition(0, 0);
@@ -261,7 +264,8 @@ public class TapMode extends ModeConfig {
                     falObj = new FallingObject(type, dispenser.getxPos());
                     fallingObjects.set(modelCount, falObj);
                     falObj.enableGraphics(graphicsData);
-                    falObj.initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
+                    falObj.initializeMatrices(viewMatrix, perspectiveMatrix, orthographicMatrix,
+                            lightPosInEyeSpace);
                     models.add(falObj);
                 } catch (Exception e) {
                     Log.e("error", e.getMessage());

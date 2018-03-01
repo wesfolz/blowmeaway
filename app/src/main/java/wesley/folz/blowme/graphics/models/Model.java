@@ -156,10 +156,15 @@ public abstract class Model
         numVertices = vertexOrder.length;
     }
 
-    public void initializeMatrices(float[] viewMatrix, float[] projectionMatrix, float[] lightPosInEyeSpace)
+    public void initializeMatrices(float[] viewMatrix, float[] perspectiveMatrix,
+            float[] orthographicMatrix, float[] lightPosInEyeSpace)
     {
         this.setViewMatrix(viewMatrix);
-        this.setProjectionMatrix(projectionMatrix);
+        if (orthographicProjection) {
+            this.setProjectionMatrix(orthographicMatrix);
+        } else {
+            this.setProjectionMatrix(perspectiveMatrix);
+        }
         this.setLightPosInEyeSpace(lightPosInEyeSpace);
 
         //only call if resuming from pause state
@@ -464,6 +469,8 @@ public abstract class Model
     protected ShortBuffer drawListBuffer;
 
     protected int numVertices;
+
+    protected boolean orthographicProjection = false;
 
     private Bounds bounds;
 

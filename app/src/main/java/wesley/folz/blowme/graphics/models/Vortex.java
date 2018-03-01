@@ -107,20 +107,24 @@ public class Vortex extends Model
     }
 
     @Override
-    public void initializeMatrices(float[] viewMatrix, float[] projectionMatrix, float[] lightPositionInEyeSpace)
+    public void initializeMatrices(float[] viewMatrix, float[] perspectiveMatrix,
+            float[] orthographicMatrix, float[] lightPosInEyeSpace)
     {
-        super.initializeMatrices(viewMatrix, projectionMatrix, lightPositionInEyeSpace);
+        super.initializeMatrices(viewMatrix, perspectiveMatrix, orthographicMatrix,
+                lightPosInEyeSpace);
         if (!this.resuming)
         {
             //rotate 130 degrees about x-axis
-            Matrix.rotateM(modelMatrix, 0, 10, 1, 0, 0);
+            //Matrix.rotateM(modelMatrix, 0, 10, 1, 0, 0);
             //Matrix.scaleM(modelMatrix, 0, 1.0f, 0.01f, 1.0f);
         }
 
-        dustCloud.initializeMatrices(viewMatrix, projectionMatrix, lightPositionInEyeSpace);
+        dustCloud.initializeMatrices(viewMatrix, perspectiveMatrix, orthographicMatrix,
+                lightPosInEyeSpace);
         for (OrbitingObject orbitingObject : orbitingObjects)
         {
-            orbitingObject.initializeMatrices(viewMatrix, projectionMatrix, lightPositionInEyeSpace);
+            orbitingObject.initializeMatrices(viewMatrix, perspectiveMatrix, orthographicMatrix,
+                    lightPosInEyeSpace);
         }
     }
 

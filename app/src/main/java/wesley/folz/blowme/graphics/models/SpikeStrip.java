@@ -49,10 +49,11 @@ public class SpikeStrip extends DestructiveObstacle {
     }
 
     @Override
-    public void initializeMatrices(float[] viewMatrix, float[] projectionMatrix,
-            float[] lightPosInEyeSpace) {
+    public void initializeMatrices(float[] viewMatrix, float[] perspectiveMatrix,
+            float[] orthographicMatrix, float[] lightPosInEyeSpace) {
         for (Spike s : spikes) {
-            s.initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
+            s.initializeMatrices(viewMatrix, perspectiveMatrix, orthographicMatrix,
+                    lightPosInEyeSpace);
         }
     }
 

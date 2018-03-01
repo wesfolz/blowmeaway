@@ -15,17 +15,19 @@ public class Background extends Model
         super();
         float corner = 1.0f;
         float length = 1.0f;
+        float z = -5.0f;
+        this.orthographicProjection = true;
         interleavedData = new float[]{
-                -corner, length * corner, -1.0f,    // top left
+                -corner, length * corner, z,    // top left
                 0.0f, 0.0f,            //texture
                 0.0f, 0.0f, 1.0f,      //normal
-                -corner, -length * corner, -1.0f,  // bottom left
+                -corner, -length * corner, z,  // bottom left
                 0.0f, 1.0f,           //texture
                 0.0f, 0.0f, 1.0f,       //normal
-                corner, -length * corner, -1.0f,    // bottom right
+                corner, -length * corner, z,    // bottom right
                 1.0f, 1.0f,                //texture
                 0.0f, 0.0f, 1.0f,       //normal
-                corner, length * corner, -1.0f,      // top right
+                corner, length * corner, z,      // top right
                 1.0f, 0.0f,              //texture
                 0.0f, 0.0f, 1.0f      //normal
         };

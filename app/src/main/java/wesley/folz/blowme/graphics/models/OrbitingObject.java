@@ -30,6 +30,8 @@ public class OrbitingObject extends Model
         initialYPos = yPos;
 
         prevUpdateTime = System.nanoTime();
+
+        //this.orthographicProjection = true;
     }
 
     @Override
@@ -63,13 +65,15 @@ public class OrbitingObject extends Model
     }
 
     @Override
-    public void initializeMatrices(float[] viewMatrix, float[] projectionMatrix, float[] lightPositionInEyeSpace)
+    public void initializeMatrices(float[] viewMatrix, float[] perspectiveMatrix,
+            float[] orthographicMatrix, float[] lightPosInEyeSpace)
     {
-        super.initializeMatrices(viewMatrix, projectionMatrix, lightPositionInEyeSpace);
+        super.initializeMatrices(viewMatrix, perspectiveMatrix, orthographicMatrix,
+                lightPosInEyeSpace);
         if (!this.resuming)
         {
             //rotate 130 degrees about x-axis
-            Matrix.translateM(modelMatrix, 0, 0, 0, zPos);
+            Matrix.translateM(modelMatrix, 0, 0, 0, initialZPos);
         }
 
         //Log.e( "blowme", "xpos: " + xPos + " ypos " + yPos );
@@ -85,7 +89,7 @@ public class OrbitingObject extends Model
         prevUpdateTime = time;
 
         float newX = 0.1f * (float) Math.cos(parametricAngle + initialAngle);
-        float newZ = 0.35f * (float) Math.sin(parametricAngle + initialAngle);
+        float newZ = 0.1f * (float) Math.sin(parametricAngle + initialAngle);
 
         parametricAngle += angle;
 

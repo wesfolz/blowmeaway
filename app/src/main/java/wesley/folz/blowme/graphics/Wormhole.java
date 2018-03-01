@@ -40,12 +40,16 @@ public class Wormhole extends Model {
     }
 
     @Override
-    public void initializeMatrices(float[] viewMatrix, float[] projectionMatrix,
-            float[] lightPositionInEyeSpace) {
-        distortion1.initializeMatrices(viewMatrix, projectionMatrix, lightPositionInEyeSpace);
-        distortion2.initializeMatrices(viewMatrix, projectionMatrix, lightPositionInEyeSpace);
-        core1.initializeMatrices(viewMatrix, projectionMatrix, lightPositionInEyeSpace);
-        core2.initializeMatrices(viewMatrix, projectionMatrix, lightPositionInEyeSpace);
+    public void initializeMatrices(float[] viewMatrix, float[] perspectiveMatrix,
+            float[] orthographicMatrix, float[] lightPosInEyeSpace) {
+        distortion1.initializeMatrices(viewMatrix, perspectiveMatrix, orthographicMatrix,
+                lightPosInEyeSpace);
+        distortion2.initializeMatrices(viewMatrix, perspectiveMatrix, orthographicMatrix,
+                lightPosInEyeSpace);
+        core1.initializeMatrices(viewMatrix, perspectiveMatrix, orthographicMatrix,
+                lightPosInEyeSpace);
+        core2.initializeMatrices(viewMatrix, perspectiveMatrix, orthographicMatrix,
+                lightPosInEyeSpace);
     }
 
     @Override

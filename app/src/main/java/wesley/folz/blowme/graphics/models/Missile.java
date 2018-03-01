@@ -48,10 +48,12 @@ public class Missile extends Model {
     }
 
     @Override
-    public void initializeMatrices(float[] viewMatrix, float[] projectionMatrix,
-            float[] lightPosInEyeSpace) {
-        super.initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
-        trail.initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
+    public void initializeMatrices(float[] viewMatrix, float[] perspectiveMatrix,
+            float[] orthographicMatrix, float[] lightPosInEyeSpace) {
+        super.initializeMatrices(viewMatrix, perspectiveMatrix, orthographicMatrix,
+                lightPosInEyeSpace);
+        trail.initializeMatrices(viewMatrix, perspectiveMatrix, orthographicMatrix,
+                lightPosInEyeSpace);
     }
 
     @Override

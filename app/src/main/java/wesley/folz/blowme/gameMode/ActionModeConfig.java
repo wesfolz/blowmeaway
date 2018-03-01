@@ -43,7 +43,8 @@ public class ActionModeConfig extends ModeConfig
         initializeGameObjects();
 
         for (Model m : models) {
-            m.initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
+            m.initializeMatrices(viewMatrix, perspectiveMatrix, orthographicMatrix,
+                    lightPosInEyeSpace);
         }
 
         surfaceView.queueEvent(new Runnable() { //run on glthread

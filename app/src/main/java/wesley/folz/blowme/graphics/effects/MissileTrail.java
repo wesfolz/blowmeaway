@@ -34,6 +34,7 @@ public class MissileTrail extends ParticleSystem {
 
         rotationMatrix = new float[16];
         Matrix.setIdentityM(rotationMatrix, 0);
+        this.orthographicProjection = true;
         generateParticles();
     }
 

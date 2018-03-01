@@ -192,18 +192,6 @@ public class DustCloud extends ParticleSystem
     }
 
     @Override
-    public void initializeMatrices(float[] viewMatrix, float[] projectionMatrix, float[] lightPositionInEyeSpace)
-    {
-        super.initializeMatrices(viewMatrix, projectionMatrix, lightPositionInEyeSpace);
-        if (!this.resuming)
-        {
-            Matrix.rotateM(modelMatrix, 0, 10, 1, 0, 0);
-        }
-
-        //Log.e( "blowme", "xpos: " + xPos + " ypos " + yPos );
-    }
-
-    @Override
     public void updatePosition(float x, float y)
     {
         if (y != 0)

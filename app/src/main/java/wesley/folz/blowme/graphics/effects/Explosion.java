@@ -38,9 +38,10 @@ public class Explosion extends ParticleSystem
     }
 
     @Override
-    public void initializeMatrices(float[] viewMatrix, float[] projectionMatrix, float[] lightPosInEyeSpace) {
+    public void initializeMatrices(float[] viewMatrix, float[] perspectiveMatrix,
+            float[] orthographicMatrix, float[] lightPosInEyeSpace) {
         this.setViewMatrix(viewMatrix);
-        this.setProjectionMatrix(projectionMatrix);
+        this.setProjectionMatrix(perspectiveMatrix);
         this.setLightPosInEyeSpace(lightPosInEyeSpace);
 
         //only call if resuming from pause state

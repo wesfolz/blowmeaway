@@ -22,12 +22,13 @@ public class WormholeDistortion extends Model {
         yPos = 0;
         initialXPos = x;
         initialYPos = y;
-        initialZPos = -0.5f;
+        initialZPos = -5f;
         scaleFactor = 0.1f;
         setBounds(new Bounds());
         getBounds().setBounds(initialXPos - scaleFactor, initialYPos - scaleFactor,
                 initialXPos + scaleFactor, initialYPos + scaleFactor);
         scaleFactor = 0.3f;
+        this.orthographicProjection = true;
     }
 
     @Override

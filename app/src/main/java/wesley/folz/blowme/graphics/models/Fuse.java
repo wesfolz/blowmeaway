@@ -66,10 +66,12 @@ public class Fuse extends RicochetObstacle {
     }
 
     @Override
-    public void initializeMatrices(float[] viewMatrix, float[] projectionMatrix,
-            float[] lightPositionInEyeSpace) {
-        super.initializeMatrices(viewMatrix, projectionMatrix, lightPositionInEyeSpace);
-        sparkler.initializeMatrices(viewMatrix, projectionMatrix, lightPositionInEyeSpace);
+    public void initializeMatrices(float[] viewMatrix, float[] perspectiveMatrix,
+            float[] orthographicMatrix, float[] lightPosInEyeSpace) {
+        super.initializeMatrices(viewMatrix, perspectiveMatrix, orthographicMatrix,
+                lightPosInEyeSpace);
+        sparkler.initializeMatrices(viewMatrix, perspectiveMatrix, orthographicMatrix,
+                lightPosInEyeSpace);
     }
 
     @Override

@@ -122,14 +122,20 @@ public abstract class ModeConfig
     {
         if (!resuming) {
             float ratio = (float) width / height;
+            float eyeZ = 5.0f;
 
+            Log.e("ratio", "ratio " + ratio);
             // Set the camera position (View matrix)
-            Matrix.setLookAtM(viewMatrix, 0, 0, 0, 5.0f, 0, 0, -1.0f, 0, 1.0f, 0);
+            Matrix.setLookAtM(viewMatrix, 0, 0, 0, eyeZ, 0, 0, 0.0f, 0, 1.0f, 0);
 
             // this projection matrix is applied to object coordinates
             // in the onDrawFrame() method
-            //Matrix.frustumM( projectionMatrix, 0, - ratio, ratio, - 1, 1, 1, 10 );
-            Matrix.orthoM(projectionMatrix, 0, -ratio, ratio, -1, 1, 1, 10);
+            float zNear = 1;
+            float zFar = 1000;
+            float size = 1 / eyeZ;
+            Matrix.frustumM(perspectiveMatrix, 0, -ratio * size, ratio * size, -size, size, zNear,
+                    zFar);
+            Matrix.orthoM(orthographicMatrix, 0, -ratio, ratio, -1, 1, 4, 10);
 
             float[] mLightPosInWorldSpace = new float[4];
             float[] mLightPosInModelSpace = new float[]{0.0f, 0.0f, 0.0f, 1.0f};
@@ -142,10 +148,11 @@ public abstract class ModeConfig
             Matrix.multiplyMV(mLightPosInWorldSpace, 0, mLightModelMatrix, 0, mLightPosInModelSpace,
                     0);
             Matrix.multiplyMV(lightPosInEyeSpace, 0, viewMatrix, 0, mLightPosInWorldSpace, 0);
-            //Matrix.multiplyMV(lightPosInEyeSpace, 0, projectionMatrix, 0, lightPosInEyeSpace, 0);
+            //Matrix.multiplyMV(lightPosInEyeSpace, 0, perspectiveMatrix, 0, lightPosInEyeSpace, 0);
 
             for (Model m : models) {
-                m.initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
+                m.initializeMatrices(viewMatrix, perspectiveMatrix, orthographicMatrix,
+                        lightPosInEyeSpace);
             }
 
             Log.e("pause", "surface changed mode");
@@ -157,7 +164,8 @@ public abstract class ModeConfig
     void initializeFromExistingMode(ModeConfig mode, GamePlaySurfaceView surfaceView)
     {
         this.graphicsData = mode.graphicsData;
-        this.projectionMatrix = mode.projectionMatrix;
+        this.perspectiveMatrix = mode.perspectiveMatrix;
+        this.orthographicMatrix = mode.orthographicMatrix;
         this.viewMatrix = mode.viewMatrix;
         this.lightPosInEyeSpace = mode.lightPosInEyeSpace;
         this.background = mode.background;
@@ -187,7 +195,8 @@ public abstract class ModeConfig
                         }
                     }
                 }
-                m.initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
+                m.initializeMatrices(viewMatrix, perspectiveMatrix, orthographicMatrix,
+                        lightPosInEyeSpace);
                 modelCount++;
             }
 
@@ -264,7 +273,8 @@ public abstract class ModeConfig
                 falObj = new FallingObject(type, dispenser.getxPos());
                 fallingObjects.set(modelCount, falObj);
                 falObj.enableGraphics(graphicsData);
-                falObj.initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
+                falObj.initializeMatrices(viewMatrix, perspectiveMatrix, orthographicMatrix,
+                        lightPosInEyeSpace);
                 models.set(index, falObj);
             } catch (Exception e) {
                 Log.e("error", e.getMessage());
@@ -434,7 +444,8 @@ public abstract class ModeConfig
                 (float) (index + 1) * (2.0f / (numVortexes + 1.0f)) - 1, capacity);
         if (reinitialize) {
             v.enableGraphics(graphicsData);
-            v.initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
+            v.initializeMatrices(viewMatrix, perspectiveMatrix, orthographicMatrix,
+                    lightPosInEyeSpace);
             vortexes.set(index, v);
         } else {
             vortexes.add(v);
@@ -668,7 +679,8 @@ public abstract class ModeConfig
     Dispenser dispenser;
 
     protected float[] viewMatrix = new float[16];
-    protected float[] projectionMatrix = new float[16];
+    protected float[] perspectiveMatrix = new float[16];
+    protected float[] orthographicMatrix = new float[16];
     protected float[] lightPosInEyeSpace = new float[16];
 
     private boolean draw;

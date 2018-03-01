@@ -28,12 +28,6 @@ public class LauncherTube extends RicochetObstacle {
     }
 
     @Override
-    public void initializeMatrices(float[] viewMatrix, float[] projectionMatrix,
-            float[] lightPositionInEyeSpace) {
-        super.initializeMatrices(viewMatrix, projectionMatrix, lightPositionInEyeSpace);
-    }
-
-    @Override
     public float[] createTransformationMatrix() {
         float[] rotation = new float[16];
 

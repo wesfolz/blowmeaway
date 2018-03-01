@@ -37,7 +37,8 @@ public class EndlessModeConfig extends ModeConfig implements
         initializeGameObjects();
 
         for (Model m : models) {
-            m.initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
+            m.initializeMatrices(viewMatrix, perspectiveMatrix, orthographicMatrix,
+                    lightPosInEyeSpace);
         }
 
         surfaceView.queueEvent(new Runnable() {
@@ -203,7 +204,8 @@ public class EndlessModeConfig extends ModeConfig implements
                 o = new RicochetObstacle(pos[0], pos[1]);
                 obstacles.set(modelCount, o);
                 o.enableGraphics(graphicsData);
-                o.initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
+                o.initializeMatrices(viewMatrix, perspectiveMatrix, orthographicMatrix,
+                        lightPosInEyeSpace);
                 models.add(o);
             } else if (!wormholeInteraction(wormhole, o)) {
                 o.updatePosition(0, 0);
@@ -228,7 +230,8 @@ public class EndlessModeConfig extends ModeConfig implements
                 h = new SpikeStrip(x, pos[1]);
                 hazards.set(modelCount, h);
                 h.enableGraphics(graphicsData);
-                h.initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
+                h.initializeMatrices(viewMatrix, perspectiveMatrix, orthographicMatrix,
+                        lightPosInEyeSpace);
                 models.add(h);
             } else {
                 h.updatePosition(0, 0);
@@ -256,7 +259,8 @@ public class EndlessModeConfig extends ModeConfig implements
                 ml = new MissileLauncher(x, pos[1]);
                 missileLaunchers.set(modelCount, ml);
                 ml.enableGraphics(graphicsData);
-                ml.initializeMatrices(viewMatrix, projectionMatrix, lightPosInEyeSpace);
+                ml.initializeMatrices(viewMatrix, perspectiveMatrix, orthographicMatrix,
+                        lightPosInEyeSpace);
                 models.add(ml);
                 modelCount++;
             }

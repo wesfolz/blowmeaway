@@ -25,12 +25,6 @@ public class LauncherStand extends RicochetObstacle {
     }
 
     @Override
-    public void initializeMatrices(float[] viewMatrix, float[] projectionMatrix,
-            float[] lightPositionInEyeSpace) {
-        super.initializeMatrices(viewMatrix, projectionMatrix, lightPositionInEyeSpace);
-    }
-
-    @Override
     public float[] createTransformationMatrix() {
         float[] mvp = new float[16];
         Matrix.setIdentityM(mvp, 0);

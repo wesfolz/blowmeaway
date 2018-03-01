@@ -25,8 +25,11 @@ public class WormholeCore extends WormholeDistortion {
 
         scaleFactor = 0.3f;
 
+        this.orthographicProjection = true;
+
         initialXPos = xPos;
         initialYPos = yPos;
+        initialZPos = -5f;
     }
 
     @Override
