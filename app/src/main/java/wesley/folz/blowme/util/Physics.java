@@ -160,10 +160,6 @@ public abstract class Physics
     }
 
     public static void panUpDown(Model m, float deltaTime) {
-        if (m.getClass().toString().equals("class wesley.folz.blowme.graphics.models.Missile")) {
-            Log.e("motion",
-                    m.getClass() + " ydir " + m.getyDirection() + " xdir " + m.getxDirection());
-        }
         if (Math.abs(m.getyDirection()) >= 0.5) {// || Math.abs(m.getyDirection()) >= 1.5) {
             //m.setyMotion(-m.getyMotion());
             m.setyMotion(-m.getyDirection() / Math.abs(m.getyDirection()));

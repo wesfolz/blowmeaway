@@ -30,7 +30,6 @@ public class BezierCurve {
             pathComplete = true;
         }
 
-
         switch (controlPoints.length) {
             case 3:
                 return quadraticCurve(t);

@@ -18,17 +18,17 @@
       "xPos": 0
     },
     {
-      "model": "Vortex",
-      "index": 0,
-      "capacity": 1,
-      "type": "cube"
-    },
-    {
       "model": "Background"
     },
     {
       "model": "FallingObject",
       "index": 0,
+      "type": "cube"
+    },
+    {
+      "model": "Vortex",
+      "index": 0,
+      "capacity": 1,
       "type": "cube"
     },
     {

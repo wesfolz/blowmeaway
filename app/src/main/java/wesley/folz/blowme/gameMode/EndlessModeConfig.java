@@ -73,6 +73,7 @@ public class EndlessModeConfig extends ModeConfig implements
         vortexes = new ArrayList<>();
         hazards = new ArrayList<>();
         missileLaunchers = new ArrayList<>();
+        fans = new ArrayList<>();
 
         //background = new Background();
         models.add(background);
@@ -83,6 +84,7 @@ public class EndlessModeConfig extends ModeConfig implements
 
         //fan = new Fan();
         models.add(fan);
+        fans.add(fan);
 
         //dispenser = new Dispenser();
         models.add(dispenser);
@@ -110,6 +112,7 @@ public class EndlessModeConfig extends ModeConfig implements
         for (int i = 0; i < numMissileLaunchers; i++) {
             MissileLauncher ml = new MissileLauncher(
                     -1, -0.5f);
+            ml.setInitialAngle(45);
             models.add(ml);
             missileLaunchers.add(ml);
         }
@@ -245,6 +248,7 @@ public class EndlessModeConfig extends ModeConfig implements
         float yForce;
         int modelCount = 0;
         for (MissileLauncher ml : missileLaunchers) {
+            ml.getFuse().setIgnited(true);
             xForce = 0;
             yForce = 0;
             Missile m = ml.getMissile();
@@ -266,7 +270,7 @@ public class EndlessModeConfig extends ModeConfig implements
             }
             if (!m.isOffscreen()) {
                 if (!wormholeInteraction(wormhole, m)) {
-                    if (windInteraction(m)) {
+                    if (windInteraction(m, fan)) {
                         xForce = fan.getWind().getxForce();
                         yForce = fan.getWind().getyForce();
                     }

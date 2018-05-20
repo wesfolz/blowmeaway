@@ -112,13 +112,6 @@ public class Vortex extends Model
     {
         super.initializeMatrices(viewMatrix, perspectiveMatrix, orthographicMatrix,
                 lightPosInEyeSpace);
-        if (!this.resuming)
-        {
-            //rotate 130 degrees about x-axis
-            //Matrix.rotateM(modelMatrix, 0, 10, 1, 0, 0);
-            //Matrix.scaleM(modelMatrix, 0, 1.0f, 0.01f, 1.0f);
-        }
-
         dustCloud.initializeMatrices(viewMatrix, perspectiveMatrix, orthographicMatrix,
                 lightPosInEyeSpace);
         for (OrbitingObject orbitingObject : orbitingObjects)

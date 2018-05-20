@@ -201,7 +201,7 @@ public class GamePlayActivity extends Activity
 
     public void onPuzzleButtonClicked(View endlessButton) {
         TransitionManager.go(levelSelectScene, transitionAnimation);
-        TextView modeTitle = (TextView) findViewById(R.id.modeBannerText);
+        TextView modeTitle = findViewById(R.id.modeBannerText);
         modeTitle.setText(getResources().getString(R.string.puzzle_mode));
         GridView gridview = (GridView) findViewById(R.id.level_grid);
         gridview.setAdapter(new ImageAdapter(this));
@@ -370,8 +370,8 @@ public class GamePlayActivity extends Activity
         //gameMode = new TapMode(menuMode, surfaceView);
         gameMode.reinitialize();
 
-        numLivesView = (TextView) findViewById(R.id.numLivesTextView);
-        scoreTextView = (TextView) findViewById(R.id.timerTextView);
+        numLivesView = findViewById(R.id.numLivesTextView);
+        scoreTextView = findViewById(R.id.timerTextView);
 
         initializeGameMode();
         startEndlessModeHandler();

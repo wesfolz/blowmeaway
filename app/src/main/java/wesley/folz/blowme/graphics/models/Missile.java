@@ -5,7 +5,6 @@ import android.opengl.Matrix;
 import wesley.folz.blowme.graphics.effects.MissileTrail;
 import wesley.folz.blowme.util.Bounds;
 import wesley.folz.blowme.util.GraphicsUtilities;
-import wesley.folz.blowme.util.Physics;
 
 /**
  * Created by Wesley on 7/1/2017.
@@ -139,9 +138,9 @@ public class Missile extends Model {
                     (INITIAL_VELOCITY * deltaTime + 0.5f * acceleration * deltaTime * deltaTime) * (
                             yVelocity / velocity);
         } else { //if not flying just move up
-            deltaX = 0;
-            deltaY = deltaTime * RISING_SPEED;
-            Physics.panUpDown(this, deltaTime);
+            deltaX = x;
+            deltaY = y;// deltaTime * RISING_SPEED;
+            //Physics.panUpDown(this, deltaTime);
         }
 
         xPos += deltaX;

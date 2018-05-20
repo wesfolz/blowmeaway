@@ -372,6 +372,15 @@ public abstract class Model
         this.transporting = transporting;
     }
 
+
+    public int getTime() {
+        return time;
+    }
+
+    public void setTime(int time) {
+        this.time = time;
+    }
+
     protected boolean offscreen;
 
     boolean initialized = false;
@@ -413,6 +422,8 @@ public abstract class Model
     protected float yDirection;
     private float xMotion = 1;
     private float yMotion = -1;
+
+    private int time = 0;
 
     protected float[] stretch;
 

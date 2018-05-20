@@ -3,7 +3,6 @@ package wesley.folz.blowme.graphics.models;
 import android.opengl.Matrix;
 
 import wesley.folz.blowme.util.GraphicsUtilities;
-import wesley.folz.blowme.util.Physics;
 
 /**
  * Created by Wesley on 10/15/2017.
@@ -33,7 +32,7 @@ public class LauncherTube extends RicochetObstacle {
 
         Matrix.setIdentityM(rotation, 0);
 
-        Matrix.translateM(modelMatrix, 0, 0, getDeltaY(), 0); //translate missile
+        Matrix.translateM(modelMatrix, 0, getDeltaX(), getDeltaY(), 0); //translate missile
 
         Matrix.multiplyMM(rotation, 0, modelMatrix, 0, rotation, 0); //spin missile
 
@@ -57,8 +56,12 @@ public class LauncherTube extends RicochetObstacle {
     @Override
     public void updatePosition(float x, float y) {
         //super.updatePosition(x, y);
+        //Physics.panUpDown(this, Physics.rise(this));
 
-        Physics.panUpDown(this, Physics.rise(this));
-
+        deltaY = y;
+        yPos += deltaY;
+        deltaX = x;
+        xPos += deltaX;
+        deltaZ = 0;
     }
 }

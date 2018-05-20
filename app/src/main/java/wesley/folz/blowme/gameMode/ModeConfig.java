@@ -251,19 +251,18 @@ public abstract class ModeConfig
         return xForce;
     }
 
-    boolean windInteraction(Model falObj) {
+    boolean windInteraction(Model falObj, Fan f) {
         boolean windCollision = false;
         //calculate wind influence
-        if (Physics.isCollision(falObj.getBounds(), fan.getWind().getBounds())) {
-            Physics.calculateWindForce(fan.getWind(), falObj);
+        if (Physics.isCollision(f.getWind().getBounds(), falObj.getBounds())) {
+            Physics.calculateWindForce(f.getWind(), falObj);
             windCollision = true;
         }
         return windCollision;
     }
 
-    FallingObject offscreenInteraction(FallingObject falObj, int modelCount) {
-        if (falObj.isOffscreen()) {
-            Log.e("collision", "offscreen " + falObj.getType());
+    FallingObject offscreenInteraction(FallingObject falObj, int modelCount, boolean respawn) {
+        if (falObj.isOffscreen() && respawn) {
             try {
                 int index = models.indexOf(falObj);
                 //models.remove(falObj);
@@ -336,7 +335,7 @@ public abstract class ModeConfig
         return didExplode;
     }
 
-    void vortexInteraction(FallingObject falObj, boolean regenerate) {
+    void vortexInteraction(FallingObject falObj, boolean respawn) {
         int vortexCount = 0;
         for (Iterator<Vortex> iterator = vortexes.iterator(); iterator.hasNext(); ) {
             Vortex vortex = iterator.next();
@@ -356,7 +355,7 @@ public abstract class ModeConfig
             }
             if (vortex.isOffscreen()) {
                 models.remove(vortex);
-                if (regenerate) {
+                if (respawn) {
                     generateVortex(vortex.getType(), vortexCount, vortex.getCapacity(), true);
                 } else {
                     iterator.remove();
@@ -414,22 +413,28 @@ public abstract class ModeConfig
     }
 
     boolean fallingObjectInteractions(FallingObject falObj, int modelCount,
-            boolean regenerate) {
+            boolean respawn) {
         float yForce = 0;
         boolean destroyed = destructionInteraction(falObj) | missileInteraction(falObj);
 
-        falObj = offscreenInteraction(falObj, modelCount);
+        falObj = offscreenInteraction(falObj, modelCount, respawn);
+
+        if (!respawn) {
+            destroyed |= falObj.isOffscreen();
+        }
 
         //determine forces due to collisions with obstacles
         falObj.calculateRicochetCollisions(obstacles);
 
-        vortexInteraction(falObj, regenerate);
+        vortexInteraction(falObj, respawn);
 
         float xForce = dispenseInteraction(falObj);
 
-        if (windInteraction(falObj)) {
-            xForce = fan.getWind().getxForce();
-            yForce = fan.getWind().getyForce();
+        for (Fan f : fans) {
+            if (windInteraction(falObj, f)) {
+                xForce += f.getWind().getxForce();
+                yForce += f.getWind().getyForce();
+            }
         }
 
         if (!wormholeInteraction(wormhole, falObj)) {
@@ -474,52 +479,11 @@ public abstract class ModeConfig
 
     protected void drawModels()
     {
-
         for (Model m : models) {
-            m.draw();
-        }
-
-        /*
-        background.draw();
-        if (wormhole != null) {
-            wormhole.draw();
-        }
-        fan.draw();
-
-        dispenser.draw();
-
-        for (RicochetObstacle o : obstacles)
-        {
-            o.draw();
-        }
-        for (DestructiveObstacle h : hazards)
-        {
-            h.draw();
-        }
-
-        for (MissileLauncher ml : missileLaunchers) {
-            ml.draw();
-        }
-
-        for (FallingObject falObj : fallingObjects)
-        {
-            falObj.draw();
-        }
-
-        for (Vortex v : vortexes)
-        {
-            v.draw();
-        }
-
-        for (Explosion e : explosions)
-        {
-            if (e.isExploding())
-            {
-                e.updatePosition(0, 0);
-                e.draw();
+            if (!m.isOffscreen()) {
+                m.draw();
             }
         }
-        */
     }
 
     public void handleTouch(int action, float x, float y)
@@ -671,6 +635,7 @@ public abstract class ModeConfig
     ArrayList<Explosion> explosions;
     ArrayList<Vortex> vortexes;
     ArrayList<MissileLauncher> missileLaunchers;
+    ArrayList<Fan> fans;
 
     Wormhole wormhole;
 

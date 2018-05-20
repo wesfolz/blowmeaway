@@ -56,21 +56,11 @@ public abstract class DestructiveObstacle extends Model
         Physics.rise(this);
     }
 
-    public int getTime() {
-        return time;
-    }
-
-    public void setTime(int time) {
-        this.time = time;
-    }
-
     @Override
     public boolean isOffscreen()
     {
         return this.getBounds().getyBottom() > Border.YTOP || offscreen;
     }
-
-    private int time = 0;
 
     private static final float RISING_SPEED = 0.1f;
 

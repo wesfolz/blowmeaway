@@ -9,9 +9,12 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import wesley.folz.blowme.graphics.Border;
+import wesley.folz.blowme.graphics.Wormhole;
 import wesley.folz.blowme.graphics.effects.Explosion;
 import wesley.folz.blowme.graphics.models.DestructiveObstacle;
 import wesley.folz.blowme.graphics.models.FallingObject;
+import wesley.folz.blowme.graphics.models.Missile;
+import wesley.folz.blowme.graphics.models.MissileLauncher;
 import wesley.folz.blowme.graphics.models.Model;
 import wesley.folz.blowme.graphics.models.RicochetObstacle;
 import wesley.folz.blowme.graphics.models.SpikeStrip;
@@ -33,14 +36,16 @@ public class ActionModeConfig extends ModeConfig
         explosions = new ArrayList<>();
         vortexes = new ArrayList<>();
         hazards = new ArrayList<>();
-        obstaclesInQueue = new ArrayList<>();
-        hazardsInQueue = new ArrayList<>();
+        modelsInQueue = new ArrayList<>();
+        wormholes = new ArrayList<>();
         missileLaunchers = new ArrayList<>();
+        fans = new ArrayList<>();
 
         initializeFromExistingMode(mode, null);
-        //Log.e("json", "fanx " + fan.getxPos() + " fany " + fan.getyPos());
 
         initializeGameObjects();
+
+        fans.add(fan);
 
         for (Model m : models) {
             m.initializeMatrices(viewMatrix, perspectiveMatrix, orthographicMatrix,
@@ -81,7 +86,7 @@ public class ActionModeConfig extends ModeConfig
                         if (obstacle.getTime() == 0) {
                             obstacles.add(obstacle);
                         } else {
-                            obstaclesInQueue.add(obstacle);
+                            modelsInQueue.add(obstacle);
                         }
                         models.add(obstacle);
                         break;
@@ -95,9 +100,38 @@ public class ActionModeConfig extends ModeConfig
                         if (destructiveObstacle.getTime() == 0) {
                             hazards.add(destructiveObstacle);
                         } else {
-                            hazardsInQueue.add(destructiveObstacle);
+                            modelsInQueue.add(destructiveObstacle);
                         }
                         models.add(destructiveObstacle);
+                        break;
+
+                    case "Wormhole":
+                        Wormhole wormhole = new Wormhole((float) jso.getDouble("x1"),
+                                (float) jso.getDouble("y1"),
+                                (float) jso.getDouble("x2"), (float) jso.getDouble("y2"));
+                        wormhole.setBackground(background);
+                        wormhole.setTime(jso.getInt("time"));
+                        if (wormhole.getTime() == 0) {
+                            this.wormhole = wormhole;
+                        } else {
+                            modelsInQueue.add(wormhole);
+                        }
+
+                        models.add(wormhole);
+                        break;
+
+                    case "MissileLauncher":
+                        float mlPos[] = generateObstacleLocation(0, jso.getInt("yPos"));
+                        mlPos[0] = (float) jso.getInt("xPos");
+                        MissileLauncher ml = new MissileLauncher(mlPos[0], mlPos[1],
+                                (float) jso.getDouble("pathTime"));
+                        ml.setTime(jso.getInt("time"));
+                        models.add(ml);
+                        if (ml.getTime() == 0) {
+                            missileLaunchers.add(ml);
+                        } else {
+                            modelsInQueue.add(ml);
+                        }
                         break;
 
                     case "FallingObject":
@@ -136,8 +170,6 @@ public class ActionModeConfig extends ModeConfig
             explosions.add(explosion);
         }
 
-        //Log.e("json", "num vortexes " + numVortexes);
-
         positionsInitialized = false;
 
         //keeps object matrices from reinitializing
@@ -165,26 +197,41 @@ public class ActionModeConfig extends ModeConfig
 
         dispenser.updatePosition(0, 0);
 
+        if (wormhole != null) {
+            wormhole.updatePosition(0, 0);
+        }
+
         for (Vortex v : vortexes) {
             v.updatePosition(0, 0);
         }
 
-        for (int i = 0; i < obstaclesInQueue.size(); i++) {
-            RicochetObstacle o = obstaclesInQueue.get(i);
-            if (o.getTime() <= elapsedTime) {
-                obstacles.add(o);
-                obstaclesInQueue.remove(o);
+        for (int i = 0; i < modelsInQueue.size(); i++) {
+            Model m = modelsInQueue.get(i);
+            if (m.getTime() <= elapsedTime) {
+                modelsInQueue.remove(m);
+
+                if (m instanceof RicochetObstacle) {
+                    obstacles.add((RicochetObstacle) m);
+                } else if (m instanceof DestructiveObstacle) {
+                    hazards.add((DestructiveObstacle) m);
+                } else if (m instanceof MissileLauncher) {
+                    MissileLauncher ml = (MissileLauncher) m;
+                    ml.getFuse().setIgnited(true);
+                    missileLaunchers.add(ml);
+                } else if (m instanceof Wormhole) {
+                    this.wormhole = (Wormhole) m;
+                }
             }
         }
 
-        for (int i = 0; i < hazardsInQueue.size(); i++) {
+ /*       for (int i = 0; i < hazardsInQueue.size(); i++) {
             DestructiveObstacle d = hazardsInQueue.get(i);
             if (d.getTime() <= elapsedTime) {
                 hazards.add(d);
                 hazardsInQueue.remove(d);
             }
         }
-
+*/
         for (int i = 0; i < obstacles.size(); i++) {
             RicochetObstacle o = obstacles.get(i);
             if (o.isOffscreen()) {
@@ -204,6 +251,8 @@ public class ActionModeConfig extends ModeConfig
                 d.updatePosition(0, 0);
             }
         }
+
+        updateMissileLaunchers();
 
         int modelCount = 0;
         for (FallingObject falObj : fallingObjects) {
@@ -231,6 +280,30 @@ public class ActionModeConfig extends ModeConfig
             modelCount++;
         }
         //line.updatePosition(0, 0);
+    }
+
+
+    private void updateMissileLaunchers() {
+        float xForce;
+        float yForce;
+        int modelCount = 0;
+        for (MissileLauncher ml : missileLaunchers) {
+            xForce = 0;
+            yForce = 0;
+            Missile m = ml.getMissile();
+            if (ml.isOffscreen()) {
+            }
+            if (!m.isOffscreen()) {
+                if (!wormholeInteraction(wormhole, m)) {
+                    if (windInteraction(m, fan)) {
+                        xForce = fan.getWind().getxForce();
+                        yForce = fan.getWind().getyForce();
+                    }
+                    ml.updatePosition(xForce,
+                            yForce); //this must not be called if there's a wormhole interaction
+                }
+            }
+        }
     }
 
     private void startTiming()
@@ -309,9 +382,9 @@ public class ActionModeConfig extends ModeConfig
 
     private Timer timer;
 
-    private ArrayList<RicochetObstacle> obstaclesInQueue;
+    private ArrayList<Model> modelsInQueue;
 
-    private ArrayList<DestructiveObstacle> hazardsInQueue;
+    private ArrayList<Wormhole> wormholes;
 
     private int elapsedTime = 0;
 

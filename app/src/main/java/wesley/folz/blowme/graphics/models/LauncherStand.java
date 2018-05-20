@@ -41,4 +41,17 @@ public class LauncherStand extends RicochetObstacle {
 
         return mvp;
     }
+
+    @Override
+    public void updatePosition(float x, float y) {
+        deltaY = y;
+        yPos += deltaY;
+        deltaX = x;
+        xPos += deltaX;
+        deltaZ = 0;
+
+        getBounds().setBounds(xPos - scaleFactor, yPos - scaleFactor, xPos + scaleFactor,
+                yPos + scaleFactor);
+    }
+
 }
